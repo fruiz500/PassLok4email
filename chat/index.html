@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" manifest="chat.appcache">
+
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>PassLok chat</title>
+    <meta name="author" content="F. Ruiz">
+    <meta name="robots" content="index">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<!--CSS styles go here-->
+<style type="text/css">
+		html {
+	    -webkit-text-size-adjust: 100%;
+		}
+	    body {
+		font-family: Sans-Serif;
+		font-size:medium;
+		margin-left: 1%;
+		margin-right: 1%;
+		background-color: #FFFFFF;
+		color: #000000;
+		overflow: auto;
+		overflow-wrap: break-word;
+	    }
+		
+tr, td, th {
+    vertical-align: top;
+    padding: .7em 1.4em;
+	border: none;
+}
+
+tr {
+	display: block;
+}
+
+td {
+	float: left;
+}
+
+table {
+    width: 100%;
+	table-layout: fixed;
+	background: #f7f7ff;
+}
+	</style>
+    
+        <!-- webrtc libraries used for setting up chat and streaming -->
+        <script src="firebase.js"> </script>
+        <script src="getMediaElement.js"> </script>
+        <script src="RTCMultiConnection.js"> </script>
+    </head>
+
+    <body>
+    <audio id="ding" src="ding.mp3" preload="auto" autobuffer></audio>
+    
+            <!--Muaz says: just copy this <section> and next script -->
+                	<span id="chatmsg"></span>
+
+                    <div id="session-start">
+                  
+                    <p>You are the first to arrive. Write your name and then click the button to start the chat&nbsp;
+                    <input type="text" id="user-name-start" placeholder="Write your name here">
+                    <button id="setup-new-session" class="setup" style="font-size:18px;">Start</button></p>
+                    <p>Once you leave, no one else can join the conversation. If this is not OK, wait for someone else to start, then join.</p>
+                    </div>
+                
+                <!-- list of all available broadcasting rooms -->
+                <table id="rooms-list"></table>
+                
+                <!-- local/remote videos container-->
+                <div id="videos-container"></div>
+
+                <table>
+                    <tr>
+                        <td style="width: 55%;">
+                            <h2 style="display: block; text-align: center;">Text Chat</h2>                      
+                           <input type="text" id="chat-input" style="width: 100%;font-size:medium;" placeholder="chat message" disabled>
+                           
+                            <div id="chat-output"></div>
+                        </td>
+                        <td>
+                            <h2 style="display: block; text-align: center;">Share Files</h2>
+                            <input type="file" class="setup" id="file"  style="font-size:medium;" disabled>
+
+                            <div id="file-progress"></div>
+                        </td>
+                    </tr>
+                </table>
+        
+     <script src="chatbodyscript.js"> </script>
+    </body>
+</html>

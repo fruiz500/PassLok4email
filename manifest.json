@@ -1,0 +1,62 @@
+{
+ "name": "PassLok for Email",
+ "short_name": "PassLok",
+ "description": "High security encryption for email. PassLok is in no way associated with Gmail or Google.",
+ "version": "0.1.1",
+ "manifest_version": 2,
+ "icons": {
+ "16": "favicon.ico",
+ "48": "passlok-icon48.png",
+ "128": "passlok-touch-icon128.png"
+ },
+ "content_security_policy": "script-src 'self' https://*.firebaseio.com; object-src 'self'",
+ 
+"permissions":[
+	"storage",
+	"unlimitedStorage",
+	"tabs",
+    "https://mail.google.com/*",
+    "http://mail.google.com/*",
+    "https://google.com/*",
+    "http://google.com/*"
+    ],
+"background":{
+	"scripts": [
+		"src/background.js"
+	]
+	},	
+"content_scripts": [{
+    "matches":["https://mail.google.com/*", "http://mail.google.com/*"],
+    "css": [
+		"lib/jquery-ui.min.css",
+		"src/interface.css"
+	],
+    "js": [
+		"lib/jquery-2.2.2.min.js",
+		"lib/jquery-ui.min.js",
+		"lib/nacl.js",
+		"lib/ed2curve.js",
+		"lib/scrypt-async.js",
+		"lib/lz-string.js",
+		"src/interface.js",
+		"src/crypto.js",
+		"src/dictionary_en.js",
+		"src/chat.js",
+		"src/keylock.js",
+		"src/localdir.js",
+		"src/switching.js"
+	],
+    "run_at":"document_idle",
+    "all_frames":true
+}],
+
+"web_accessible_resources": [
+	"images/icon.png",
+	"lib/images/ui-icons_444444_256x240.png",
+	"lib/images/ui-icons_777777_256x240.png",
+	"lib/images/ui-icons_555555_256x240.png",
+	"lib/images/ui-icons_ffffff_256x240.png",
+	"lib/images/ui-icons_777620_256x240.png",
+	"lib/images/ui-icons_cc0000_256x240.png"
+    ]
+}
