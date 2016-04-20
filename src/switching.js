@@ -102,10 +102,12 @@ function checkPassword(){
 	if(!newPwdAccepted){											//first time: arm the button and wait for user to click again
 		newPwdAccepted = true;
 		keyMsg.innerHTML = "This is not the same Password as last time. If you click <strong>OK</strong> again, it will be accepted as your new Password";
-		acceptKeyBtn.style.background = '#F2B563';
+		acceptKeyBtn.style.background = '#FB5216';
+		acceptKeyBtn.style.color = 'white';
 		setTimeout(function() {
 			newPwdAccepted = false;
 			acceptKeyBtn.style.background = '';
+			acceptKeyBtn.style.color = '';
 		}, 10000)								//forget request after 10 seconds
 		throw('stopped for Password confirmation')
 	}else{															//new Password accepted, so store it and move on
@@ -234,10 +236,12 @@ function toggleRichText() {
 	}
 }
 
+var firstTimeUser = false;
 //special instructions displayed on first run
 function introGreeting(){
 	firstTimeKey.style.display = 'block';
 	keyMsg.innerHTML = 'The strength will appear here<br>Enter the Password and click <strong>OK</strong>';
+	firstTimeUser = true;
 }
 
 //to save the contents of the read dialog as a file in the default Downloads folder

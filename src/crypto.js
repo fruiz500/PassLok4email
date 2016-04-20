@@ -15,7 +15,8 @@ function signedEncrypt(){
 	callKey = 'signedEncrypt';
 	composeMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';			//Get blinking message started
 	setTimeout(function(){																			//the rest after a 20 ms delay
-		var emailArray = composeRecipientsBox.innerText.replace(/\s/g,'').split(',');
+		var emailArray = composeRecipientsBox.innerText.split(',');
+		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 		encryptList(emailArray,false);
 		isChatInvite = false;
 	},20);						//end of timeout
@@ -26,7 +27,8 @@ function readOnceEncrypt(){
 	callKey = 'readOnceEncrypt';
 	composeMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
 	setTimeout(function(){																			//the rest after a 20 ms delay
-		var emailArray = composeRecipientsBox.innerText.replace(/\s/g,'').split(',');
+		var emailArray = composeRecipientsBox.innerText.split(',');
+		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 		encryptList(emailArray,true);
 	},20);						//end of timeout
 };
@@ -34,35 +36,37 @@ function readOnceEncrypt(){
 var inviteRequested = false;
 //make an invitation. This only happens after the second button click
 function inviteEncrypt(){
+	callKey = 'inviteEncrypt';
 	if(!myKey) showKeyDialog();
 	if(!inviteRequested){				//sets flag so action happens on next click
 		inviteRequested = true;
 		composeMsg.innerHTML = "If you click <strong>Invite</strong> again, the contents of the box will be encrypted and added to a special invitation message. This message can be decrypted by anyone and is <span class='blink'>NOT SECURE</span>";
-		inviteBtn.style.background = '#F2B563';
+		inviteBtn.style.background = '#FB5216';
+		inviteBtn.style.color = 'white';
 		setTimeout(function() {
 			inviteRequested = false;
 			inviteBtn.style.background = '';
+			inviteBtn.style.color = '';
+			callKey = '';
 		}, 10000)								//forget request after 10 seconds
 
 	}else{
-	callKey = 'inviteEncrypt';
-	readKey();
-	var nonce = nacl.randomBytes(15),
-		nonce24 = makeNonce24(nonce),
-		noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
-		text = composeBox.innerHTML;
-	if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
-  	var cipherstr = symEncrypt(text,nonce24,myLockbin);
-	setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
-	composeBox.innerHTML = myezLock + "@" + noncestr + "%" + cipherstr;
-	composeBox.innerHTML = composeBox.innerHTML.match(/.{1,70}/g).join("<br>");
-	composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
-
-	callKey = '';
+		readKey();
+		var nonce = nacl.randomBytes(15),
+			nonce24 = makeNonce24(nonce),
+			noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
+			text = composeBox.innerHTML;
+		if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
+  		var cipherstr = symEncrypt(text,nonce24,myLockbin);
+		setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
+		composeBox.innerHTML = myezLock + "@" + noncestr + "%" + cipherstr;
+		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,70}/g).join("<br>");
+		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
 	
-	document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
-	$('#composeScr').dialog("close");
-	inviteRequested = false;
+		document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
+		$('#composeScr').dialog("close");
+		inviteRequested = false;
+		callKey = '';
 	}
 }
 
@@ -94,6 +98,7 @@ function encryptList(listArray,isReadOnce){
 		return
 	}
 	if(!isReadOnce) encryptArray.push(myEmail);						//copy to myself unless read-once
+	encryptArray = shuffle(encryptArray);							//extra precaution
 
 	readKey();
 	var	msgKey = nacl.randomBytes(32),
@@ -102,7 +107,6 @@ function encryptList(listArray,isReadOnce){
 		noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
 		text = composeBox.innerHTML;
 
-//	if(text.slice(0,9) != 'filename:') text = LZString.compressToBase64(text);
 	if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
 	var cipher = symEncrypt(text,nonce24,msgKey);					//main encryption event, but don't add it yet
 
@@ -207,6 +211,18 @@ function encryptList(listArray,isReadOnce){
 	}else{
 		$('#composeScr').dialog("close")		
 	}
+}
+
+//just to shuffle the array containing the recipients' emails
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length; i; i -= 1) {
+        j = Math.floor(Math.random() * i);
+        x = a[i - 1];
+        a[i - 1] = a[j];
+        a[j] = x;
+    }
+	return a
 }
 
 //encrypts a string with the secret Key, 12 char nonce
@@ -321,7 +337,6 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 		}
 		if(typeof msgKeycipher == 'undefined'){						//the password may have changed, so try again with old password
 			if(!document.getElementById('oldPwd')){showOldKeyDialog(); throw('stopped for Old Password');}
-//			var oldPwdstr = oldPwd.value.trim();
 				if(oldPwdStr){
 					var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
 						oldKey = ed2curve.convertSecretKey(oldKeySgn),
@@ -407,12 +422,11 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 	//final decryption for the main message
 	var plainstr = symDecrypt(cipher,nonce24,msgKey);
 
-//	if(plainstr.slice(0,9) != 'filename:') plainstr = LZString.decompressFromBase64(plainstr);
 	if(!plainstr.toLowerCase().match('data:;')) plainstr = LZString.decompressFromBase64(plainstr);
 	if(type != '@'){
 		readBox.innerHTML = plainstr;
 	}else{																	//add further instructions if it was an invitation
-		readBox.innerHTML = "Congratulations! You have decrypted your first message with <b>PassLok for email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Close this window by clicking the button in the upper right.</li><li>Click the <b>Compose</b> or <b>Reply</b> button on the email program.</li><li>Type in the sender's email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply.</li><li>After writing your message, Click either <b>Signed Encrypt</b> (the recipients will be able to decrypt the message multiple times) or <b>Read-once Encrypt</b> (only one decryption is possible).</li><li>AThe encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>"
+		readBox.innerHTML = "Congratulations! You have decrypted your first message with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message, click either <b>Signed Encrypt</b> (both of us will be able to decrypt the message multiple times) or <b>Read-once Encrypt</b> (only one decryption is possible).</li><li>The encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>"
 	}
 
 	syncLocDir();															//everything OK, so store

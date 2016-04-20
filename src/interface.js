@@ -141,7 +141,7 @@ var readHTML = '<div class="passlok-read" id="readScr">'+
 	'From:<br><div id="senderBox" contenteditable="false" style="display:inline;"></div>'+
 	'<span id="resetSpan">&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="resetBtn" value="Reset" style="display:none;" title="reset the current Read-once conversation with this sender">Reset</button>'+
-	'</span><br>'+
+	'</span><br><br>'+
 	'Message:<br><div id="readBox" class="cssbox"></div>'+
 '</div>';
 	
@@ -153,7 +153,6 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 		'<span id="encryptButtons">'+
 			'<button class="cssbutton" id="encryptBtn" value="Signed" style="" title="encrypt so recipients can decrypt it at will">Signed <b>Encrypt</b></button>&nbsp;&nbsp;'+
 			'<button class="cssbutton" id="readOnceBtn" value="Read-once" style="" title="encrypt so it can be decrypted Only Once">Read-once <b>Encrypt</b></button>&nbsp;&nbsp;'+
-//			'<button class="cssbutton" id="chatBtn" value="Chat" style="" title="make a chat invitation for these recipients">Chat</button>&nbsp;&nbsp;'+
 		'</span>'+
 		'<button class="cssbutton" id="inviteBtn" value="Invite" style="" title="invite recipients to PassLok">Invite</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="richBtn" value="Rich" style="" title="display toolbar for rich text editing">Rich</button>&nbsp;&nbsp;'+
@@ -162,14 +161,14 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 	'To:<br><div id="composeRecipientsBox" contenteditable="false" style="display:inline;"><span style=\"color:red\"><em>Nobody!</em> Please close this dialog and enter the recipients, then try again</span></div>'+
 	'<span id="resetSpan2">&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="resetBtn2" value="Reset" style="display:none;" title="reset the current Read-once conversation with this sender">Reset</button>'+
-	'</span><br>'+
+	'</span><br><br>'+
 	'Message:<br>' + toolbarHTML + '<div id="composeBox" class="cssbox" contenteditable="true" style="min-height: 100px;"></div>'+
 '</div>';
 	
 //key screen	
 var keyHTML = '<div class="passlok-key" id="keyScr">'+
 	'<div id="firstTimeKey" align="left" style="width:95%; display:none;">'+
-		'<h3 style="color:green;">Welcome to PassLok for email</h3>'+
+		'<h3 style="color:green;">Welcome to PassLok for Email</h3>'+
 		'<p>Before you do anything else, you must choose a secret Password, which you will memorize and <strong>will not tell anyone</strong>, and click <strong>OK</strong>.</p>'+
 		'<p>Its measured strength will appear above it as you begin to type. If it is worse than Medium, <em>things will be very slow.</em></p>'+
 		'<p>Make sure to use $ymbol$, numb3rs, caPiTals, unusual words and mespelingss.</p>'+
@@ -179,11 +178,11 @@ var keyHTML = '<div class="passlok-key" id="keyScr">'+
 			'<button class="cssbutton" id="suggestKeyBtn" value="Suggest" title="suggest a Password made of five common words">Suggest</button><br></div><br>'+
 		'</div>'+
 	'<div id="keyMsg" align="center" style="height:50px;"></div>'+
-	'<input type="password" class="cssbox" autocomplete="off" id="pwd" style="" name="text" placeholder="Enter your Password here" align="center"><br><br>'+
+	'<input type="password" class="cssbox" autocomplete="off" id="pwd" style="" name="text" placeholder="Enter your Password here" align="center"><br><br><br><br>'+
 	'<div align="center">'+
 		'<input type="checkbox" id="showKey" title="reveal box contents">&nbsp;Show&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptKeyBtn" value="OK" style="" title="accept Password">OK</button>'+
-	'</div>'+
+	'</div><br>'+
 	'<span id="fiveMin"><p>You will need to re-enter your Password if you do not use it for 5 minutes or reload your email app</p></span>'+
 '</div>';
 
@@ -259,13 +258,12 @@ function showReadDialog(email,bodyText){
 	decrypt();
 }
   
-function showComposeDialog(emailList,bodyText) {
+function showComposeDialog(emailList,bodyText,specialMessage) {
 	var modal;
 	if (!composeCreated) {
 		modal = $(composeHTML);
   
 	//event listeners; the functions are defined elsewhere
-//		modal.find('#chatBtn').click(displayChat);
 		modal.find('#encryptBtn').click(signedEncrypt);
 		modal.find('#readOnceBtn').click(readOnceEncrypt);
 		modal.find('#inviteBtn').click(function(){							//this button has two different functions depending on context
@@ -323,6 +321,11 @@ function showComposeDialog(emailList,bodyText) {
 	updateComposeButtons(emailList);
 	resetSpan2.style.display = 'none';
 	composeBox.focus();
+	if(firstTimeUser){
+		showKeyDialog();											//enter Password first if this is the first time
+		composeMsg.innerHTML = "Now write your message and click either <b>Signed Encrypt</b> (the message can be decrypted multiple times) or <b>Read-Once Encrypt</b> (the message can be decrypted only once). If the recipient is unknown to PassLok, you will have to click <b>Invite</b>, which is not secure, so be careful with what you write"
+	}
+	if(specialMessage) composeMsg.innerHTML = specialMessage;
 }
 
 var allNew = false
@@ -336,7 +339,7 @@ function updateComposeButtons(emailList){
 		encryptButtons.style.display = 'none';
 		inviteBtn.innerHTML = 'Invite';
 		inviteBtn.title = 'invite recipients to PassLok';
-		setTimeout(function(){composeMsg.innerHTML = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20);
+		if(!firstTimeUser) setTimeout(function(){composeMsg.innerHTML = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20);
 	}else{
 		encryptButtons.style.display = '';
 		inviteBtn.innerHTML = 'Chat';	
@@ -345,6 +348,10 @@ function updateComposeButtons(emailList){
 }
   
 function showKeyDialog(isInit){
+	if(!myEmail){													//do this in case it wasn't done before
+		getMyEmail();
+		retrieveAllSync();
+	}
 	var modal;
 	if (!keyCreated){
 		modal = $(keyHTML);
@@ -462,35 +469,36 @@ var insertListener = function(event) {
 document.addEventListener("animationstart", insertListener, false); // standard + firefox
 document.addEventListener("webkitAnimationStart", insertListener, false);
 
-//to detect the presence of a PassLok-encrypted message
-function detectPassLok(element){
-	var string = $(element).parents().eq(5).find('.a3s')[0].innerHTML;							//find body text
-	string = string.split("gmail_extra")[0];														//don't include quoted emails
-	string = string.replace(/[\s\n]/g,'').replace(/<(.*?)>/gi, "");								//remove spaces, newlines, and any html tags
-	string = string.trim().split("==")[1]															//first stuff between double == signs
-	if(string){
-		return string.replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0							//detect whether the whole thing is base64 plus type markers
-	}else{
-		return false
-	}
-}
 
-//the rest is for integrating the code with some web mail servers. As of version 0.1 only Gmail is supported
-var serviceName = 'gmail';							//not used yet, but will be once we add Yahoo, etc.
+//the rest is for integrating the code with certain web mail servers
+var serviceName = window.location.hostname;							//to detect Gmail, Yahoo, etc.
+if(serviceName.match('google')){ serviceName = 'google'
+}else if(serviceName.match('yahoo')){ serviceName = 'yahoo'
+}else if(serviceName.match('live')){ serviceName = 'outlook'
+};
 
 //to retrieve the user's own email address
 function getMyEmail(){
-	myEmail = document.title.split('-')[1].trim();				//from Gmail title
+	if(serviceName == 'google'){
+		myEmail = document.title.split('-')[1].trim();
+	}else if(serviceName == 'yahoo'){
+		var parts = document.title.split('-');
+		myEmail = parts[parts.length - 2].trim() + '@yahoo.com';
+	}else if(serviceName == 'outlook'){
+//		myEmail = $('head').find("script[src*='live']")[0].attributes['src'].value.match(/live:(.*)\&callback/)[1] + '@outlook.com'
+		myEmail = document.title.split('-')[1].trim();
+	}
 }
 
-//detects Gmail compose or read areas and places buttons in them  
+//detects compose or read areas and places buttons in them  
 function composeIntercept(ev) {
-	var composeBoxes = $('.n1tfz');
+	//start with Gmail
+  if(serviceName == 'google'){
+	var composeBoxes = $('.n1tfz');												//toolbar at bottom of window
 	if (composeBoxes && composeBoxes.length > 0){
 		composeBoxes.each(function(){
 			var composeMenu = $(this).parents().eq(2);
-			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){
-				var maxSizeCheck = composeMenu.parents().eq(4).find('[style*="max-height"]');
+			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){							//insert PassLok icon right after the toolbar icons
 				var encryptionFormOptions = '<a href="#" class="passlok" data-title2="insert PassLok-encrypted text"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>';
 				composeMenu.find('.n1tfz :nth-child(6) :first').parent().after(encryptionFormOptions);
 
@@ -498,33 +506,89 @@ function composeIntercept(ev) {
 					var bodyDiv = $(this).parents().eq(11).find('.Am');
 					bodyID = bodyDiv.attr('id');									//this global variable will be used to write the encrypted message
 					var bodyText = bodyDiv.html();
+					bodyText = bodyText.split('<div style="color: rgb(0, 0, 0);">')[0];		//fix for old reply style
 					//PREVIOUS THREAD MESSAGES OPTIONAL
-					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
-					if(extraText) bodyText += extraText;
-					var emails = $(this).parents().eq(12).find('.vN');
+//					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
+//					if(extraText) bodyText += extraText;
+
+					var emails = $(this).parents().eq(12).find('.vN');		//element containing recipient addresses
 					var emailList = [];
 					for(var i = 0; i < emails.length; i++){
 						emailList.push(emails.get(i).attributes['email'].value)
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 					showComposeDialog(emailList,bodyText);
-//					if(!myKey) showKeyDialog();
 				});	  
 			};
 		});
 	}
 
 //this part for reading messages
-	var viewTitleBar = rootElement.find('td[class="gH acX"]');
+	var viewTitleBar = rootElement.find('td[class="gH acX"]');					//title bar at top of message
 	if (viewTitleBar && viewTitleBar.length > 0){
-		viewTitleBar.each(function(v) {
+		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
 			if ($(this).find('.passlok').length === 0){
-			  if(detectPassLok(this)){
+			  var bodyText = $(this).parents().eq(5).find('.a3s')[0].innerHTML;							//find body text
+			  bodyText = bodyText.split("gmail_extra")[0];	
+			  if(bodyText && stripHeaders(bodyText).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0){
 				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>');
 				
 				$(this).find('.passlok').click(function(){
-					var email = $(this).parents().eq(5).find('.iw')[0].firstChild.attributes['email'].value;
-					var bodyText = $(this).parents().eq(5).find('.a3s')[0].innerHTML;
+					var email = $(this).parents().eq(5).find('.iw')[0].firstChild.attributes['email'].value;		//sender's address
+//					var bodyText = $(this).parents().eq(5).find('.a3s')[0].innerHTML;								//body of the message
+//					var subject = $(this).parents().eq(16).find('.hP').text();
+					showReadDialog(email,bodyText);
+					if(!myKey) showKeyDialog();
+				});
+			  }
+			}
+		});
+	}	
+	
+	//now the same for Yahoo
+  }else if(serviceName == 'yahoo'){
+	var composeBoxes = $('.bottomToolbar');												//toolbar at bottom of window
+	if (composeBoxes && composeBoxes.length > 0){
+		composeBoxes.each(function(){
+			var composeMenu = $(this).parents().eq(0);
+			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){							//insert PassLok icon right after the toolbar icons
+				var encryptionFormOptions = '<a href="#" class="passlok" data-title2="insert PassLok-encrypted text"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>';
+				composeMenu.find('.draft-delete-btn').after(encryptionFormOptions);
+
+				$(this).find('.passlok').click(function(){						//activate the button
+					var bodyDiv = $(this).parents().eq(3).find('.cm-rtetext');
+					bodyID = bodyDiv.attr('id');									//this global variable will be used to write the encrypted message, should be "rtetext"
+					var bodyText = bodyDiv.html();				//TODO: yahoo needs a fix for the reply window
+					bodyText = bodyText.split('<div class="qtdSeparateBR"')[0];	//take out quoted stuff
+					//PREVIOUS THREAD MESSAGES OPTIONAL
+//					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
+//					if(extraText) bodyText += extraText;
+
+					var emails = $(this).parents().eq(3).find('.cm-to').find('span');		//element containing recipient addresses
+					var emailList = [];
+					for(var i = 0; i < emails.length - 1; i++){
+						emailList.push(emails.get(i).attributes['data-address'].value)
+					}
+//					var subject = $(this).parents().eq(11).find('.aoT').val();
+					var specialMessage = "Because of a bug in Yahoo, encrypting a message in a Reply window will be tricky unless you <em>disable Conversations</em> in Settings"
+					showComposeDialog(emailList,bodyText,specialMessage);
+				});	  
+			};
+		});
+	}
+
+//this part for reading messages
+	var viewTitleBar = $('.thread-info, .msg-date');					//title bar at top of message, regular and no-conversations style
+	if (viewTitleBar && viewTitleBar.length > 0){
+		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
+			if ($(this).find('.passlok').length === 0){
+			  var bodyText = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0].innerHTML;
+			  if(bodyText && stripHeaders(bodyText).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0){
+				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>');
+				
+				$(this).find('.passlok').click(function(){
+					var email = $(this).parents().eq(2).find('.from, .lozenge-static.hcard')[0].attributes['data-address'].value;		//sender's address
+//					var bodyText = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0].innerHTML;					//body of the message
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog();
@@ -533,4 +597,60 @@ function composeIntercept(ev) {
 			}
 		});
 	}
+
+	//now the same for Outlook
+  }else if(serviceName == 'outlook'){
+	var composeBoxes = $('._z_v._z_B, ._mcp_73, ._mcp_h6').eq(-1).parent();				//toolbar at bottom, sometimes top
+	if (composeBoxes && composeBoxes.length > 0){
+		composeBoxes.each(function(){
+			var composeMenu = $(this);
+			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){							//insert PassLok icon right after the toolbar icons
+				var encryptionFormOptions = '<a href="#" class="passlok" data-title2="insert PassLok-encrypted text"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>';
+				composeMenu.append(encryptionFormOptions);
+
+				$(this).find('.passlok').click(function(){						//activate the button
+					var bodyDiv = $(this).parents().eq(2).find('._mcp_M1, ._mcp_33, ._mcp_K5')[0];	//different class in old and new interface
+					bodyDiv.id = "bodyText";
+					bodyID = "bodyText";									//this global variable will be used to write the encrypted message
+					var bodyText = bodyDiv.innerHTML;
+					bodyText = bodyText.split('<div style="color: rgb(0, 0, 0);">')[0];		//fix for old style reply
+					//PREVIOUS THREAD MESSAGES OPTIONAL
+//					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
+//					if(extraText) bodyText += extraText;
+
+					var emails = $(this).parents().eq(4).find('._pe_m, ._pe_o');		//element containing recipient addresses, different class
+					var emailList = [];
+					for(var i = 0; i < emails.length; i++){
+						emailList.push(emails[i].innerText)
+					}
+//					var subject = $(this).parents().eq(11).find('.aoT').val();
+					showComposeDialog(emailList,bodyText);
+				});	  
+			};
+		});
+	};
+	
+//this part for reading messages
+
+	var viewTitleBar = rootElement.find('._rp_u1, ._rp_81').parent();					//reply icon at top of message, old or new interface
+	if (viewTitleBar && viewTitleBar.length > 0){
+		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
+			if ($(this).find('.passlok').length === 0){
+			  var bodyText = $(this).parents().eq(8).find('._rp_V4, ._rp_u4')[1].innerHTML;
+			  if(bodyText && stripHeaders(bodyText).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0){
+				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>');
+				
+				$(this).find('.passlok').click(function(){
+					var email = $(this).parents().eq(2).find('._pe_l')[0].innerText.replace(/<(.*?)>/gi, "").trim();			//sender's address
+					var bodyText = $(this).parents().eq(8).find('._rp_V4, ._rp_u4')[1].innerHTML;							//got to re-find the body of the message
+//					var subject = $(this).parents().eq(16).find('.hP').text();
+					showReadDialog(email,bodyText);
+					if(!myKey) showKeyDialog();
+				});
+			  }
+			}
+		});
+	}
+
+  }
 }

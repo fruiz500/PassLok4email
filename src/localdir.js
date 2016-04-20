@@ -27,10 +27,12 @@ function resetPFS(){
 	if(!resetRequested){				//sets flag so action happens on next click
 		resetRequested = true;
 		readMsg.innerHTML = "If you click <strong>Reset</strong> again, the current conversation will be reset. This cannot be undone";
-		resetBtn.style.background = '#F2B563';
+		resetBtn.style.background = '#FB5216';
+		resetBtn.style.color = 'white';
 		setTimeout(function() {
 			resetRequested = false;
 			resetBtn.style.background = '';
+			resetBtn.style.color = '';
 		}, 10000)								//forget request after 10 seconds
 
 	}else{
@@ -58,10 +60,12 @@ function resetPFS2(){
 		}
 		resetRequested = true;
 		composeMsg.innerHTML = "If you click <strong>Reset</strong> again, the current conversation will be reset. This cannot be undone";
-		resetBtn2.style.background = '#F2B563';
+		resetBtn2.style.background = '#FB5216';
+		resetBtn2.style.color = 'white';
 		setTimeout(function() {
 			resetRequested = false;
 			resetBtn2.style.background = '';
+			resetBtn2.style.color = '';
 		}, 10000)								//forget request after 10 seconds
 
 	}else{
@@ -171,6 +175,6 @@ function retrieveAllSync(){
 			});			
 //end of asynchronous loop, any code below won't wait for it to be done
 
-		} else {introGreeting()}
+		} else {introGreeting()}			//display special messages for a first-time user 
 	});
 }

@@ -2,7 +2,7 @@
 <html lang="en">
       <head>
       <meta charset="utf-8">
-      <title>PassLok for email Help</title>
+      <title>PassLok for Email Help</title>
 
       <link href="lib/jquery-ui.min.css" rel="stylesheet">
       <script src="lib/jquery-2.2.2.min.js"></script>
@@ -49,94 +49,83 @@ body {
 </style>
       </head>
       <body>
-<h2  align="center" style="color:green;font-size:x-large;">Welcome to PassLok for email</h2>
+<h2  align="center" style="color:green;font-size:x-large;">Welcome to PassLok for Email</h2>
 <br>
 &nbsp;&nbsp;&nbsp;<span id='helpmsg'>For help on how to do things, click on each title.</span>
 <br><br>
 <div id="accordion">
-        <h3>What is PassLok for email?</h3>
+        <h3>What is PassLok for Email?</h3>
   <div>
     <p>
-          <p>PassLok for email is a Chrome extension that makes your email private by encrypting it end-to-end so only the recipient can decrypt your message. Currently it supports only Gmail, but other email systems will be added in the future. PassLok for email is in no way associated with Gmail or Google.</p>
-    <p> You can encrypt rich text messages and small files in <em>Signed mode</em>, which allows you and the recipients to decrypt them again as often as necessary, after they provide their Password, or in <em>Read-once mode</em>, which allows recipients to decrypt them only once.</p>
-    <p>PassLok does not involve any server other than Google and the email server, and they only see data that  they cannot decrypt. Your Password is not sent anywhere or even stored locally.</p>
-    <p>You can also use PassLok for email for set up real-time secure chat sessions involving text, files, audio, or even video. The connection is direct between participants, with a server getting involved only at the start to help connect the participants to one another.</p>
-    <p>PassLok for email is <em>still in experimental phase</em>, as it has not yet been duly vetted by experts. Bear this in mind before entrusting sensitive information to it.</p>
-    <p>If you want more capability or want to use an unsupported email server, you may want to try PassLok Privacy, from <a href="https://PassLok.com" target="_blank">https://PassLok.com</a>. PassLok Privacy implements the additional Anonymous encryption mode plus a number of steganography methods, signatures and secret splitting. PassLok Privacy also allows multiple users, or multiple identities, on the same machine. Messages encrypted in PassLok for email can be decrypted in PassLok Privacy, and vice-versa.</p>
-    </p>
+          <p>PassLok for Email is a Chrome extension that makes your email private by encrypting it end-to-end so only the intended recipients can decrypt your message. Currently it supports Gmail, Yahoo, and Outlook online. PassLok for Email is in no way associated with Google or any email service.</p>
+    <p> You can encrypt rich text messages and small files in <em>Signed mode</em>, which allows you and the recipients to decrypt them again as often as necessary, or in <em>Read-once mode</em>, which allows recipients to decrypt them only once.    </p>
+    <p>You can also set up real-time secure chat sessions involving text, files, audio, or even video. The connection is direct between participants, with a server getting involved only at the start to help connect the participants to one another.</p>
+    <p>Unlike most other email encryption apps, PassLok for Email does not involve additional connections. It only communicates with the email page, and minimally so, in order to maintain a high level of security. Your secret Password (which you should <em>never</em> give to anyone), is not stored anywhere and remains in memory only as long as necessary to do its job.    </p>
+    <p>If you want more capability or want to use an unsupported email service, you may want to try the standalone app <a href="https://passlok.com/app" target="_blank">PassLok Privacy</a>, also from <a href="https://PassLok.com" target="_blank">https://PassLok.com</a>. PassLok Privacy implements the additional Anonymous encryption mode plus signatures, secret splitting, and a number of steganography methods. Messages encrypted in PassLok for Email can be decrypted in PassLok Privacy, and vice-versa.</p>
+    <p>PassLok for Email is built on the highly regarded NaCl crypto engine, but the app itself is <em>still in experimental phase</em>, as it has not yet been duly vetted by experts. Bear this in mind before entrusting sensitive information to it. You can get full details on PassLok for Email's cryptography from the <a href="https://passlok.com/files/passlok4email_technical_document.pdf" target="_blank">PassLok for Email technical document.</a> The source code is available at <a href="https://github.com/fruiz500/passlok4email" target="_blank">https://github.com/fruiz500/passlok4email</a>. Please use this page to report bugs or suggest improvements.  </p>
   </div>
-        <h3>How do I use PassLok for email?</h3>
+        <h3>How do I use PassLok for Email?</h3>
   <div>
     <p>
-          <p>The first time PassLok for email ran on your machine, you were asked to come up with a secret Password. You must remember this Password and <em>never give it to anyone</em>, not even your friends. PassLok for email gives you a score as you type it and tells you how long it will take to process it. The lower the score, the longer it takes, so it is better to come up with a good Password. PassLok for email doesn't store it or send it anywhere at all, so no one can help you if you forget it. There is no Password reminder.</p>
-    <p>After that, <strong>as soon as you click</strong> the PassLok icon on a encrypted message, the message loads automatically and PassLok for email decrypts it, possibly asking you first for your Password. The first time you get an encrypted message from someone, or if the sender's Password has changed, PassLok for email will inform you and ask you accept it.</p>
-    <p>To send an encrypted message, click  click the <strong>Compose</strong> or <strong>Reply</strong> button in email, and then do this:</p>
+          <p>The first time PassLok for Email ran on your machine, you were asked to come up with a secret Password. You must remember this Password and <em>never give it to anyone</em>, not even your friends. PassLok for Email gives you a score as you type it and tells you how long it will take to process it. The lower the score, the longer it takes, so it is better to come up with a good Password.</p>
+    <p>As soon as you click<strong></strong> the PassLok icon (orange key) on a encrypted message, the message loads automatically and PassLok for Email decrypts it, possibly asking you first for your Password. The first time you get an encrypted message from someone, or if the sender's Password has changed, PassLok for Email will inform you and ask you accept it.</p>
+    <p>To send an encrypted message, click  click the <strong>Compose</strong> or <strong>Reply</strong> button in your email page, and then do this:</p>
     <ol>
-            <li>Fill in the recipients addresses, and perhaps the subject line, but <em><strong>do not</strong></em> write the text that you want to be encrypted (otherwise the email server might have it, unencrypted, as soon as you type it).</li>
-            <li>Click the PasLok icon near the bottom of the box. A dialog will open where you can write your confidential message or load a small file.</li>
+            <li>Fill in the recipients' addresses, and perhaps the subject line, but <em><strong>do not</strong></em> write the text that you want to be encrypted (otherwise the email server might have it, unencrypted, as soon as you type it).</li>
+            <li>Click the PasLok icon near the top of the bottom of the box. A dialog will open where you can write your confidential message or load a small file.</li>
             <li>After writing your mesage, click either <strong>Signed Encrypt</strong> (the message can be decrypted multiple times) or <strong>Read-once Encrypt</strong> (the message can be decrypted only once).</li>
-            <li>The message will then be encrypted and placed back at the top of the compose box. Add whatever plain text or attachments you want before sending it out. Beware: attachments added this way <em>will not be encrypted</em>, if you want them encrypted, follow the instructions below about encrypting files.</li>
+            <li>The message will then be encrypted and placed back at the top of the compose box. Add whatever plain text or attachments you want before sending it out in the normal way. Beware: attachments added this way <em>will not be encrypted</em>, if you want them encrypted, follow the instructions below about encrypting files.</li>
           </ol>
-    <p>If you want to correspond with new people, you must send them an invitation first, or receive one from them. To do this, proceed as indicated above but click the <strong>Invite</strong> button instead. Be aware, however, that the contents of invitation messages are <em>not secure</em>, and anyone in the world can decrypt them. Decrypting any message encrypted by someone will work as well as decrypting an invitation from that person, although you might not be able to decrypt the contents.</p>
-    </p>
+    <p>If you want to correspond with new people, you must send them an invitation first, or receive one from them. To do this, proceed as indicated above but click the <strong>Invite</strong> button instead. Be aware, however, that the contents of invitation messages are <em>not secure</em>, and anyone in the world can decrypt them. Decrypting any message encrypted by someone will work as well as decrypting an invitation from that person in order to establish communication, although you might not be able to decrypt the contents.</p>
+    <p>Also, be aware that encrypted messages that you forward to others won't be decryptable by the new recipients, since they were encrypted for you, not for them.</p>
   </div>
   		<h3>What if my friends don't have Chrome?</h3>
   <div>
     <p>
-    	<p>If they don't have Chrome or are on a mobile platform (mobile Chrome does not yet support extensions), they can still use <strong>PassLok Privacy</strong>, which has an Email mode fully compatible with PassLok for email, selectable on the <strong>Options</strong> tab. They will have to cut and paste between their email and the app, however, since PassLok Privacy does not connect to any other program, but otherwise they will be able to exchange encrypted material with you just as easily.</p>
-        <p>PassLok Privacy is available for free from <a href="https://passlok.com" target="_blank">https://passlok.com</a>, plus the <a href="https://chrome.google.com/webstore/detail/passlok-privacy/epcchpdljafmfegifkigklfcmkphfmbh" target= "_blank">Chrome</a>, <a href="https://play.google.com/store/apps/details?id=com.fruiz500.passlok" target= "_blank">Android</a>, and <a href="https://itunes.apple.com/us/app/passlok-privacy/id879861603?mt=8&uo=4" target= "_blank">iOS</a> app stores.
-    </p>
+    	<p>If they don't have Chrome or are on a mobile platform (mobile Chrome does not yet support extensions), they can still use <strong>PassLok Privacy</strong>, which has an Email mode fully compatible with PassLok for Email, selectable on the <strong>Options</strong> tab. They will have to cut and paste between their email and the app, however, since PassLok Privacy does not connect to any other program, but otherwise they will be able to exchange encrypted material with you just as easily.</p>
+        <p>PassLok Privacy is available for free from <a href="https://passlok.com/app" target="_blank">https://passlok.com</a>, plus the <a href="https://chrome.google.com/webstore/detail/passlok-privacy/epcchpdljafmfegifkigklfcmkphfmbh" target= "_blank">Chrome</a>, <a href="https://play.google.com/store/apps/details?id=com.fruiz500.passlok" target= "_blank">Android</a>, and <a href="https://itunes.apple.com/us/app/passlok-privacy/id879861603?mt=8&uo=4" target= "_blank">iOS</a> app stores.  </p>
   </div>
         <h3>Can I change my Password?</h3>
   <div>
     <p>
           <p>Sure! Just type in a new Password when you reload your email page. Since  data needed by Read-once mode is stored encrypted with the Password, you may be asked to supply the old Password in order to access that data.</p>
-    <p>If you change your Password, recipients will see your next message as coming from an unknown source, and will be asked to accept the sender, but things will continue normally after that. Be sure to tell them that you have changed your Password. For additional assurance, attach a short video clip of yourself reading the first few characters of any message encrypted by you.</p>
-    </p>
+    <p>If you change your Password, recipients will see your next message as coming from an unknown source, and will be asked to accept the sender, but things will continue normally after that. Be sure to tell them that you have changed your Password.</p>
+    <p>For additional assurance, attach a short video clip of yourself reading the first few characters of any message encrypted by you. A good place to put the URL for the video is your email signature. If Chrome insists on converting the link into an actual video, put some parts of it in italics.</p>
+    <p>If you use multiple email services or even multiple accounts for each service, PassLok will keep them separate even though you may have chosen to use the same Password. To the recipients, they will behave as completely separate senders.  </p>
   </div>
         <h3>Can I change machines?</h3>
   <div>
     <p>
-          <p>Sure you can! PassLok for email syncs your data between machines as soon as you log into Chrome, provided the extension is enabled. All the sensitive data is encrypted before it is sent to Google servers.</p>
-    <p>If you want to make sure that your data has been wiped from a particular machine you were using, remove your login from Chrome on that machine.</p>
-    </p>
-  </div>
+          <p>Sure you can! PassLok for Email syncs your data between machines as soon as you log into Chrome, provided the extension is enabled. All the sensitive data is encrypted before it is sent to Google servers.</p>
+    <p>If you want to make sure that your data has been wiped from a particular machine you were using, remove your login from Chrome on that machine by going to <strong>Settings</strong> on the Chrome menu, and clicking <strong>Disconnect your Google Account</strong>.</p></div>
         <h3>How does Chat work?</h3>
   <div>
     <p>
           <p>If you click the <strong>Chat</strong> button instead of the encrypt buttons, a dialog asks you what kind of real-time chat you want to set up. There are three choices: text and files, this plus audio, and all this plus video. You can also add a short message, such as the exact time to start the chat session.</p>
     <p>After you click <strong>OK</strong>, PassLok makes an encrypted chat invitation that you can then send to the participants of the chat. This invitation contains the short message mentioned above, plus some data needed to establish the connection. The contents of the Message box are not included.</p>
-    <p>When the recipients get your chat invitation, they will decrypt it like any other PassLok message and then the short message will pop up and ask for confirmation to continue (this is so they don't start too early). After this the chat will open on a separate tab and ask for your alias. When each participant supplies this, they connect directly to one another. They also may be asked to grant permission to feed audio or video when the connection takes place. The sender connects exactly the same way, by decrypting the invitation he/she sent to the others.</p>
-    <p>If you get disconnected, just reload the chat tab and type your alias again. The chat session ceases to exist when all participants close their chat tabs.</p>
-    </p>
-  </div>
+    <p>When the recipients get your chat invitation, they will decrypt it like any other PassLok message and then the short message will pop up and ask for confirmation to continue (this is so they don't join the chat too early, if set for a later time). After this the chat will open on a separate tab and ask you to supply a name for yourself. When each participant does this, they connect directly to one another. They also may be asked to grant permission to feed audio or video when the connection takes place. The original sender connects exactly the same way, by decrypting the invitation he/she sent to the others.</p>
+    <p>If you get disconnected, just reload the chat tab in Chrome and type your alias again. The chat session ceases to exist when all participants close their chat tabs.</p></div>
         <h3>Can I encrypt files?</h3>
   <div>
     <p>
           <p>Chat has its own secure file-sending process, so we refer here to sending files by email. You have two options:</p>
-    <p>1. Encrypt the files using AES with an archiving utility such as <a href="http://www.7-zip.org/" target="_blank">7-zip</a> (Windows), <a href="http://www.kekaosx.com/" target="_blank">Keka</a> (OSX), or p7zip (Linux), then lock the password for the files inside an encrypted email message, and attach the encrypted archives at the email compose window.</p>
-    <p>2. You can load a single file smaller than a megabyte as text using the <strong>Select a file</strong> button,  and then encrypt it as a regular message. After decryption, the recipient can save the file using the <strong>Save file</strong> button. You can add text above or below the encoded file, but not a second file.</p>
-    </p>
-  </div>
+    <p>1. Encrypt the files using AES with an archiving utility such as <a href="http://www.7-zip.org/" target="_blank">7-zip</a> (Windows), <a href="http://www.kekaosx.com/" target="_blank">Keka</a> (OSX), or p7zip (Linux), then lock the password for the files inside an encrypted email message, and attach the encrypted archives at the email Compose window.</p>
+    <p>2. You can load a single file smaller than a megabyte as text using the <strong>Select a file</strong> button,  and then encrypt it as a regular message. After decryption, the recipient can save the file using the <strong>Save file</strong> button. You can add text above or below the encoded file, but not a second file.</p></div>
         <h3>Something is not working</h3>
   <div>
-    <p>
-          <p>If a new message fails to decrypt even though the Password is correct, this may be because it is a Read-once message and the conversation has gone out of sync, likely as a consequence of reading messages out of sequence. To get back in sync, click the <strong>Reset</strong> button next to the sender's address twice, and then send a Read-once encrypted message to the other person asking to repeat the last message. </p>
-    </p>
-  </div>
+    <p>If you are using Yahoo, clicking the PassLok icon when you are in a Reply window may lead to a PassLok popup where the keyboard does not respond correctly. This is caused by Yahoo's keyboard shortcuts being still active in the background, trying to do something with the Conversations list. Unfortunately, Yahoo does not offer a setting to turn off any of its shortcuts, so the easiest thing to do in order to fix this bug is go to Yahoo mail settings and disable Conversations.<p>If a new message fails to decrypt even though the Password is correct, this may be because it is a Read-once message and the conversation has gone out of sync, likely as a consequence of reading messages out of sequence. To get back in sync, click the <strong>Reset</strong> button next to the sender's address twice, and then send a Read-once encrypted message to the other person asking to repeat the last message.</p></div>
         <h3>Are there any insecurities?</h3>
   <div>
     <p>
-          <p>We have tried to make PassLok for email extremely easy to use without impacting security, but tradeoffs do exist. There are three main issues that you must be aware of:</p>
-    <p>1. <strong>Users are not authenticated</strong>. This means that someone could gain access to your correspondent's email account and impersonate him/her without your realizing it. From time to time you should ask your correspondents to send you something that only they could produce (for instance, a selfie picture where they do something you requested in your previous message). If your correspondent switches Password he/she should tell you about it, because PassLok for email will warn you that his/her Password has changed. To further protect you against a "man in the middle," follow the instructions in the next help item.</p>
+          <p>We have tried to make PassLok for Email extremely easy to use without impacting security, but tradeoffs do exist. There are three main issues that you must be aware of:</p>
+    <p>1. <strong>Users are not authenticated</strong>. This means that someone could gain access to your correspondent's email account and impersonate him/her without your realizing it. From time to time you should ask your correspondents to send you something that only they could produce (for instance, a selfie picture where they do something you requested in your previous message). If your correspondent switches Password he/she should tell you about it, because PassLok for Email will warn you that his/her Password has changed. To further protect you against a "man in the middle," follow the instructions in the next help item.</p>
     <p>2. <strong>Not all messages have the same level of security</strong>:</p>
     <ol>
             <li>Invitations have no security at all, as they can be read by anyone anytime. This is why you need to click the button twice and a warning is displayed.</li>
             <li>Signed mode messages can be decrypted forever by anyone who has acquired the recipient's Password at the time of the encryption.</li>
             <li>Messages initiating a Read-once exchange and Read-once messages encrypted right after a reset are secure against third parties reading them, but they can be decrypted indefinitely both by sender and recipient, just as Signed messages. The replies to those can be decrypted more than once, but only until a new reply is made. The second reply from either end is immediately undecryptable after the first read, but still a powerful enemy who obtains both Passwords and gains access to both machines would be able to reconstruct the plain contents. Third replies and beyond, however, become absolutely undecryptable by anyone as soon as the recipient decrypts them.</li>
           </ol>
-    <p>3. <strong>Hackers could change the code</strong> at the Google server, and thereby destroy all security without users realizing it. You can, however, inspect the code and compare it with the authentic code published at GitHub. Instructions for this are in a help item below.</p>
-    </p>
+    <p>3. <strong>Hackers could change the code</strong> at the Google server, and thereby destroy all security without users realizing it. You can, however, inspect the code and compare it with the authentic code published at GitHub. Instructions for this are in a help item below.  </p>
   </div>
         <h3>Click here for instructions against a "man in the middle"</h3>
   <div>
@@ -152,15 +141,15 @@ body {
             <li><em>When I get your second half, I'll put the two halves together and decrypt your message. Then, following your instructions I'll send you the picture or video right away, not encrytped, along with the second half of my encrytped request.</em></li>
             <li><em>When you get it, please verify that what I sent conforms to your instructions. If so, put together the two halves of my encrypted message, decrypt it, and send me what I ask in the message as soon as possible, also not encrypted. Then I'll know that there is no one in-between us.</em></li>
           </ol>
-    <p><em>Many thanks. Sincerely, This-and-That</em></p>
-    </p>
+    <p><em>Many thanks. Sincerely, This-and-That</em>  </p>
   </div>
         <h3>How to authenticate the code</h3>
   <div>
     <p>
-    <p>You can always inspect the code by opening a Developer console in Chrome (under the &quot;More Tools&quot; menu) and looking at the Sources tab. But a hacker with acces to the Google servers may have introduced subtle changes that are not easy to spot. Do this to defend against this possibility:</p>
+    <p>You can always inspect the code by opening a Developer console in Chrome (under the &quot;More Tools&quot; menu) and looking at the Sources tab &gt; Content Scripts &gt; top &gt;PassLok for Email. But a hacker with acces to the Google servers might have introduced subtle changes that are not easy to spot. Do this to defend against this possibility:</p>
     <ol>
-      <li>Follow this link: <a href="https://clients2.google.com/service/update2/crx?response=redirect&x=id%3Dehakihemolfjgbbfhkbjgahppbhecclh%26uc" target="_blank">https://clients2.google.com/service/update2/crx?response=redirect&amp;x=id%3Dehakihemolfjgbbfhkbjgahppbhecclh%26uc</a> which will download a fresh copy of PassLok for email from the server, as a .crx file.</li>
+      <li>Follow this link to the Chrome Extension Downloader app: <a href="http://chrome-extension-downloader.com/" target="_blank">http://chrome-extension-downloader.com/</a></li>
+      <li>Paste in the link to PassLok for Email in the Chrome store, which is this: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh  Then click the <strong>Download Extension</strong> button. This will download a fresh copy of PassLok for Email from Google, as a .crx file.</li>
       <li>Obtain the SHA256 hash of the file you just downloaded using a utility such as <a href="http://www.bitser.org/checksum-calculator-windows-7-freeware.shtml" target="_blank">Bitser</a> for Windows, sha256sum in Linux, or shasum -a 256 in OSX, or a web service such as Online-convert (<a href="http://hash.online-convert.com/sha256-generator" target = "_blank">http://hash.online-convert.com/sha256-generator</a>) or Defuse (<a href="https://defuse.ca/checksums.htm" target="_blank">https://defuse.ca/checksums.htm</a>).</li>
       <li>Get the authentic SHA256 for Passlok for email, which is published in these places:</li>
       <ul>
@@ -170,38 +159,26 @@ body {
         <li>PassLok Privacy Android app description: <a href="https://play.google.com/store/apps/details?id=com.fruiz500.passlok" target="_blank">https://play.google.com/store/apps/details?id=com.fruiz500.passlok</a></li>
         <li>PassLok Privacy iOS app description: <a href="https://itunes.apple.com/us/app/passlok-privacy/id879861603?mt=8&uo=4" target="_blank">https://itunes.apple.com/us/app/passlok-privacy/id879861603?mt=8&amp;uo=4</a></li>
       </ul>
-      <li>If the published hash matches what you obtained from the .crx file, all is good; go ahead and install PassLok for email by dragging the .crx file into Chrome's Extensions page, if it wasn't installed already. Otherwise something is wrong and you should not trust PassLok for email.</li>
-    </ol>
-    </p>
-  </div> 
-        <h3> What's underneath PassLok for email?</h3>
-  <div>
-    <p>
-          <p>PassLok for email is the little sibling of PassLok Privacy (<a href="https://passlok.com" target="_blank">https://passlok.com</a>), from which it takes its Signed and Read-once encryption modes. While PassLok includes a complete directory management system for other user's Locks (public keys), PassLok for email makes this automatic by including the sender's ezLok with every message.</p>
-    <p>You can get full details on PassLok for email's cryptography from the <a href="https://www.seeonce.net/seeonce_technical_document.pdf" target="_blank">PassLok for email technical document.</a>.</p>
-    </p>
-  </div>
+      <li>If the published hash matches what you obtained from the .crx file, all is good; go ahead and install PassLok for Email by dragging the .crx file into Chrome's Extensions page, if it wasn't installed already. Otherwise something is wrong and you should not trust PassLok for Email.</li></ol></div> 
         <h3>Privacy Statement, Legal Notices, and Warrant Canary</h3>
   <div>
     <p>
-          <p>PassLok for email is a self-contained piece of code that does not rely on servers to do its job. Therefore:</p>
-    <p><strong>1. We cannot give your secret Password to anyone</strong> (not even yourself) because we don't have it. Your Password is never stored or transmitted, and gets deleted from memory after five minutes of not being used. We don't have your Read-once data, either.</p>
-    <p><strong>2. We cannot give your private data to anyone</strong> because PassLok for email does not send anything out of your computer. Its only interaction is with the email page. When the extension loads you get only the code, without any cookies, plugins, or anything of that sort. We get back <em>nothing</em> from you. Google does store some data needed for Read-once conversations, but it is encrypted under your Password before it is sent to them.</p>
+          <p>PassLok for Email is a self-contained piece of code that does not rely on servers to do its job. Therefore:</p>
+    <p><strong>1. We cannot give your secret Password to anyone</strong> (not even yourself) because we don't have it. Your Password is never stored or transmitted, and gets deleted from memory after five minutes of not being used.</p>
+    <p><strong>2. We cannot give your private data to anyone</strong> because PassLok for Email only interacts with the email page. When the extension loads you get only the code, without any cookies, plugins, or anything of that sort. We get back <em>nothing</em> from you. Google does store some data needed for Read-once conversations, but it is encrypted under your Password before it is sent to them.</p>
     <p><strong>3. We cannot eavesdrop on your chat sessions, or enable anyone to do so.</strong> Establishing a chat session does involve contacting a signaling server (Firebase) and giving it your IP address and a disposable chatroom name so that others can contact you; the signaling server never sees the content of your chat, which is between participants only. The Google servers don't even see the connection data.</p>
-    <p><strong>4. We will never weaken the cryptography methods contained within PassLok for email at the request of a third party, private or public (regardless of what the email server might do).</strong> This also means no backdoors will ever be added. We would rather shut down PassLok than be forced to do this, which would betray the very essence of our efforts. If we learn that a counterfeit version of PassLok for email is circulating, whether placed by hackers or government agencies, we will make the fact known to users.</p>
+    <p><strong>4. We will never weaken the cryptography methods contained within the free PassLok for Email at the request of a third party, private or public (regardless of what the email server might do).</strong> This also means no backdoors will ever be added. We would rather shut down PassLok than be forced to do this, which would betray the very essence of our efforts. If we learn that a counterfeit version of PassLok for Email is circulating, whether placed by hackers or government agencies, we will make the fact known to users.</p>
     <p><strong>Notices:</strong></p>
-    <p>Since PassLok for email is distributed as a piece of human-readable code, we consider it an expression of free speech protected by the laws of many countries. Putting into circulation tampered versions of PassLok for email, whether by individuals or public entities, violates free speech and copyright protection laws.</p>
-    <p>PassLok for email contains strong cryptographic methods, which may be illegal in some countries. Please check the local laws before using PassLok for email.</p>
-    <p>PassLok for email is intended to protect professionals and innocent citizens from hackers and abusive surveillance. It is not intended to facilitate any form of crime. Please refrain from using it if your intention is to commit a crime.</p>
+    <p>Since PassLok for Email is distributed as a piece of human-readable code, we consider it an expression of free speech protected by the laws of many countries. Putting into circulation tampered versions of PassLok for Email, whether by individuals or public entities, violates free speech and copyright protection laws.</p>
+    <p>PassLok for Email contains strong cryptographic methods, which may be illegal in some countries. Please check the local laws before using PassLok for Email.</p>
+    <p>PassLok for Email is intended to protect professionals and innocent citizens from hackers and abusive surveillance. It is not intended to facilitate any form of crime. Please refrain from using it if your intention is to commit a crime.</p>
     <div id="canary"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8BAMAAADI0sRBAAAAGFBMVEUAAAAAAAD///91XhdgYGCcnJzMzMzUqipkv+fEAAAAAXRSTlMAQObYZgAAAYFJREFUOMt1lLGOgzAQREEUaVkHkhpEUkOVmvsDIt31IF1PdP8vnWwzHtaGKRDmsbO7eHGm9Cfyys4km/ojmEvQ/ZBS10N6Gl+I18/v6G/KtCrTOnVuscbWSwsxPYPBwEsGw1nxgEGpxoUzuI00MjuDqWdwvyD4e88nuOdbMFOge3j79V3liHAjL7np4kt4u5V2fwS8bGbbHd3hjZ0wyt1hZAzuxL3FZoffqrUSlaG4qqU2HFbMfoplj68pNqr0T4xF4SFUMyJcY+EqxVgTS4QlwkZjrAXSubFRsw4H5p5BxLlIgwfTIW6DoXafPcYkqN74zRf3uN7bf2HHChvnuMGX7WoRYD8tTN/4q2CS/YQ8tvY79GwsXjO3J6jq/Qz7Mds8ds5RSDypAmz4zSr1E/EfQ9MJHjDd5PSGu1Vt8Q3BOBrVDuNdnj0DB2RCvH0xPpnYHoLhXmluXdajU7E7ONOj+YyP5Fzx9MDHQHIkQGCv1WtcaFqSkKeUumjnVB80TP0D1fGXaRHBg/YAAAAASUVORK5CYII=">
-            <p>This paragraph and the canary logo above attest to the fact that we have never received any requests under gag order for user data or modifications of the code. They will be absent once we receive one of such requests.</p>
-            </p>
-          </div>
+            <p>This paragraph and the canary logo above attest to the fact that we have never received any requests under gag order for user data or modifications of the code. They will be absent once we receive one of such requests.</p></div>
   </div>
 </div>
 <br>
 <address>
-      PassLok for email 0.1 &#169; F. Ruiz 2016
+      PassLok for Email 0.1 &#169; F. Ruiz 2016
       </address>
 <ul>
         <li> engine: NaCl by D. Bernstein, W. Janssen, T. Lange, P. Schwabe, M. Dempsky, and A. Moon 2013</li>
@@ -210,7 +187,7 @@ body {
         <li> lz-string compression by pieroxy 2014</li>
         <li> file In/Out based on an article from the This Could Be Better blog 2012</li>
         <li> webRTC chat by Muaz Khan 2015</li>
-        <li>user interface and testing by the IIT PassLok group 2014</li>
+        <li>user interface and testing by the IIT PassLok group 2014-16</li>
       </ul>
      <address>
       This document may be used, modified or redistributed under GNU GPL license, version 3.0 or higher.

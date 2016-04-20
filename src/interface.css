@@ -3,7 +3,17 @@
       to { clip: rect(0px, auto, auto, auto); }
     }
 
-.n1tfz, td[class="gH acX"], td[class="fA"]{
+.n1tfz, td[class="gH acX"]{			<!--this is for Gmail-->
+      -webkit-animation-duration: 0.001s;
+      -webkit-animation-name: composeInserted;
+    }
+	
+.bottomToolbar, .thread-info, .msg-date{  <!--this is for Yahoo-->
+      -webkit-animation-duration: 0.001s;
+      -webkit-animation-name: composeInserted;
+    }
+
+._z_g1, ._rp_u1, ._mcp_73, ._mcp_h6, ._rp_81{	<!--this is for Outlook-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
     }
