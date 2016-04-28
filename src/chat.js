@@ -1,11 +1,11 @@
 ﻿//displays how many characters are left in chat invitation string
-function charsLeft(){
-	var chars = chatDate.value.length;
+function charsLeftChat(){
+	var chars = encodeURI(chatDate.value).replace(/%20/g, ' ').length;
 	var limit = 43;
 	if (chars <= limit){
-		chatmsg.innerHTML = chars + " characters out of " + limit + " used"
+		chatMsg.innerHTML = chars + " characters out of " + limit + " used"
 	}else{
-		chatmsg.innerHTML = '<span style="color:orange">Maximum length exceeded. The message will be truncated</span>'
+		chatMsg.innerHTML = '<span style="color:orange">Maximum length exceeded. The message will be truncated</span>'
 	}
 }
 

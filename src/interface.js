@@ -36,6 +36,9 @@ var rootElement = $(document),
 	nameCreated = false,
 	chatCreated = false,
 	acceptChatCreated = false,
+	coverCreated = false,
+	decoyInCreated = false,
+	decoyOutCreated = false,
 	bodyID = '';
 
 //html code for dialogs
@@ -136,6 +139,7 @@ var readHTML = '<div class="passlok-read" id="readScr">'+
 	'<div id="readMsg" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
 	'<div id="readButtons" style="display: block;" align="center">'+
 		'<button class="cssbutton" id="readHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>&nbsp;&nbsp;'+
+		'<button class="cssbutton" id="decoyBtn" value="Decoy" style="" title="decrypt hidden message, if any">Decoy</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="saveFileBtn" value="Save file" title="save file to default Downloads folder in original format, or as an html file if type is not recognized">Save file</button>'+
 	'</div>'+
 	'From:<br><div id="senderBox" contenteditable="false" style="display:inline;"></div>'+
@@ -150,11 +154,8 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 	'<div id="composeMsg" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
 	'<div id="composeButtons" style="display: block;" align="center">'+
 		'<button class="cssbutton" id="compHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>&nbsp;&nbsp;'+
-		'<span id="encryptButtons">'+
-			'<button class="cssbutton" id="encryptBtn" value="Signed" style="" title="encrypt so recipients can decrypt it at will">Signed <b>Encrypt</b></button>&nbsp;&nbsp;'+
-			'<button class="cssbutton" id="readOnceBtn" value="Read-once" style="" title="encrypt so it can be decrypted Only Once">Read-once <b>Encrypt</b></button>&nbsp;&nbsp;'+
-		'</span>'+
-		'<button class="cssbutton" id="inviteBtn" value="Invite" style="" title="invite recipients to PassLok">Invite</button>&nbsp;&nbsp;'+
+		'<button class="cssbutton" id="encryptBtn" value="Signed" style="" title="encrypt this message using the mode selected below"><b>Encrypt</b></button>&nbsp;&nbsp;'+
+		'<button class="cssbutton" id="inviteBtn" value="Invite" style="" title="invite recipients to PassLok"><b>Invite</b></button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="richBtn" value="Rich" style="" title="display toolbar for rich text editing">Rich</button>&nbsp;&nbsp;'+
 		'<input class="custom-file-input" type="file" id="loadFile" style="" title="open dialog to select file to load"/>'+
 	'</div>'+
@@ -163,6 +164,14 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 		'<button class="cssbutton" id="resetBtn2" value="Reset" style="display:none;" title="reset the current Read-once conversation with this sender">Reset</button>'+
 	'</span><br><br>'+
 	'Message:<br>' + toolbarHTML + '<div id="composeBox" class="cssbox" contenteditable="true" style="min-height: 100px;"></div>'+
+	'<br>'+
+	'<div id="checkBoxes" align="center">'+
+		'<input type="radio" name="lockmodes" id="signedMode" title="the message can be decrypted multiple times" checked/>&nbsp; Signed &nbsp;&nbsp;'+
+   		'<input type="radio" name="lockmodes" id="onceMode" title="the message can be decrypted only once"/>&nbsp; Read-once&nbsp;&nbsp;'+
+		'<input type="radio" name="lockmodes" id="chatMode" title="make an invitation to real-time chat"/>&nbsp; Chat&nbsp;&nbsp;&nbsp;&nbsp;'+
+		'<input type="checkbox" id="stegoMode" title="output hidden as normal text"/>&nbsp; Hidden&nbsp;&nbsp;'+
+		'<input type="checkbox" id="decoyMode" title="second message added"/>&nbsp; Decoy'+
+	'</div>'+
 '</div>';
 	
 //key screen	
@@ -208,7 +217,7 @@ var nameHTML = '<div class="passlok-name" id="nameScr">'+
 
 //make chat dialog
 var chatHTML = '<div class="passlok-chat "id="chatScr">'+
-	'Choose the type of chat, then optionally write in the box a message including the date and time<br><br>'+
+	'<span id="chatMsg">Choose the type of chat, then optionally write in the box a message including the date and time</span><br><br>'+
 	'<div align="center">'+
 		'<input type="radio" name="chatmodes" id="dataChat"  title="chat with text messages and file exchange" checked/>&nbsp; Text and files&nbsp;&nbsp;'+
 		'<input type="radio" name="chatmodes" id="audioChat" title="like Text chat, plus audio"/>&nbsp; Audio&nbsp;&nbsp;'+
@@ -223,13 +232,43 @@ var chatHTML = '<div class="passlok-chat "id="chatScr">'+
 
 //accept chat dialog
 var acceptChatHTML = '<div class="passlok-acceptchat" id="acceptChatScr">'+
-	'<div id="chatMsg" align="center" style="height:50px;"></div><br><br>'+
+	'<div id="chatMsg2" align="center" style="height:50px;"></div><br><br>'+
 	'<div align="center">'+
 		'<button class="cssbutton" id="cancelChat2Btn" value="Cancel" style="" title="cancel chat">Cancel</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptChatBtn" value="OK" style="" title="start chat">OK</button>'+
 	'</div>'+
 '</div>';
 
+//Cover text entry dialog
+var coverHTML = '<div class="passlok-cover" id="coverScr">'+
+	'<div align="center"> <span id="coverMsg">Please enter the cover text for hiding and click <strong>OK</strong></span><br><br>'+
+    	'<textarea class="cssbox" rows="5" autocomplete="off" id="coverBox" style="width:95%;max-height:600px" placeholder="Enter the cover text here." align="center"></textarea><br>'+
+    	'<button class="cssbutton" id="cancelCoverBtn" value="cancel" style="" title="close cover text dialog">Cancel</button>&nbsp;'+
+		'<button class="cssbutton" id="acceptCoverBtn" value="OK" style="" title="accept cover text">OK</button>'+
+	'</div>'+
+'</div>';
+
+//Decoy message entry
+var decoyInHTML = '<div class="passlok-decoyin" id="decoyIn" align="center">'+
+	'<p id="decoyMsg">Enter the Hidden Message</p>'+
+	'<textarea id="decoyText" class="cssbox" style="width:95%;" name="text" rows="3"></textarea>'+
+	'<p id="decoyInMsg">Enter the Decoy Key or Lock</p>'+
+	'<input type="password" class="cssbox" id="decoyPwdIn" style="width:95%;" name="key"/><br><br>'+
+	'<input type="checkbox" id="showDecoyInCheck" title="reveal Key">&nbsp; Show&nbsp;&nbsp;'+
+	'<button class="cssbutton" id="cancelDecoyInBtn" value="Cancel" title="do not encrypt">Cancel</button>&nbsp;'+
+	'<button class="cssbutton" id="acceptDecoyInBtn" value="OK" title="go on with encryption">OK</button>'+
+'</div>';
+
+//Decoy message retrieval
+var decoyOutHTML = '<div class="passlok-decoyout" id="decoyOut" align="center">'+
+	'<p>Enter the Decoy Key</p>'+
+	'<input type="password" class="cssbox" id="decoyPwdOut" style="width:95%;" name="key"/><br><br>'+
+	'<input type="checkbox" id="showDecoyOutCheck" title="reveal Password">&nbsp; Show&nbsp;'+
+	'<input type="checkbox" id="sharedDecoyOut" title="uncheck if this is not a Shared Key" checked>&nbsp; Shared<br><br>'+
+	'<button class="cssbutton" id="cancelDecoyOutBtn" value="Cancel" title="stop decryption">Cancel</button>&nbsp;'+
+	'<button class="cssbutton" id="acceptDecoyOutBtn" value="OK" title="go on with decryption">OK</button>'+
+	'<p>The Hidden message will appear at the top of the decrypt window</p>'+
+'</div>';
 
 //the following functions create popup boxes (modals) using jQuery UI, and extract data from the email client to populate some of them	  
 function showReadDialog(email,bodyText){
@@ -244,6 +283,7 @@ function showReadDialog(email,bodyText){
 				console.log(response.farewell);
 			});
 		});
+		modal.find('#decoyBtn').click(doDecoyDecrypt); 
 		modal.find('#saveFileBtn').click(saveURLAsFile); 		
 		readCreated = true;  
 	}else{
@@ -264,11 +304,8 @@ function showComposeDialog(emailList,bodyText,specialMessage) {
 		modal = $(composeHTML);
   
 	//event listeners; the functions are defined elsewhere
-		modal.find('#encryptBtn').click(signedEncrypt);
-		modal.find('#readOnceBtn').click(readOnceEncrypt);
-		modal.find('#inviteBtn').click(function(){							//this button has two different functions depending on context
-			if(allNew){inviteEncrypt();}else{displayChat();}
-		});
+		modal.find('#encryptBtn').click(encrypt);
+		modal.find('#inviteBtn').click(inviteEncrypt);
 		modal.find('#richBtn').click(toggleRichText);
 		modal.find('#loadFile').change(loadFileAsURL);
 		modal.find('#compHelpBtn').click(function(){
@@ -323,7 +360,7 @@ function showComposeDialog(emailList,bodyText,specialMessage) {
 	composeBox.focus();
 	if(firstTimeUser){
 		showKeyDialog();											//enter Password first if this is the first time
-		composeMsg.innerHTML = "Now write your message and click either <b>Signed Encrypt</b> (the message can be decrypted multiple times) or <b>Read-Once Encrypt</b> (the message can be decrypted only once). If the recipient is unknown to PassLok, you will have to click <b>Invite</b>, which is not secure, so be careful with what you write"
+		composeMsg.innerHTML = "Now write your message and select either <em>Signed</em> (the message can be decrypted multiple times) or <em>Read-Once</em> (the message can be decrypted only once) at the bottom of this window, then click <b>Encrypt</b>. If the recipient is unknown to PassLok, you will have to click <b>Invite</b>, which is not secure, so be careful with what you write"
 	}
 	if(specialMessage) composeMsg.innerHTML = specialMessage;
 }
@@ -336,14 +373,14 @@ function updateComposeButtons(emailList){
 		if(locDir[emailList[index].trim()]) allNew = false
 	}
 	if(allNew){
-		encryptButtons.style.display = 'none';
-		inviteBtn.innerHTML = 'Invite';
-		inviteBtn.title = 'invite recipients to PassLok';
+		encryptBtn.style.display = 'none';
+		inviteBtn.style.display = '';
+		checkBoxes.style.display = 'none';
 		if(!firstTimeUser) setTimeout(function(){composeMsg.innerHTML = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20);
 	}else{
-		encryptButtons.style.display = '';
-		inviteBtn.innerHTML = 'Chat';	
-		inviteBtn.title = 'make a chat invitation for these recipients';	
+		encryptBtn.style.display = '';
+		inviteBtn.style.display = 'none';
+		checkBoxes.style.display = '';
 	}
 }
   
@@ -427,6 +464,7 @@ function showChatDialog(){
 	//event listeners; the functions are defined elsewhere
 		modal.find('#cancelChatBtn').click(cancelChat);
 		modal.find('#makeChatBtn').click(makeChat);
+		modal.find('#chatDate').keyup(charsLeftChat);
   
 		chatCreated = true;
 	}else{
@@ -435,6 +473,7 @@ function showChatDialog(){
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
 		modal.dialog({modal:true, width: 600, autoOpen: true})
 	}
+	chatDate.value = composeBox.innerText.slice(0,43);
 	if(!myKey) showKeyDialog();
 }
 
@@ -457,6 +496,65 @@ function showAcceptChatDialog(message){
 	}
 }
 
+function showCoverDialog(){
+	var modal;
+	if (!coverCreated){
+		modal = $(coverHTML);
+  
+	//event listeners; the functions are defined elsewhere
+		modal.find('#cancelCoverBtn').click(cancelStego);
+		modal.find('#acceptCoverBtn').click(textStego);
+  
+		coverCreated = true;
+	}else{
+		modal = $(".passlok-cover");
+	}
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
+		modal.dialog({modal: true, width: 700, autoOpen: true});
+	}
+}
+
+function showDecoyInDialog(){
+	var modal;
+	if (!decoyInCreated){
+		modal = $(decoyInHTML);
+  
+	//event listeners; the functions are defined elsewhere
+		modal.find('#cancelDecoyInBtn').click(cancelDecoyIn);
+		modal.find('#acceptDecoyInBtn').click(encrypt);
+		modal.find('#decoyText').keyup(charsLeftDecoy);
+		modal.find('#decoyPwdIn').keyup(function(){decoyPwdInKeyup(event)});
+		modal.find('#showDecoyInCheck').click(showDecoyPwdIn);
+  
+		decoyInCreated = true;
+	}else{
+		modal = $(".passlok-decoyin");
+	}
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
+		modal.dialog({modal:true, width: 600, autoOpen: true})
+	}
+}
+
+function showDecoyOutDialog(){
+	var modal;
+	if (!decoyOutCreated){
+		modal = $(decoyOutHTML);
+  
+	//event listeners; the functions are defined elsewhere
+		modal.find('#cancelDecoyOutBtn').click(cancelDecoyOut);
+		modal.find('#acceptDecoyOutBtn').click(doDecoyDecrypt);
+		modal.find('#decoyPwdOut').keyup(function(){decoyPwdOutKeyup(event)});
+		modal.find('#showDecoyOutCheck').click(showDecoyPwdOut);
+  
+		decoyOutCreated = true;
+	}else{
+		modal = $(".passlok-decoyout");
+	}
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
+		modal.dialog({modal:true, width: 600, autoOpen: true})
+	}
+	if(!myKey) showKeyDialog();
+}
 
 //This animation strategy inspired by http://blog.streak.com/2012/11/how-to-detect-dom-changes-in-css.html
 //based on http://davidwalsh.name/detect-node-insertion changes will depend on CSS as well.
@@ -485,8 +583,7 @@ function getMyEmail(){
 		var parts = document.title.split('-');
 		myEmail = parts[parts.length - 2].trim() + '@yahoo.com';
 	}else if(serviceName == 'outlook'){
-//		myEmail = $('head').find("script[src*='live']")[0].attributes['src'].value.match(/live:(.*)\&callback/)[1] + '@outlook.com'
-		myEmail = document.title.split('-')[1].trim();
+		myEmail = document.title.split('-')[1].trim() + '@outlook.com';
 	}
 }
 
@@ -528,14 +625,18 @@ function composeIntercept(ev) {
 	if (viewTitleBar && viewTitleBar.length > 0){
 		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
 			if ($(this).find('.passlok').length === 0){
-			  var bodyText = $(this).parents().eq(5).find('.a3s')[0].innerHTML;							//find body text
-			  bodyText = bodyText.split("gmail_extra")[0];	
-			  if(bodyText && stripHeaders(bodyText).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0){
+			  var bodyElement = $(this).parents().eq(5).find('.a3s').eq(0);
+			  var moreElement = bodyElement.find('.ajU');
+			  if(moreElement.length > 0){
+				  var bodyText = moreElement.eq(0).prev().html();
+			  }else{
+				  var bodyText = bodyElement.html();
+			  }
+			  if(isPassLok(bodyText)){
 				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>');
 				
 				$(this).find('.passlok').click(function(){
 					var email = $(this).parents().eq(5).find('.iw')[0].firstChild.attributes['email'].value;		//sender's address
-//					var bodyText = $(this).parents().eq(5).find('.a3s')[0].innerHTML;								//body of the message
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog();
@@ -583,12 +684,11 @@ function composeIntercept(ev) {
 		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
 			if ($(this).find('.passlok').length === 0){
 			  var bodyText = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0].innerHTML;
-			  if(bodyText && stripHeaders(bodyText).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0){
+			  if(isPassLok(bodyText)){
 				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>');
 				
 				$(this).find('.passlok').click(function(){
 					var email = $(this).parents().eq(2).find('.from, .lozenge-static.hcard')[0].attributes['data-address'].value;		//sender's address
-//					var bodyText = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0].innerHTML;					//body of the message
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog();
@@ -600,7 +700,7 @@ function composeIntercept(ev) {
 
 	//now the same for Outlook
   }else if(serviceName == 'outlook'){
-	var composeBoxes = $('._z_v._z_B, ._mcp_73, ._mcp_h6').eq(-1).parent();				//toolbar at bottom, sometimes top
+	var composeBoxes = $('._z_v._z_B, ._mcp_f6, ._mcp_73').eq(-1).parent();				//toolbar at bottom, sometimes top
 	if (composeBoxes && composeBoxes.length > 0){
 		composeBoxes.each(function(){
 			var composeMenu = $(this);
@@ -609,7 +709,7 @@ function composeIntercept(ev) {
 				composeMenu.append(encryptionFormOptions);
 
 				$(this).find('.passlok').click(function(){						//activate the button
-					var bodyDiv = $(this).parents().eq(2).find('._mcp_M1, ._mcp_33, ._mcp_K5')[0];	//different class in old and new interface
+					var bodyDiv = $(this).parents().eq(2).find('._mcp_M1, ._mcp_33, ._mcp_I5')[0];	//different class in old and new interface
 					bodyDiv.id = "bodyText";
 					bodyID = "bodyText";									//this global variable will be used to write the encrypted message
 					var bodyText = bodyDiv.innerHTML;
@@ -621,7 +721,9 @@ function composeIntercept(ev) {
 					var emails = $(this).parents().eq(4).find('._pe_m, ._pe_o');		//element containing recipient addresses, different class
 					var emailList = [];
 					for(var i = 0; i < emails.length; i++){
-						emailList.push(emails[i].innerText)
+						var address = emails[i].innerText;
+						if(!address.match('@')) address = address + '@outlook.com';
+						emailList.push(address)
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 					showComposeDialog(emailList,bodyText);
@@ -632,17 +734,18 @@ function composeIntercept(ev) {
 	
 //this part for reading messages
 
-	var viewTitleBar = rootElement.find('._rp_u1, ._rp_81').parent();					//reply icon at top of message, old or new interface
+	var viewTitleBar = rootElement.find('._rp_71, ._rp_81').parent();					//reply icon at top of message, old or new interface
 	if (viewTitleBar && viewTitleBar.length > 0){
 		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
 			if ($(this).find('.passlok').length === 0){
-			  var bodyText = $(this).parents().eq(8).find('._rp_V4, ._rp_u4')[1].innerHTML;
-			  if(bodyText && stripHeaders(bodyText).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0){
+			  var bodyText = $(this).parents().eq(8).find('._rp_t4, ._rp_u4')[1].innerHTML;
+			  if(isPassLok(bodyText)){
 				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+chrome.extension.getURL("images/icon.png")+'" /></a>');
 				
 				$(this).find('.passlok').click(function(){
-					var email = $(this).parents().eq(2).find('._pe_l')[0].innerText.replace(/<(.*?)>/gi, "").trim();			//sender's address
-					var bodyText = $(this).parents().eq(8).find('._rp_V4, ._rp_u4')[1].innerHTML;							//got to re-find the body of the message
+					var email = $(this).parents().eq(2).find('._pe_l')[0].innerText.replace(/<(.*?)>/gi,"").trim();			//sender's address
+					if(!email.match('@')) email = email + '@outlook.com';
+					var bodyText = $(this).parents().eq(8).find('._rp_t4, ._rp_u4').eq(-1).html();							//got to re-find the body of the message
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog();
@@ -653,4 +756,16 @@ function composeIntercept(ev) {
 	}
 
   }
+}
+
+//removes headers but does not filter the contents
+function stripHeaders2(string){
+	string = string.replace(/[\s\n]/g,'').replace(/&nbsp;/g,'').replace(/<(.*?)>/gi,"");		//remove spaces, newlines, and any html tags
+	string = string.trim().replace(/==+/g,'==');													//turn multiple = into just ==
+	if(string.match('==')){ return string.split('==')[1] }else{ return string }
+}
+
+//for detecting the presence of a PassLok-encrypted item, regular or hidden. Returns true or false
+function isPassLok(string){
+	return (stripHeaders2(string).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0 || string.match('\u2004') || string.match('\u2005') || string.match('\u2006'))
 }

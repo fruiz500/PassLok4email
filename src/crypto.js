@@ -1,9 +1,30 @@
-﻿//function that starts it all when the Unlock button is pushed
+﻿//selects the encryption mode and starts it
+function encrypt(){
+	callKey = 'encrypt';
+	if(!myKey){
+		showKeyDialog();
+		throw('stopped for key input');
+	}
+	if(signedMode.checked){
+		signedEncrypt();
+	}else if(onceMode.checked){
+		readOnceEncrypt();
+	}else if(chatMode.checked){
+		displayChat();
+	}
+}
+
+//function that starts it all when the read screen loads
 function decrypt(){
-	if(!myKey) showKeyDialog();
 	callKey = 'decrypt';
+	if(!myKey){
+		showKeyDialog();
+		throw('stopped for key input');
+	}
 	readMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
-	setTimeout(function(){																			//the rest after a 20 ms delay
+	setTimeout(function(){
+		var text = readBox.innerHTML;
+		if(text.match('\u2004') || text.match('\u2005') || text.match('\u2006')) fromLetters(text);		//if hidden text
 		decryptList();
 		openChat();
 	},20);						//end of timeout
@@ -11,8 +32,6 @@ function decrypt(){
 
 //same but for locking
 function signedEncrypt(){
-	if(!myKey) showKeyDialog();
-	callKey = 'signedEncrypt';
 	composeMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';			//Get blinking message started
 	setTimeout(function(){																			//the rest after a 20 ms delay
 		var emailArray = composeRecipientsBox.innerText.split(',');
@@ -23,8 +42,6 @@ function signedEncrypt(){
 };
 
 function readOnceEncrypt(){
-	if(!myKey) showKeyDialog();
-	callKey = 'readOnceEncrypt';
 	composeMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
 	setTimeout(function(){																			//the rest after a 20 ms delay
 		var emailArray = composeRecipientsBox.innerText.split(',');
@@ -106,14 +123,16 @@ function encryptList(listArray,isReadOnce){
 		nonce24 = makeNonce24(nonce),
 		noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
 		text = composeBox.innerHTML;
+		
+	var padding = decoyEncrypt(59,nonce24,myKey);					//this for decoy mode
 
 	if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
 	var cipher = symEncrypt(text,nonce24,msgKey);					//main encryption event, but don't add it yet
 
-	if(isReadOnce){													//add type marker and nonce
-		var outString = myezLock + '$' + noncestr
+	if(isReadOnce){													//add type marker, nonce, and padding for decoy msg
+		var outString = myezLock + '$' + noncestr + padding
 	}else{
-		var outString = myezLock + '#' + noncestr
+		var outString = myezLock + '#' + noncestr + padding
 	}
 
 	//for each email on the List (unless empty), encrypt the message key and add it, prefaced by the first 256 bits of the ciphertext when the item is encrypted with the message nonce and the shared key. Notice: same nonce, but different key for each item (unless someone planted two recipients who have the same key, but then the encrypted result will also be identical).
@@ -204,8 +223,14 @@ function encryptList(listArray,isReadOnce){
 
 	syncLocDir();
 	callKey = '';
-	document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
+	if(stegoMode.checked){
+		textStego();
+	}else{
+		document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
+	}
 	
+	stegoMode.checked = false;
+	decoyMode.checked = false;
 	if(inviteArray.length != 0){		 
 		composeMsg.innerHTML = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:<br>' + inviteArray.join(', ') + '<br>You should send them an invitation first. You may close this dialog now'
 	}else{
@@ -252,12 +277,13 @@ function keyDecrypt(cipherstr){
 
 //this strips initial and final header, plus spaces and non-base64 characters in the middle
 function stripHeaders(string){
-	string = string.replace(/[\s\n]/g,'').replace(/<(.*?)>/gi, "");								//remove spaces, newlines, and any html tags
-	string = string.trim().split("==")[1]
+	string = string.replace(/[\s\n]/g,'').replace(/&nbsp;/g,'').replace(/<(.*?)>/gi,"");		//remove spaces, newlines, and any html tags
+	if(string.match('==')) string = string.split('==')[1];
 	string = string.replace(/[^a-zA-Z0-9+\/@#\$%]+/g,''); 										//takes out anything that is not base64 or a type marker
 	return string
 }
 
+var padding = '', nonce24;			//global variables involved in decoding secret message
 //decrypts a message encrypted for multiple recipients. Encryption can be Signed, Read-once, or an Invitation. This is detected automatically.
 function decryptList(){
 	var text = stripHeaders(readBox.innerHTML);
@@ -289,7 +315,8 @@ function decryptList(){
 	var stuffForId = myLock;
 
 	var noncestr = cipherArray[0].slice(0,20);
-	var	nonce24 = makeNonce24(nacl.util.decodeBase64(noncestr));
+	nonce24 = makeNonce24(nacl.util.decodeBase64(noncestr));			//these are global variables so they can be read when decryption completes
+	padding = cipherArray[0].slice(20,120);
 	var cipher = cipherArray[cipherArray.length - 1];
 
 	if(type == '#'){														//signed mode
@@ -432,4 +459,82 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 	syncLocDir();															//everything OK, so store
 	readMsg.innerHTML = 'Decrypt successful';
 	callKey = '';
+}
+
+//displays how many characters are left in decoy message
+function charsLeftDecoy(){
+	var chars = encodeURI(decoyText.value).replace(/%20/g, ' ').length;
+	var limit = 59;
+	if (chars <= limit){
+		decoyMsg.innerHTML = chars + " characters out of " + limit + " used"
+	}else{
+		decoyMsg.innerHTML = '<span style="color:orange">Maximum length exceeded. The message will be truncated</span>'
+	}
+}
+
+//encrypts a hidden message into the padding included with list encryption, or makes a random padding also encrypted so it's indistinguishable
+function decoyEncrypt(length,nonce24,seckey){
+	if (decoyMode.checked){
+		if(typeof(decoyPwdIn) == "undefined"){
+			showDecoyInDialog();
+			throw ("stopped for decoy input")			
+		}
+		if (!decoyPwdIn.value.trim() || !decoyText.value.trim()){ 					//stop to display the decoy entry form if there is no hidden message or key
+			showDecoyInDialog();
+			throw ("stopped for decoy input")
+		}
+		var keystr = decoyPwdIn.value,
+			text = encodeURI(decoyText.value.replace(/%20/g, ' '));
+		var keyStripped = stripHeaders(keystr);
+
+		if (keyStripped.length == 43 || keyStripped.length == 50){						//the key is a Lock, so do asymmetric encryption
+			if (keyStripped.length == 50) keyStripped = changeBase(keyStripped.toLowerCase().replace(/l/g,'L'), BASE36, BASE64, true) //ezLock replaced by regular Lock
+			var sharedKey = makeShared(convertPubStr(keyStripped),seckey);
+		}else{
+			var sharedKey = wiseHash(keystr,nacl.util.encodeBase64(nonce24));			//symmetric encryption for true shared key
+		}
+		decoyPwdIn.value = "";
+		decoyText.value = "";
+		$('#decoyIn').dialog("close");
+		showDecoyInCheck.checked = false;
+
+	} else {																		//no decoy mode, so salt comes from random text and key
+		var sharedKey = nacl.randomBytes(32),
+			text = nacl.util.encodeBase64(nacl.randomBytes(44)).replace(/=+$/,'');
+	};
+	while (text.length < length) text = text + ' ';				//add spaces to make the number of characters required
+	text = text.slice(0,length);
+	var cipher = symEncrypt(text,nonce24,sharedKey);
+	return cipher;
+}
+
+//decrypt the message hidden in the padding, for decoy mode
+function decoyDecrypt(cipher,nonce24,dummylock){
+	if(typeof(decoyPwdOut) == "undefined"){
+		showDecoyOutDialog();
+		throw ("stopped for decoy input")			
+	}	
+	if (!decoyPwdOut.value.trim()){					//stop to display the decoy key entry form if there is no key entered
+		showDecoyOutDialog();
+		throw ("stopped for decoy input")
+	}
+	var keystr = decoyPwdOut.value;
+	decoyPwdOut.value = ""
+	if(!sharedDecoyOut.checked){							//asymmetric mode, so now make the real encryption key
+		var email = myEmail,
+			sharedKey = makeShared(dummylock,ed2curve.convertSecretKey(nacl.sign.keyPair.fromSeed(wiseHash(keystr,email)).secretKey));
+	}else{																				//symmetric mode
+		var sharedKey = wiseHash(keystr,nacl.util.encodeBase64(nonce24));
+	}
+	$('#decoyOut').dialog("close");
+	showDecoyOutCheck.checked = false;
+	sharedDecoyOut.checked = false;
+	
+	var plain = symDecrypt(cipher,nonce24,sharedKey,true);
+	readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decodeURI(plain) + '</span>';
+}
+
+//does decoy decryption after a button is clicked
+function doDecoyDecrypt(){
+	decoyDecrypt(padding,nonce24,convertPubStr(theirLock))
 }

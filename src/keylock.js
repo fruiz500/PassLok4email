@@ -1,5 +1,5 @@
 ﻿//function to test key strength and come up with appropriate key stretching. Based on WiseHash
-function keyStrength(pwd,display) {
+function keyStrength(pwd,location) {
 	var entropy = entropycalc(pwd);
 
 	if(entropy == 0){
@@ -21,8 +21,12 @@ function keyStrength(pwd,display) {
 	var iter = Math.max(1,Math.min(20,Math.ceil(24 - entropy/5)));			//set the scrypt iteration exponent based on entropy: 1 for entropy >= 120, 20(max) for entropy <= 20
 
 	var seconds = time10/10000*Math.pow(2,iter-8);			//to tell the user how long it will take, in seconds
-
-	keyMsg.innerHTML = 'Password strength: ' + msg + '<br>Up to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process';
+	var msg = 'Password strength: ' + msg + '<br>Up to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process';
+	if(location == 'pwd'){
+		keyMsg.innerHTML = msg
+	}else if(location == 'decoy'){
+		decoyInMsg.innerHTML = msg
+	}
 	return iter
 };
 
@@ -162,7 +166,7 @@ function symEncrypt(plainstr,nonce24,symKey){
 
 needRecrypt = false;
 //decrypt string with a symmetric key
-function symDecrypt(cipherstr,nonce24,symKey){
+function symDecrypt(cipherstr,nonce24,symKey,isDecoy){
 	try{															//this may fail if the string is corrupted, hence the try
 		var cipher = nacl.util.decodeBase64(cipherstr);
 	}catch(err){
@@ -170,7 +174,8 @@ function symDecrypt(cipherstr,nonce24,symKey){
 		throw('decodeBase64 failed')
 	}
 	var	plain = nacl.secretbox.open(cipher,nonce24,symKey);
-		if(!plain){													//failed, try old password
+	  if(!plain){													//failed, try old password
+	  	  if(!isDecoy){
 			if(oldPwdStr){
 				var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
 					oldKey = ed2curve.convertSecretKey(oldKeySgn);
@@ -183,7 +188,10 @@ function symDecrypt(cipherstr,nonce24,symKey){
 			}else{
 				failedDecrypt('new')							//this will open the old Password dialog
 			}
-		}
+	     }else{													//if doing a decoy decryption, don't ask for a new password
+	  		failedDecrypt('decoy')
+	     }
+	  }
 	return nacl.util.encodeUTF8(plain)
 }
 
@@ -216,6 +224,9 @@ function failedDecrypt(marker){
 	}else if(marker == 'idSigned'){
 		restoreTempLock();
 		readMsg.innerHTML = 'No message found for you';
+		callKey = ''
+	}else if(marker == 'decoy'){
+		readMsg.innerHTML = 'Hidden message not found';
 		callKey = ''
 	}else{
 		restoreTempLock();

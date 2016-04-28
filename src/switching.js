@@ -16,6 +16,24 @@ function showOldSec(){
 	}
 }
 
+//same, for decoy In box
+function showDecoyPwdIn(){
+	if(showDecoyInCheck.checked){
+		decoyPwdIn.type="TEXT";
+	}else{
+		decoyPwdIn.type="PASSWORD";
+	}
+}
+
+//same, for decoy Out box
+function showDecoyPwdOut(){
+	if(showDecoyOutCheck.checked){
+		decoyPwdOut.type="TEXT";
+	}else{
+		decoyPwdOut.type="PASSWORD";
+	}
+}
+
 //The key expires after 5 minutes of not being used, this function keeps it alive
 function readKey(){
 	resetTimer();
@@ -80,10 +98,8 @@ function acceptKey(){
 		syncChromeLock(myEmail,JSON.stringify(locDir[myEmail]));
 		
 		key2any();											//this also deletes the Password from the box
-		if (callKey == 'signedEncrypt'){					//now complete whatever was being done when the Password was found missing
-			signedEncrypt()
-		}else if(callKey == 'readOnceEncrypt'){
-			readOnceEncrypt()
+		if (callKey == 'encrypt'){					//now complete whatever was being done when the Password was found missing
+			encrypt()
 		}else if(callKey == 'inviteEncrypt'){
 			inviteEncrypt()
 		}else if(callKey == 'decrypt'){
@@ -154,11 +170,34 @@ function cancelAcceptChat(){
 	readBox.innerHTML = '';
 }
 
+function cancelStego(){
+	$('#coverScr').dialog("close");
+	composeMsg.innerHTML = 'Hiding canceled';
+	coverBox.value = '';
+	stegoMode.checked = false;
+}
+
 //opens screen to store new Lock obtained through a message
 function openNewLock(){
 	showNameDialog();
 	nameMsg.innerHTML = 'This message from ' + theirEmail + ' was locked with a new Password. Click <strong>OK</strong> if you wish to accept it.';
 	throw('stopped to accept new Lock')
+}
+
+function cancelDecoyIn(){
+	$('#decoyIn').dialog("close");
+	composeMsg.innerHTML = 'Decoy encryption canceled';
+	decoyText.value = '';
+	decoyPwdIn.value = '';
+	showDecoyInCheck.checked = false;
+}
+
+function cancelDecoyOut(){
+	$('#decoyOut').dialog("close");
+	readMsg.innerHTML = 'Decoy decryption canceled';
+	decoyPwdOut.value = '';
+	showDecoyOutCheck.checked = false;
+	sharedDecoyOut.checked = true;
 }
 
 //displays Password strength and resets timer
@@ -169,7 +208,7 @@ function pwdKeyup(evt){
 	acceptKeyBtn.style.background = '';
 	evt = evt || window.event
 	if (evt.keyCode == 13){acceptKey()} else{												//accept upon return, otherwise display strength
-		 return keyStrength(pwd.value,true);
+		 return keyStrength(pwd.value,'pwd');
 	}
 }
 
@@ -178,6 +217,20 @@ function oldPwdKeyup(evt){
 	evt = evt || window.event
 	if (evt.keyCode == 13){acceptOldKey()}
 	else if(oldPwd.value.trim() == ''){return}
+}
+
+//enter decoy Key from keyboard
+function decoyPwdInKeyup(evt){
+	evt = evt || window.event
+	if (evt.keyCode == 13){acceptDecoyIn()} else {
+		return keyStrength(decoyPwdIn.value,'decoy')
+	}
+}
+
+//enter decoy Key from keyboard
+function decoyPwdOutKeyup(evt){
+	evt = evt || window.event
+	if (evt.keyCode == 13) doDecoyDecrypt()
 }
 
 //called when the Key box is empty

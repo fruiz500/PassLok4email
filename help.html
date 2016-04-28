@@ -60,7 +60,8 @@ body {
           <p>PassLok for Email is a Chrome extension that makes your email private by encrypting it end-to-end so only the intended recipients can decrypt your message. Currently it supports Gmail, Yahoo, and Outlook online. PassLok for Email is in no way associated with Google or any email service.</p>
     <p> You can encrypt rich text messages and small files in <em>Signed mode</em>, which allows you and the recipients to decrypt them again as often as necessary, or in <em>Read-once mode</em>, which allows recipients to decrypt them only once.    </p>
     <p>You can also set up real-time secure chat sessions involving text, files, audio, or even video. The connection is direct between participants, with a server getting involved only at the start to help connect the participants to one another.</p>
-    <p>Unlike most other email encryption apps, PassLok for Email does not involve additional connections. It only communicates with the email page, and minimally so, in order to maintain a high level of security. Your secret Password (which you should <em>never</em> give to anyone), is not stored anywhere and remains in memory only as long as necessary to do its job.    </p>
+    <p>Unlike most other email encryption apps, PassLok for Email does not involve additional connections. It only communicates with the email page, and minimally so, in order to maintain a high level of security. Your secret Password (which you should <em>never</em> give to anyone), is not stored anywhere and remains in memory only as long as necessary to do its job.</p>
+    <p>And then, if you are really paranoid, PassLok for Email can disguise its output so it does not look encrypted at all. It can also hide a second, undetectable message that is encrypted under a different key.</p>
     <p>If you want more capability or want to use an unsupported email service, you may want to try the standalone app <a href="https://passlok.com/app" target="_blank">PassLok Privacy</a>, also from <a href="https://PassLok.com" target="_blank">https://PassLok.com</a>. PassLok Privacy implements the additional Anonymous encryption mode plus signatures, secret splitting, and a number of steganography methods. Messages encrypted in PassLok for Email can be decrypted in PassLok Privacy, and vice-versa.</p>
     <p>PassLok for Email is built on the highly regarded NaCl crypto engine, but the app itself is <em>still in experimental phase</em>, as it has not yet been duly vetted by experts. Bear this in mind before entrusting sensitive information to it. You can get full details on PassLok for Email's cryptography from the <a href="https://passlok.com/files/passlok4email_technical_document.pdf" target="_blank">PassLok for Email technical document.</a> The source code is available at <a href="https://github.com/fruiz500/passlok4email" target="_blank">https://github.com/fruiz500/passlok4email</a>. Please use this page to report bugs or suggest improvements.  </p>
   </div>
@@ -73,7 +74,7 @@ body {
     <ol>
             <li>Fill in the recipients' addresses, and perhaps the subject line, but <em><strong>do not</strong></em> write the text that you want to be encrypted (otherwise the email server might have it, unencrypted, as soon as you type it).</li>
             <li>Click the PasLok icon near the top of the bottom of the box. A dialog will open where you can write your confidential message or load a small file.</li>
-            <li>After writing your mesage, click either <strong>Signed Encrypt</strong> (the message can be decrypted multiple times) or <strong>Read-once Encrypt</strong> (the message can be decrypted only once).</li>
+            <li>After writing your mesage, check that the encryption mode selected at the bottom is the one you want. There are three options: <strong>Signed</strong> (the message can be decrypted multiple times), <strong>Read-once </strong>(the message can be decrypted only once), and <strong>Chat</strong> (to make an encrypted invitation to join a real-time chat). Then click <strong>Encrypt</strong>.</li>
             <li>The message will then be encrypted and placed back at the top of the compose box. Add whatever plain text or attachments you want before sending it out in the normal way. Beware: attachments added this way <em>will not be encrypted</em>, if you want them encrypted, follow the instructions below about encrypting files.</li>
           </ol>
     <p>If you want to correspond with new people, you must send them an invitation first, or receive one from them. To do this, proceed as indicated above but click the <strong>Invite</strong> button instead. Be aware, however, that the contents of invitation messages are <em>not secure</em>, and anyone in the world can decrypt them. Decrypting any message encrypted by someone will work as well as decrypting an invitation from that person in order to establish communication, although you might not be able to decrypt the contents.</p>
@@ -101,8 +102,8 @@ body {
         <h3>How does Chat work?</h3>
   <div>
     <p>
-          <p>If you click the <strong>Chat</strong> button instead of the encrypt buttons, a dialog asks you what kind of real-time chat you want to set up. There are three choices: text and files, this plus audio, and all this plus video. You can also add a short message, such as the exact time to start the chat session.</p>
-    <p>After you click <strong>OK</strong>, PassLok makes an encrypted chat invitation that you can then send to the participants of the chat. This invitation contains the short message mentioned above, plus some data needed to establish the connection. The contents of the Message box are not included.</p>
+          <p>If you select <strong>Chat</strong> option at the bottom of the window before clicking <strong>Encrypt</strong>, a dialog asks you what kind of real-time chat you want to set up. There are three choices: text and files, this plus audio, and all this plus video. You can also add a short message, such as the exact time to start the chat session.</p>
+    <p>After you click <strong>OK</strong>, PassLok makes an encrypted chat invitation, which you can then send to the participants of the chat. This invitation contains the short message mentioned above (limit 43 characters) plus some data needed to establish the connection.</p>
     <p>When the recipients get your chat invitation, they will decrypt it like any other PassLok message and then the short message will pop up and ask for confirmation to continue (this is so they don't join the chat too early, if set for a later time). After this the chat will open on a separate tab and ask you to supply a name for yourself. When each participant does this, they connect directly to one another. They also may be asked to grant permission to feed audio or video when the connection takes place. The original sender connects exactly the same way, by decrypting the invitation he/she sent to the others.</p>
     <p>If you get disconnected, just reload the chat tab in Chrome and type your alias again. The chat session ceases to exist when all participants close their chat tabs.</p></div>
         <h3>Can I encrypt files?</h3>
@@ -111,6 +112,39 @@ body {
           <p>Chat has its own secure file-sending process, so we refer here to sending files by email. You have two options:</p>
     <p>1. Encrypt the files using AES with an archiving utility such as <a href="http://www.7-zip.org/" target="_blank">7-zip</a> (Windows), <a href="http://www.kekaosx.com/" target="_blank">Keka</a> (OSX), or p7zip (Linux), then lock the password for the files inside an encrypted email message, and attach the encrypted archives at the email Compose window.</p>
     <p>2. You can load a single file smaller than a megabyte as text using the <strong>Select a file</strong> button,  and then encrypt it as a regular message. After decryption, the recipient can save the file using the <strong>Save file</strong> button. You can add text above or below the encoded file, but not a second file.</p></div>
+    
+  <h3>I don't want my messages to look encrypted</h3>
+  <div>
+        <p>Then you will love <strong>Hidden</strong> mode, which you can select at the bottom of the encrypt dialog, prior to clicking <strong>Encrypt</strong>. Then a popup will ask you to supply a cover text, which will be used to hide your encrypted message. Paste in something long (otherwise it may be repeated, which is not so good), and click <strong>OK</strong>. Your message will be encrypted and then encoded into the letters and spaces of the cover text, and then placed back in the email page's compose or reply box. It will look like the original cover text. Add whatever extra text you like at top and bottom (you may need to complete words at the end), and send it.</p>
+        <p>On the receiving end, PassLok for Email will detect that the text contains a hidden message. When the recipient clicks the PassLok icon, it will be extracted and decrypted as usual.</p>
+        <p>Hidden mode can be used together with Decoy mode and any of the encryption modes.</p>
+  </div>
+  
+        <h3>What is Decoy mode?</h3>
+  <div>
+        <p>When you turn on the <strong>Decoy</strong> option at the bottom of the encrypt dialog, PassLok includes a second message (limit 59 characters), which is encrypted under a separate key. Its presence is undetectable, and it won't make the encrypted result any longer or shorter. This is the process to use Decoy mode:</p>
+        <p>When you are the sender:</p>
+        <ol>
+          <li>Check the <strong>Decoy</strong> box, in addtion to setting the encryption mode and optionally Hidden mode, and click <strong>Encrypt</strong> after you have typed in the main message.</li>
+          <li>A dialog asks you for the hidden message and the special Decoy <em>Key</em> or <em>Lock</em>. A <em>Key</em> is one that both the sender and the recipients know. A <em>Lock</em> is matched to a special Key, so that the Lock is used to encrypt, and the Key to decrypt (more on how to use those below). Click <strong>OK</strong> after you have supplied everything.</li>
+          <li>Encryption proceeds and the result appears in the email page's compose or reply window, from where you can send it.</li>
+        </ol>
+        <p>When you are the recipient:</p>
+        <ol>
+          <li>Decrypt the message normally by clicking the PassLok icon, then click the <strong>Decoy</strong> button in the decrypt dialog.</li>
+          <li>A dialog asks you for the Decoy Key, which can be shared as we saw above, or the one matching a Lock. In the latter case you must uncheck the <strong>Shared</strong> box so PassLok knows how to proceed (shared and unshared Keys look the same). Click <strong>OK</strong> after you wrote the appropiate Key.</li>
+          <li>Then if all goes well the decrypted hidden message appears highlighted in blue at the top of the decrypt window. If not, you'll get a message stating that no hidden message was found.</li>
+        </ol>
+        <p>How to make a Lock matching a Key that is not going to be shared (this has the advantage that the sender cannot compromise the hidden text, since the Key cannot be obtained from the Lock):</p>
+        <ol>
+          <li>Restart your email page and click the Compose button, then write in anything in the recipients address box and click the PassLok icon.</li>
+          <li>Click the <strong>Invite</strong> button (or <strong>Encrypt</strong>, if that's what shows). A dialog will ask you for your Password.</li>
+          <li>Normally you would type in your normal Password, but this time type in the Key for which a Lock is to be made, then click <strong>OK</strong> (twice). You will be warned that the Password is different.</li>
+          <li>Something encrypted will appear in the compose window. The Lock is the first 50 characters of the gibberish part, which is immediately followed by one of these characters: #, $, or @. Select it, copy it, and send it to those you wish to write to you in Decoy mode.</li>
+          <li>Since PassLok thinks that you have changed your Password, reload the email page now so you can go back to normal.</li>
+        </ol>
+   </div>
+   
         <h3>Something is not working</h3>
   <div>
     <p>If you are using Yahoo, clicking the PassLok icon when you are in a Reply window may lead to a PassLok popup where the keyboard does not respond correctly. This is caused by Yahoo's keyboard shortcuts being still active in the background, trying to do something with the Conversations list. Unfortunately, Yahoo does not offer a setting to turn off any of its shortcuts, so the easiest thing to do in order to fix this bug is go to Yahoo mail settings and disable Conversations.<p>If a new message fails to decrypt even though the Password is correct, this may be because it is a Read-once message and the conversation has gone out of sync, likely as a consequence of reading messages out of sequence. To get back in sync, click the <strong>Reset</strong> button next to the sender's address twice, and then send a Read-once encrypted message to the other person asking to repeat the last message.</p></div>
@@ -187,6 +221,7 @@ body {
         <li> lz-string compression by pieroxy 2014</li>
         <li> file In/Out based on an article from the This Could Be Better blog 2012</li>
         <li> webRTC chat by Muaz Khan 2015</li>
+        <li>text hiding based on a homoglyph encoder by Adrian Crenshaw, 2013</li>
         <li>user interface and testing by the IIT PassLok group 2014-16</li>
       </ul>
      <address>

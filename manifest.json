@@ -1,8 +1,8 @@
 {
  "name": "PassLok for Email",
  "short_name": "PassLok",
- "description": "High security encryption for email. PassLok is in no way associated with Gmail or Google.",
- "version": "0.1.3",
+ "description": "High security encryption for email. PassLok is in no way associated with Gmail, Yahoo, or Outlook.",
+ "version": "0.1.4",
  "manifest_version": 2,
  "icons": {
  "16": "favicon.ico",
@@ -55,7 +55,8 @@
 		"src/chat.js",
 		"src/keylock.js",
 		"src/localdir.js",
-		"src/switching.js"
+		"src/switching.js",
+		"src/stego.js"
 	],
     "run_at":"document_idle",
     "all_frames":true
