@@ -153,9 +153,9 @@ var readHTML = '<div class="passlok-read" id="readScr">'+
 var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 	'<div id="composeMsg" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
 	'<div id="composeButtons" style="display: block;" align="center">'+
+		'<button class="cssbutton" id="encryptBtn" value="Signed" style="background-color:#3896F9;color:white;" title="encrypt this message using the mode selected below">Encrypt</button>'+
+		'<button class="cssbutton" id="inviteBtn" value="Invite" style="background-color:#3896F9;color:white;" title="invite recipients to PassLok">Invite</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="compHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>&nbsp;&nbsp;'+
-		'<button class="cssbutton" id="encryptBtn" value="Signed" style="" title="encrypt this message using the mode selected below"><b>Encrypt</b></button>&nbsp;&nbsp;'+
-		'<button class="cssbutton" id="inviteBtn" value="Invite" style="" title="invite recipients to PassLok"><b>Invite</b></button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="richBtn" value="Rich" style="" title="display toolbar for rich text editing">Rich</button>&nbsp;&nbsp;'+
 		'<input class="custom-file-input" type="file" id="loadFile" style="" title="open dialog to select file to load"/>'+
 	'</div>'+
@@ -264,7 +264,6 @@ var decoyOutHTML = '<div class="passlok-decoyout" id="decoyOut" align="center">'
 	'<p>Enter the Decoy Key</p>'+
 	'<input type="password" class="cssbox" id="decoyPwdOut" style="width:95%;" name="key"/><br><br>'+
 	'<input type="checkbox" id="showDecoyOutCheck" title="reveal Password">&nbsp; Show&nbsp;'+
-	'<input type="checkbox" id="sharedDecoyOut" title="uncheck if this is not a Shared Key" checked>&nbsp; Shared<br><br>'+
 	'<button class="cssbutton" id="cancelDecoyOutBtn" value="Cancel" title="stop decryption">Cancel</button>&nbsp;'+
 	'<button class="cssbutton" id="acceptDecoyOutBtn" value="OK" title="go on with decryption">OK</button>'+
 	'<p>The Hidden message will appear at the top of the decrypt window</p>'+
@@ -492,7 +491,7 @@ function showAcceptChatDialog(message){
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
 		modal.dialog({modal: true, width: 600, autoOpen: true});
-		chatMsg.innerHTML = message
+		chatMsg2.innerHTML = message
 	}
 }
 
@@ -767,5 +766,6 @@ function stripHeaders2(string){
 
 //for detecting the presence of a PassLok-encrypted item, regular or hidden. Returns true or false
 function isPassLok(string){
+	if(typeof(string) == 'undefined') return false;
 	return (stripHeaders2(string).replace(/[a-zA-Z0-9+\/@#\$%]+/g,'').length == 0 || string.match('\u2004') || string.match('\u2005') || string.match('\u2006'))
 }

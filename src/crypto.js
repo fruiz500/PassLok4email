@@ -59,11 +59,9 @@ function inviteEncrypt(){
 		inviteRequested = true;
 		composeMsg.innerHTML = "If you click <strong>Invite</strong> again, the contents of the box will be encrypted and added to a special invitation message. This message can be decrypted by anyone and is <span class='blink'>NOT SECURE</span>";
 		inviteBtn.style.background = '#FB5216';
-		inviteBtn.style.color = 'white';
 		setTimeout(function() {
 			inviteRequested = false;
-			inviteBtn.style.background = '';
-			inviteBtn.style.color = '';
+			inviteBtn.style.background = '#3896F9';
 			callKey = '';
 		}, 10000)								//forget request after 10 seconds
 
@@ -519,19 +517,26 @@ function decoyDecrypt(cipher,nonce24,dummylock){
 		throw ("stopped for decoy input")
 	}
 	var keystr = decoyPwdOut.value;
-	decoyPwdOut.value = ""
-	if(!sharedDecoyOut.checked){							//asymmetric mode, so now make the real encryption key
-		var email = myEmail,
-			sharedKey = makeShared(dummylock,ed2curve.convertSecretKey(nacl.sign.keyPair.fromSeed(wiseHash(keystr,email)).secretKey));
-	}else{																				//symmetric mode
-		var sharedKey = wiseHash(keystr,nacl.util.encodeBase64(nonce24));
+	decoyPwdOut.value = ""	;
+
+	try{															//this may fail if the string is corrupted, hence the try
+		var cipher = nacl.util.decodeBase64(cipher);
+	}catch(err){
+		readMsg.innerHTML = "The hidden message seems to be corrupted or incomplete";
+		throw('decodeBase64 failed')
 	}
+
+	var sharedKey = wiseHash(keystr,nacl.util.encodeBase64(nonce24)),							//try symmetric mode first
+		plain = nacl.secretbox.open(cipher,nonce24,sharedKey);
+	if(!plain){																//not a shared key, so try asymmetric
+		sharedKey = makeShared(dummylock,ed2curve.convertSecretKey(nacl.sign.keyPair.fromSeed(wiseHash(keystr,myEmail)).secretKey));
+		plain = nacl.secretbox.open(cipher,nonce24,sharedKey);
+	}
+	if(!plain) failedDecrypt('decoy');									//give up
+
 	$('#decoyOut').dialog("close");
 	showDecoyOutCheck.checked = false;
-	sharedDecoyOut.checked = false;
-	
-	var plain = symDecrypt(cipher,nonce24,sharedKey,true);
-	readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decodeURI(plain) + '</span>';
+	readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decodeURI(nacl.util.encodeUTF8(plain)) + '</span>';
 }
 
 //does decoy decryption after a button is clicked

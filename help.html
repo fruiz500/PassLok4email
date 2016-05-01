@@ -126,14 +126,14 @@ body {
         <p>When you are the sender:</p>
         <ol>
           <li>Check the <strong>Decoy</strong> box, in addtion to setting the encryption mode and optionally Hidden mode, and click <strong>Encrypt</strong> after you have typed in the main message.</li>
-          <li>A dialog asks you for the hidden message and the special Decoy <em>Key</em> or <em>Lock</em>. A <em>Key</em> is one that both the sender and the recipients know. A <em>Lock</em> is matched to a special Key, so that the Lock is used to encrypt, and the Key to decrypt (more on how to use those below). Click <strong>OK</strong> after you have supplied everything.</li>
+          <li>A dialog asks you for the hidden message and the special shared <em>Key</em> or <em>Lock</em>. A shared <em>Key</em> is one that both the sender and the recipients know. A <em>Lock</em> is matched to a Key that the recipient has not shared, so that the Lock is used to encrypt, and the Key to decrypt (more on how to use those below). Click <strong>OK</strong> after you have supplied everything.</li>
           <li>Encryption proceeds and the result appears in the email page's compose or reply window, from where you can send it.</li>
         </ol>
         <p>When you are the recipient:</p>
         <ol>
           <li>Decrypt the message normally by clicking the PassLok icon, then click the <strong>Decoy</strong> button in the decrypt dialog.</li>
-          <li>A dialog asks you for the Decoy Key, which can be shared as we saw above, or the one matching a Lock. In the latter case you must uncheck the <strong>Shared</strong> box so PassLok knows how to proceed (shared and unshared Keys look the same). Click <strong>OK</strong> after you wrote the appropiate Key.</li>
-          <li>Then if all goes well the decrypted hidden message appears highlighted in blue at the top of the decrypt window. If not, you'll get a message stating that no hidden message was found.</li>
+          <li>A dialog asks you for the Decoy Key, which can be shared as we saw above, or the one matching a Lock.  Enter the Key and click <strong>OK</strong>.</li>
+          <li>Then if all goes well the decrypted hidden message appears in blue at the top of the decrypt window. If not, you'll get a message stating that no hidden message was found.</li>
         </ol>
         <p>How to make a Lock matching a Key that is not going to be shared (this has the advantage that the sender cannot compromise the hidden text, since the Key cannot be obtained from the Lock):</p>
         <ol>
@@ -141,7 +141,7 @@ body {
           <li>Click the <strong>Invite</strong> button (or <strong>Encrypt</strong>, if that's what shows). A dialog will ask you for your Password.</li>
           <li>Normally you would type in your normal Password, but this time type in the Key for which a Lock is to be made, then click <strong>OK</strong> (twice). You will be warned that the Password is different.</li>
           <li>Something encrypted will appear in the compose window. The Lock is the first 50 characters of the gibberish part, which is immediately followed by one of these characters: #, $, or @. Select it, copy it, and send it to those you wish to write to you in Decoy mode.</li>
-          <li>Since PassLok thinks that you have changed your Password, reload the email page now so you can go back to normal.</li>
+          <li>Since PassLok now thinks that you have changed your Password, reload the email page now so you can go back to normal.</li>
         </ol>
    </div>
    

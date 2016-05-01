@@ -173,25 +173,22 @@ function symDecrypt(cipherstr,nonce24,symKey,isDecoy){
 		readMsg.innerHTML = "This encrypted message seems to be corrupted or incomplete";
 		throw('decodeBase64 failed')
 	}
+
 	var	plain = nacl.secretbox.open(cipher,nonce24,symKey);
-	  if(!plain){													//failed, try old password
-	  	  if(!isDecoy){
-			if(oldPwdStr){
-				var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
-					oldKey = ed2curve.convertSecretKey(oldKeySgn);
-				plain = nacl.secretbox.open(cipher,nonce24,oldKey);
-				if(!plain){
-					failedDecrypt('old')
-				}else{
-					needRecrypt = true							//record the fact that a new Password is being used
-				}
+	if(!plain){													//failed, try old password
+		if(oldPwdStr){
+			var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
+				oldKey = ed2curve.convertSecretKey(oldKeySgn);
+			plain = nacl.secretbox.open(cipher,nonce24,oldKey);
+			if(!plain){
+				failedDecrypt('old')
 			}else{
-				failedDecrypt('new')							//this will open the old Password dialog
+				needRecrypt = true							//record the fact that a new Password is being used
 			}
-	     }else{													//if doing a decoy decryption, don't ask for a new password
-	  		failedDecrypt('decoy')
-	     }
-	  }
+		}else{
+			failedDecrypt('new')							//this will open the old Password dialog
+		}
+	}
 	return nacl.util.encodeUTF8(plain)
 }
 

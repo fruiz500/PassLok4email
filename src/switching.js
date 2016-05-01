@@ -165,7 +165,7 @@ function cancelChat(){
 
 function cancelAcceptChat(){
 	$('#acceptChatScr').dialog("close");
-	chatMsg.innerHTML = '';
+	chatMsg2.innerHTML = '';
 	readMsg.innerHTML = 'Chat canceled';
 	readBox.innerHTML = '';
 }
@@ -197,7 +197,6 @@ function cancelDecoyOut(){
 	readMsg.innerHTML = 'Decoy decryption canceled';
 	decoyPwdOut.value = '';
 	showDecoyOutCheck.checked = false;
-	sharedDecoyOut.checked = true;
 }
 
 //displays Password strength and resets timer
