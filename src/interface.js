@@ -144,7 +144,7 @@ var readHTML = '<div class="passlok-read" id="readScr">'+
 	'</div>'+
 	'From:<br><div id="senderBox" contenteditable="false" style="display:inline;"></div>'+
 	'<span id="resetSpan">&nbsp;&nbsp;'+
-		'<button class="cssbutton" id="resetBtn" value="Reset" style="display:none;" title="reset the current Read-once conversation with this sender">Reset</button>'+
+		'<button class="cssbutton" id="resetBtn" value="Reset" style="" title="reset the current Read-once conversation with this sender">Reset</button>'+
 	'</span><br><br>'+
 	'Message:<br><div id="readBox" class="cssbox"></div>'+
 '</div>';
@@ -161,7 +161,7 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 	'</div>'+
 	'To:<br><div id="composeRecipientsBox" contenteditable="false" style="display:inline;"><span style=\"color:red\"><em>Nobody!</em> Please close this dialog and enter the recipients, then try again</span></div>'+
 	'<span id="resetSpan2">&nbsp;&nbsp;'+
-		'<button class="cssbutton" id="resetBtn2" value="Reset" style="display:none;" title="reset the current Read-once conversation with this sender">Reset</button>'+
+		'<button class="cssbutton" id="resetBtn2" value="Reset" style="" title="reset the current Read-once conversation with this sender">Reset</button>'+
 	'</span><br><br>'+
 	'Message:<br>' + toolbarHTML + '<div id="composeBox" class="cssbox" contenteditable="true" style="min-height: 100px;"></div>'+
 	'<br>'+

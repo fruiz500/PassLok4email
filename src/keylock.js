@@ -198,15 +198,18 @@ function failedDecrypt(marker){
 		$('#oldKeyScr').dialog("open");
 	}else if(marker == 'old'){
 		if(typeof(readScr) != "undefined"){
-			readMsg.innerHTML = 'The old Password has not worked either. Try resetting the exchange';
+			readMsg.innerHTML = 'The old Password has not worked either. Reload the email page and try again';
 			resetSpan.style.display = '';
 		}else if(typeof(composeScr) != "undefined"){
-			composeMsg.innerHTML = 'The old Password has not worked either. Try resetting the exchange with the affected recipient';
-			if(composeRecipientsBox.innerHTML.split(', ').length < 2) resetSpan2.style.display = '';				//display this only if one recipient
+			composeMsg.innerHTML = 'The old Password has not worked either. Reload the email page and try again';
+			if(composeRecipientsBox.innerHTML.split(', ').length < 2 && onceMode.checked){
+				resetSpan2.style.display = '';				//display this only if one recipient
+				composeMsg.innerHTML = 'The old Password has not worked either. Try resetting the exchange with this recipient';
+			}
 		}
 	}else if(marker == 'readonce'){
 		restoreTempLock();
-		readMsg.innerHTML = 'Read-once messages can be decrypted <em>only once</em>';
+		readMsg.innerHTML = 'Read-once messages can be decrypted <em>only once</em><br>You may want to reset the exchange with the button below';
 		resetSpan.style.display = '';
 		callKey = ''
 	}else if(marker == 'signed'){
@@ -215,7 +218,7 @@ function failedDecrypt(marker){
 		callKey = ''
 	}else if(marker == 'idReadonce'){
 		restoreTempLock();
-		readMsg.innerHTML = 'Nothing found for you, or you are trying to decrypt a Read-once message for the 2nd time';
+		readMsg.innerHTML = 'Nothing found for you, or you are trying to decrypt a Read-once message for the 2nd time<br>You may want to reset the exchange with the button below';
 		resetSpan.style.display = '';
 		callKey = ''
 	}else if(marker == 'idSigned'){

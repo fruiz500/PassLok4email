@@ -327,7 +327,13 @@ function saveURLAsFile(){
 		downloadLink.innerHTML = "Download File";
 	} else {																//to save contents as text file
 		var textFileAsBlob = new Blob([readBox.innerHTML.trim()], {type:'text/plain'});
-		downloadLink.download = 'PassLok save.html';
+		fileNameToSaveAs = prompt("The box contents will be saved as an html file. Please enter a name for it.");
+		if(fileNameToSaveAs.indexOf('.') == -1){
+			if(fileNameToSaveAs.trim() == '') fileNameToSaveAs = 'PassLok save';
+			downloadLink.download = fileNameToSaveAs + '.html';
+		}else{
+			downloadLink.download = fileNameToSaveAs;
+		}
 		downloadLink.innerHTML = "Download File";
 		content = window.URL.createObjectURL(textFileAsBlob);
 	}

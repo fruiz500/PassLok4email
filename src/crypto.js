@@ -53,8 +53,6 @@ function readOnceEncrypt(){
 var inviteRequested = false;
 //make an invitation. This only happens after the second button click
 function inviteEncrypt(){
-	callKey = 'inviteEncrypt';
-	if(!myKey) showKeyDialog();
 	if(!inviteRequested){				//sets flag so action happens on next click
 		inviteRequested = true;
 		composeMsg.innerHTML = "If you click <strong>Invite</strong> again, the contents of the box will be encrypted and added to a special invitation message. This message can be decrypted by anyone and is <span class='blink'>NOT SECURE</span>";
@@ -66,6 +64,7 @@ function inviteEncrypt(){
 		}, 10000)								//forget request after 10 seconds
 
 	}else{
+		callKey = 'inviteEncrypt';
 		readKey();
 		var nonce = nacl.randomBytes(15),
 			nonce24 = makeNonce24(nonce),
@@ -76,7 +75,7 @@ function inviteEncrypt(){
 		setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
 		composeBox.innerHTML = myezLock + "@" + noncestr + "%" + cipherstr;
 		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,70}/g).join("<br>");
-		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
+		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li><li>If you don't use Chrome or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
 	
 		document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
 		$('#composeScr').dialog("close");
@@ -451,7 +450,7 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 	if(type != '@'){
 		readBox.innerHTML = plainstr;
 	}else{																	//add further instructions if it was an invitation
-		readBox.innerHTML = "Congratulations! You have decrypted your first message with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message, click either <b>Signed Encrypt</b> (both of us will be able to decrypt the message multiple times) or <b>Read-once Encrypt</b> (only one decryption is possible).</li><li>The encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>"
+		readBox.innerHTML = "Congratulations! You have decrypted your first message with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt</b> button.</li><li>The encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>"
 	}
 
 	syncLocDir();															//everything OK, so store
