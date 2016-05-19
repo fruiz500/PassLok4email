@@ -13,7 +13,7 @@
       -webkit-animation-name: composeInserted;
     }
 
-._z_g1, ._rp_u1, ._mcp_76, ._mcp_73, ._mcp_h6, ._rp_81, ._rp_71{	<!--this is for Outlook-->
+._z_g1, ._rp_u1, ._mcp_76, ._mcp_73, ._mcp_h6, ._rp_81, ._rp_71, ._mcp_25, ._mcp_D7{	<!--this is for Outlook-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
     }
@@ -60,11 +60,6 @@
 }
 .ui-state-error .ui-icon,.ui-state-error-text .ui-icon{
 	background-image:url("chrome-extension://__MSG_@@extension_id__/lib/images/ui-icons_cc0000_256x240.png")
-}
-
-a {
-  color: #900;
-  text-decoration: none;
 }
 
 a:hover {

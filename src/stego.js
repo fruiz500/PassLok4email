@@ -1,14 +1,16 @@
 //This function calls the encoder
-function textStego(){
-	if(typeof(coverBox) == 'undefined') {showCoverDialog(); return};
-	if(coverBox.value.trim() == '') {showCoverDialog(); return};
+function textStego(text){
+	if(text.match('==')) text = text.split('==')[1];
+	text = text.replace(/<(.*?)>/gi,"");
+	var	result = toLetters(text);
+	coverBox.value = '';
+	return result
+}
 
-	var cleanText = stripHeaders(composeBox.innerHTML),
-		turns = toLetters(cleanText);
-	if(turns){var turnText = 'It was repeated ' + turns + ' times. '}else{var turnText = ''}
-	composeMsg.innerHTML = 'Message encoded into letters of this text. ' + turnText + 'Please complete it if necessary';
-	$('#coverScr').dialog("close");
-	document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
+//just to enter the cover text
+function enterCover(){
+	if(typeof(coverBox) == 'undefined') {showCoverDialog(); throw('break for cover input')};
+	if(coverBox.value.trim() == '') {showCoverDialog(); throw('break for cover input')};	
 }
 
 //makes the binary equivalent (string) of an ASCII string
@@ -103,14 +105,14 @@ function encodableBits(cover){
 //encodes text as special letters and spaces in the cover text, which replace the original ones
 function toLetters(text){
 	var textBin = toBin(text),
-		coverText = addSpaces(coverBox.value.trim()).replace(/\n\n/g,'<br><br>').replace(/\n/g,' '),
+		coverText = addSpaces(coverBox.value.trim()).replace(/ +/g," ").replace(/ \n/g,"\n"),			//remove multiple spaces, space before linefeed
 		cover = coverText,
 		capacity = encodableBits(cover);
 	if (capacity < textBin.length){						//repeat the cover text if it is too short
 		var turns = Math.ceil(textBin.length / capacity);
 		var index = 0;
 		while (index < turns){
-			cover = cover + '<br><br>' + coverText;
+			cover = cover + ' ' + coverText;
 			index++;
 		};
 		capacity = encodableBits(cover)
@@ -131,8 +133,7 @@ function toLetters(text){
 		}
 		i++;
 	}
-	composeBox.innerHTML = finalString;
-	return turns
+	return finalString
 }
 
 //gets the original text from Letters encoded text

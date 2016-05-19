@@ -34,14 +34,62 @@ function showDecoyPwdOut(){
 	}
 }
 
+//to switch beteen basic and all buttons
+function switchButtons(){
+	if(interfaceBtn.innerHTML == 'Show all buttons'){
+		encryptFileBtn.style.display = '';
+		richBtn.style.display = '';
+		checkBoxes.style.display = '';
+		interfaceBtn.innerHTML = 'Show main buttons'
+	}else{
+		encryptFileBtn.style.display = 'none';
+		richBtn.style.display = 'none';
+		checkBoxes.style.display = 'none';
+		interfaceBtn.innerHTML = 'Show all buttons'
+	}
+}
+
+var allNew = false
+//removes some buttons depending on the recipients' list
+function updateComposeButtons(emailList){
+	allNew = true;	
+	for (var index = 0; index < emailList.length; index++){		//scan email array to separate those in the directory from those that are not
+		if(locDir[emailList[index].trim()]) allNew = false
+	}
+	if(allNew){
+		encryptBtn.style.display = 'none';
+		encryptFileBtn.style.display = 'none';
+		inviteBtn.style.display = '';
+		interfaceBtn.style.display = 'none';
+		checkBoxes.style.display = 'none';
+		richBtn.style.display = 'none';
+		niceEditor = true;						//to turn off nice editor
+		toggleRichText();
+		if(!firstTimeUser) setTimeout(function(){composeMsg.innerHTML = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20);
+	}else{
+		inviteBtn.style.display = 'none';
+		interfaceBtn.style.display = '';
+		encryptBtn.style.display = '';
+		if(interfaceBtn.innerHTML != 'Show all buttons'){
+			encryptFileBtn.style.display = '';
+			checkBoxes.style.display = '';
+			richBtn.style.display = '';
+			checkBoxes.style.display = '';
+		}else{
+			encryptFileBtn.style.display = 'none';
+			checkBoxes.style.display = 'none';
+			richBtn.style.display = 'none';
+			checkBoxes.style.display = 'none';
+		}
+	}
+}
+
 //The key expires after 5 minutes of not being used, this function keeps it alive
 function readKey(){
 	resetTimer();
-
-	if (!myKey){															//if deleted, prompt again
-		any2key();
-		keyMsg.innerHTML = 'Please enter your secret Password';
-		throw ('Password needed')
+	if(!myKey){
+		showKeyDialog();
+		throw('stopped for key input');
 	}
 }
 
@@ -97,9 +145,14 @@ function acceptKey(){
 		locDir[myEmail][0] = myLock;
 		syncChromeLock(myEmail,JSON.stringify(locDir[myEmail]));
 		
-		key2any();											//this also deletes the Password from the box
+		firstTimeUser = false;
+		resetTimer();
+		$('#keyScr').dialog("close");
+		pwd.value = '';
 		if (callKey == 'encrypt'){					//now complete whatever was being done when the Password was found missing
 			encrypt()
+		}else if(callKey == 'encrypt2file'){
+			encrypt2file()
 		}else if(callKey == 'inviteEncrypt'){
 			inviteEncrypt()
 		}else if(callKey == 'decrypt'){
@@ -142,6 +195,16 @@ function acceptOldKey(){
 		readOnceEncrypt()
 	}else if(callKey == 'decrypt'){
 		decrypt()
+	}
+}
+
+//finish what was being done when the cover box was found empty
+function acceptCover(){
+	$('#coverScr').dialog("close");
+	if (callKey == 'encrypt'){
+		encrypt()
+	}else if(callKey == 'encrypt2file'){
+		encrypt2file()
 	}
 }
 
@@ -232,18 +295,6 @@ function decoyPwdOutKeyup(evt){
 	if (evt.keyCode == 13) doDecoyDecrypt()
 }
 
-//called when the Key box is empty
-function any2key(){
-	$('#keyScr').dialog("open")
-}
-
-//close screens and reset Key timer when leaving the Key box. Restarts whatever was being done when the Key was found missing.
-function key2any(){
-	resetTimer();
-	$('#keyScr').dialog("close");
-	pwd.value = '';
-}
-
 //writes five random dictionary words in the Password box
 function suggestKey(){
 	var output = '';
@@ -296,69 +347,28 @@ function introGreeting(){
 	firstTimeUser = true;
 }
 
-//to save the contents of the read dialog as a file in the default Downloads folder
-function saveURLAsFile(){
-	var URLToWrite = readBox.innerHTML.trim().replace(/<br>/g,'\n'),
-		URLToWriteSplit = URLToWrite.split('\n'),
-		content = '',
-		fileNameToSaveAs = '';
-		
-	for(var i = 0; i < URLToWriteSplit.length; i++){
-		if(URLToWriteSplit[i].toLowerCase().match('data:;')){
-			content = URLToWriteSplit[i].trim();
-			fileNameToSaveAs = URLToWriteSplit[i - 1].split(':')[1];
-			break
-		}
-	}
-
-	var downloadLink = document.createElement("a");
-	if(content.slice(0,4).toLowerCase()=='data'){							//regular save of encoded file
-
-//first check if the file can lead to problems, and if so display a message
-		var extension = fileNameToSaveAs.toLowerCase().match(/\.\w+$/);
-		var suspicious =  ['.exe','.scr','.url','.com','.pif','.bat','.xht','.htm','.html','.xml','.xhtml','.js','.sh','.svg','.gadget','.msi','.msp','.hta','.cpl','.msc','.jar','.cmd','.vb','.vbs','.jse','.ws','.wsf','.wsc','.wsh','.ps1','.ps2','.ps1xml','.ps2xml','.psc1','.scf','.lnk','.inf','.reg','.doc','.xls','.ppt','.pdf','.swf','.fla','.docm','.dotm','.xlsm','.xltm','.xlam','.pptm','.potm','.ppam','.ppsm','.sldm','.dll','.dllx','.rar','.zip','.7z','.gzip','.gzip2','.tar','.fon','.svgz','.jnlp'];
-		if(extension){
-			var index = suspicious.indexOf(extension[0])
-		} else {
-			var index = -1
-		}
-
-		downloadLink.download = fileNameToSaveAs;
-		downloadLink.innerHTML = "Download File";
-	} else {																//to save contents as text file
-		var textFileAsBlob = new Blob([readBox.innerHTML.trim()], {type:'text/plain'});
-		fileNameToSaveAs = prompt("The box contents will be saved as an html file. Please enter a name for it.");
-		if(fileNameToSaveAs.indexOf('.') == -1){
-			if(fileNameToSaveAs.trim() == '') fileNameToSaveAs = 'PassLok save';
-			downloadLink.download = fileNameToSaveAs + '.html';
-		}else{
-			downloadLink.download = fileNameToSaveAs;
-		}
-		downloadLink.innerHTML = "Download File";
-		content = window.URL.createObjectURL(textFileAsBlob);
-	}
-	downloadLink.href = content;
-	downloadLink.click();
-
-	if(index >= 0){
-		readMsg.innerHTML = "<span style='color:red;'>WARNING: This file has extension " + suspicious[index] + "  Accessing it might lead to executing a malicious payload</span>"
-	}else{
-		readMsg.innerHTML = 'File saved with filename ' + downloadLink.download;
-	}
-}
-
 //to load a file into the compose dialog
 function loadFileAsURL(){
 	var fileToLoad = loadFile.files[0];
-	
 	var fileReader = new FileReader();
-	fileReader.onloadend = function(fileLoadedEvent){
+	fileReader.onload = function(fileLoadedEvent){
 		var fileName = fileToLoad.name;
 		var URLFromFileLoaded = fileLoadedEvent.target.result;
+		if(URLFromFileLoaded.length > 2000000){
+			var reply = confirm("This file is larger than 1.5MB and Chrome won't save it. Do you want to continue loading it?");
+			if(!reply){
+				composeMsg.innerHTML = 'File load canceled';
+				throw('file load canceled')
+			}
+		}
 		if(fileToLoad.type.slice(0,4) == "text"){
-			composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;');
+			if(URLFromFileLoaded.slice(0,2) == '==' && URLFromFileLoaded.slice(-2) == '=='){
+				composeBox.innerHTML += '<br><a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '&nbsp;&nbsp;<button onClick="followLink(this);">Save</button></a>'
+			}else{
+				composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
+			}
 		}else{
-			composeBox.innerHTML += "<br><br>filename:" + fileName + "<br>" + URLFromFileLoaded;
+			composeBox.innerHTML += '<br><a download="' + fileName + '" href="' + URLFromFileLoaded + '">' + fileName + '&nbsp;&nbsp;<button onClick="followLink(this);">Save</button></a>'
 		}
 	};
 	if(fileToLoad.type.slice(0,4) == "text"){
@@ -370,12 +380,42 @@ function loadFileAsURL(){
 	}
 }
 
+//same, but loading on the read screen and attempting decryption after load
+function loadEncryptedFile(){
+	var fileToLoad = loadEncrFile.files[0];
+	var fileReader = new FileReader();
+	fileReader.onload = function(fileLoadedEvent){
+		var fileName = fileToLoad.name;
+		var URLFromFileLoaded = fileLoadedEvent.target.result;
+		if(fileToLoad.type.slice(0,4) == "text"){
+			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '</a>';
+			decrypt()
+		}else{
+			readBox.innerHTML = '<a download="' + fileName + '" href="' + URLFromFileLoaded + '">' + fileName + '</a>'
+		}
+	};
+	if(fileToLoad.type.slice(0,4) == "text"){
+		fileReader.readAsText(fileToLoad, "UTF-8")
+	}else{
+		fileReader.readAsDataURL(fileToLoad, "UTF-8")
+	}
+//	decrypt()
+}
+
+//used to download a packaged file
+function followLink(thisLink){
+	var downloadLink = document.createElement("a");
+	downloadLink.download = thisLink.parentElement.download;
+	downloadLink.href = thisLink.parentElement.href;
+	downloadLink.click();
+}
+
 var time10 = 0;														//to display time needed to process Password
 
 //things that should happen after the email program loads completely
 window.addEventListener("load",function(){
   setTimeout(function(){
-	showKeyDialog(true);											//initialize password dialogs, but don't show them
+	showKeyDialog(true);											//initialize some dialogs, but don't show them
 	showOldKeyDialog(true);
 	console.log(document.title);
 	getMyEmail();

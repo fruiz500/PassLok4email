@@ -1,29 +1,49 @@
-﻿//selects the encryption mode and starts it
+//selects the encryption mode and starts it
 function encrypt(){
 	callKey = 'encrypt';
-	if(!myKey){
-		showKeyDialog();
-		throw('stopped for key input');
+	readKey();
+	if(stegoMode.checked){var lengthLimit = 10000}else{var lengthLimit = 71000};
+	if(!chatMode.checked && composeBox.innerHTML.length > lengthLimit){
+		var reply = confirm("This item is too long to be encrypted directly into the email and likely will be clipped by the server, rendering it undecryptable. We suggest to cancel and encrypt to file instead, then attach the file to your email");
+		if(!reply) throw('text is too long for encrypting to email')
 	}
-	if(signedMode.checked){
-		signedEncrypt();
-	}else if(onceMode.checked){
-		readOnceEncrypt();
-	}else if(chatMode.checked){
+	if(stegoMode.checked) enterCover();
+	if(chatMode.checked){
 		displayChat();
+	}else{
+		composeMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';			//Get blinking message started
+		setTimeout(function(){																			//the rest after a 20 ms delay
+			var emailArray = composeRecipientsBox.innerText.split(',');
+			for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
+			encryptList(emailArray,false);
+			isChatInvite = false;
+		},20);						//end of timeout		
 	}
+}
+
+//selects the encryption mode and starts it, but outputs to file instead. Chat not an option
+function encrypt2file(){
+	callKey = 'encrypt2file';
+	readKey();
+	if(stegoMode.checked) enterCover();
+	composeMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';			//Get blinking message started
+	setTimeout(function(){																			//the rest after a 20 ms delay
+		var emailArray = composeRecipientsBox.innerText.split(',');
+		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
+		encryptList(emailArray,true);
+		isChatInvite = false;
+	},20);						//end of timeout	
 }
 
 //function that starts it all when the read screen loads
 function decrypt(){
 	callKey = 'decrypt';
-	if(!myKey){
-		showKeyDialog();
-		throw('stopped for key input');
-	}
+	readKey();
 	readMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
 	setTimeout(function(){
 		var text = readBox.innerHTML;
+		if(text.match('==')) text = text.split('==')[1];
+		text = text.replace(/<(.*?)>/gi,"");
 		if(text.match('\u2004') || text.match('\u2005') || text.match('\u2006')) fromLetters(text);		//if hidden text
 		decryptList();
 		openChat();
@@ -73,7 +93,7 @@ function inviteEncrypt(){
 		if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
   		var cipherstr = symEncrypt(text,nonce24,myLockbin);
 		setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
-		composeBox.innerHTML = myezLock + "@" + noncestr + "%" + cipherstr;
+		composeBox.innerHTML = myezLock + "@" + noncestr + "-" + cipherstr;
 		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,70}/g).join("<br>");
 		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li><li>If you don't use Chrome or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
 	
@@ -87,7 +107,7 @@ function inviteEncrypt(){
 //encrypts for a list of recipients, as emails in listArray. First makes a 256-bit message key, then gets the Lock for each recipient and encrypts the message key with it
 //the output string contains each encrypted key along with 66 bits of an encrypted form of the recipient's Lock, so he/she can find the right encrypted key
 //two modes: Signed, and ReadOnce
-function encryptList(listArray,isReadOnce){
+function encryptList(listArray,isFileOut){
 	var encryptArray = [],
 		inviteArray = [],
 		myselfOnList = false;
@@ -111,10 +131,9 @@ function encryptList(listArray,isReadOnce){
 		composeMsg.innerHTML = 'None of these recipients are in your directory. You should send them an invitation first.';
 		return
 	}
-	if(!isReadOnce) encryptArray.push(myEmail);						//copy to myself unless read-once
+	if(!onceMode.checked) encryptArray.push(myEmail);						//copy to myself unless read-once
 	encryptArray = shuffle(encryptArray);							//extra precaution
 
-	readKey();
 	var	msgKey = nacl.randomBytes(32),
 		nonce = nacl.randomBytes(15),
 		nonce24 = makeNonce24(nonce),
@@ -126,7 +145,7 @@ function encryptList(listArray,isReadOnce){
 	if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
 	var cipher = symEncrypt(text,nonce24,msgKey);					//main encryption event, but don't add it yet
 
-	if(isReadOnce){													//add type marker, nonce, and padding for decoy msg
+	if(onceMode.checked){													//add type marker, nonce, and padding for decoy msg
 		var outString = myezLock + '$' + noncestr + padding
 	}else{
 		var outString = myezLock + '#' + noncestr + padding
@@ -141,7 +160,7 @@ function encryptList(listArray,isReadOnce){
 			}else{
 				var Lock = locDir[email][0]
 			}
-			if(!isReadOnce){
+			if(!onceMode.checked){
 				var sharedKey = makeShared(convertPubStr(Lock),myKey),
 					cipher2 = nacl.util.encodeBase64(nacl.secretbox(msgKey,nonce24,sharedKey)).replace(/=+$/,''),
 					idTag = symEncrypt(Lock,nonce24,sharedKey);
@@ -199,38 +218,55 @@ function encryptList(listArray,isReadOnce){
 					}
 				}
 			}
-			if(isReadOnce){
-				if(email != myEmail) outString = outString + '%' + idTag.slice(0,9) + '%' + newLockCipher + cipher2 + typeChar;
+			if(onceMode.checked){
+				if(email != myEmail) outString = outString + '-' + idTag.slice(0,9) + '-' + newLockCipher + cipher2 + typeChar;
 			}else{
-				outString = outString + '%' + idTag.slice(0,9) + '%' + cipher2;
+				outString = outString + '-' + idTag.slice(0,9) + '-' + cipher2;
 			}
 		}
 	}
 	//all recipients done at this point
 
 	//finish off by adding the encrypted message and tags
-	outString = outString + '%' + cipher;
-	if(isReadOnce){
-		composeBox.innerHTML = '<pre>----------begin Read-once message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Read-once message encrypted with PassLok-----------</pre>'
-	} else if(isChatInvite){
-		composeBox.innerHTML = '<pre>----------begin Chat invitation encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Chat invitation encrypted with PassLok-----------</pre>'
-	} else {
-		composeBox.innerHTML = '<pre>----------begin Signed message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Signed message encrypted with PassLok-----------</pre>'
+	outString = outString + '-' + cipher;
+	if(stegoMode.checked) outString = textStego(outString);
+	
+	if(isFileOut){
+		if(stegoMode.checked){
+			composeBox.innerHTML = '<a download="ChangeMe.txt" href="data:,==' + outString + '=="><b>PassLok Hidden message; right-click and Save link as... Make sure to change the name</b></a>'
+		}else if(onceMode.checked){
+			composeBox.innerHTML = '<a download="PLmso.txt" href="data:,==' + outString + '=="><b>PassLok Read-once message; right-click and Save link as...</b></a>'
+		}else{
+			composeBox.innerHTML = '<a download="PLmss.txt" href="data:,==' + outString + '=="><b>PassLok Signed message; right-click and Save link as...</b></a>'
+		}
+	}else{
+		if(stegoMode.checked){
+			composeBox.innerText = outString
+		}else if(invisibleMode.checked){
+			composeBox.innerHTML = 'Invisible message below this line<div style="display:none !important">==' + outString + '==</div>'
+		}else{
+			if(onceMode.checked){
+				composeBox.innerHTML = '<pre>----------begin Read-once message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Read-once message encrypted with PassLok-----------</pre>'
+			} else if(isChatInvite){
+				composeBox.innerHTML = '<pre>----------begin Chat invitation encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Chat invitation encrypted with PassLok-----------</pre>'
+			} else {
+				composeBox.innerHTML = '<pre>----------begin Signed message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Signed message encrypted with PassLok-----------</pre>'
+			}
+		}
 	}
 
 	syncLocDir();
 	callKey = '';
-	if(stegoMode.checked){
-		textStego();
+	visibleMode.checked = true;
+	decoyMode.checked = false;
+	if(isFileOut){
+		composeMsg.innerHTML = "Contents encrypted into a file. Now save it, close this dialog, and attach the file to your email"
 	}else{
 		document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
 	}
-	
-	stegoMode.checked = false;
-	decoyMode.checked = false;
 	if(inviteArray.length != 0){		 
 		composeMsg.innerHTML = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:<br>' + inviteArray.join(', ') + '<br>You should send them an invitation first. You may close this dialog now'
-	}else{
+	}else if(!isFileOut){
 		$('#composeScr').dialog("close")		
 	}
 }
@@ -250,7 +286,6 @@ function shuffle(a) {
 //encrypts a string with the secret Key, 12 char nonce
 function keyEncrypt(plainstr){
 	plainstr = encodeURI(plainstr).replace(/%20/g,' ');			//in case there are any special characters
-	readKey();
 	var	nonce = nacl.randomBytes(9),
 		nonce24 = makeNonce24(nonce),
 		noncestr = nacl.util.encodeBase64(nonce),
@@ -261,7 +296,6 @@ function keyEncrypt(plainstr){
 //decrypts a string encrypted with the secret Key, 12 char nonce. Returns original if not encrypted
 function keyDecrypt(cipherstr){
 	if (cipherstr.charAt(0) == '~'){
-		readKey();
 		cipherstr = cipherstr.slice(1);							//take out the initial '~'
 		var	noncestr = cipherstr.slice(0,12),
 			nonce24 = makeNonce24(nacl.util.decodeBase64(noncestr));
@@ -274,10 +308,19 @@ function keyDecrypt(cipherstr){
 
 //this strips initial and final header, plus spaces and non-base64 characters in the middle
 function stripHeaders(string){
-	string = string.replace(/[\s\n]/g,'').replace(/&nbsp;/g,'').replace(/<(.*?)>/gi,"");		//remove spaces, newlines, and any html tags
-	if(string.match('==')) string = string.split('==')[1];
-	string = string.replace(/[^a-zA-Z0-9+\/@#\$%]+/g,''); 										//takes out anything that is not base64 or a type marker
+	string = string.replace(/[\s\n]/g,'').replace(/&nbsp;/g,'');							//remove spaces, newlines
+	if(string.match('==')) string = string.split('==')[1];									//keep only PassLok item, if bracketed
+	string = string.replace(/<(.*?)>/gi,"").replace(/[^a-zA-Z0-9+\/@#$-]+/g,''); 			//takes out html tags and anything that is not base64 or a type marker
 	return string
+}
+
+//to make sure attached Lock is correct
+function isBase36(string){
+	var result = true;
+	for(var i = 0; i < string.length; i++){
+		if(BASE36.indexOf(string.charAt(i)) == '-1') result = false
+	}
+	return result
 }
 
 var padding = '', nonce24;			//global variables involved in decoding secret message
@@ -285,7 +328,12 @@ var padding = '', nonce24;			//global variables involved in decoding secret mess
 function decryptList(){
 	var text = stripHeaders(readBox.innerHTML);
 	theirEmail = senderBox.innerHTML.trim();
-	theirLock = changeBase(text.slice(0,50),BASE36,BASE64,true);
+	if(isBase36(text.slice(0,50)) && !isBase36(text.charAt(50))){
+		theirLock = changeBase(text.slice(0,50),BASE36,BASE64,true)
+	}else{
+		readMsg.innerHTML = 'This message is not encrypted, but perhaps the attachments are';
+		throw('illegal Lock at the start')
+	}
 	
 	if(!locDir[theirEmail]){											//make entry if needed
 		locDir[theirEmail] = [];
@@ -307,8 +355,7 @@ function decryptList(){
 	
 	var	type = text.charAt(0);
 	text = text.slice(1);
-	var cipherArray = text.split('%');
-	readKey();
+	var cipherArray = text.split('-');
 	var stuffForId = myLock;
 
 	var noncestr = cipherArray[0].slice(0,20);
@@ -415,6 +462,8 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 		msgKeycipher = msgKeycipher.slice(79,-1);
 		var newLock = symDecrypt(newLockCipher,nonce24,idKey);
 
+		if(locDir[theirEmail][1] == null && locDir[theirEmail][2] == null){ var isVirgin = true }else{ var isVirgin = false };		//detect if this is the first message in an exchange (not a reset)
+
 		if(typeChar == 'r'){											//if reset type, delete ephemeral data first
 			locDir[theirEmail][1] = locDir[theirEmail][2] = null;
 		}
@@ -450,11 +499,12 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 	if(type != '@'){
 		readBox.innerHTML = plainstr;
 	}else{																	//add further instructions if it was an invitation
-		readBox.innerHTML = "Congratulations! You have decrypted your first message with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt</b> button.</li><li>The encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>"
+		readBox.innerHTML = "Congratulations! You have decrypted your first message with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt to email</b> button.</li><li>The encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>"
 	}
 
 	syncLocDir();															//everything OK, so store
 	readMsg.innerHTML = 'Decrypt successful';
+	if(isVirgin) readMsg.innerHTML = 'You have just decrypted the first message in a Read-once conversation. This message can be decrypted again, but doing so will cause the conversation to go out of sync. It is best to delete it to prevent this possibility';
 	callKey = '';
 }
 
@@ -531,10 +581,10 @@ function decoyDecrypt(cipher,nonce24,dummylock){
 		sharedKey = makeShared(dummylock,ed2curve.convertSecretKey(nacl.sign.keyPair.fromSeed(wiseHash(keystr,myEmail)).secretKey));
 		plain = nacl.secretbox.open(cipher,nonce24,sharedKey);
 	}
-	if(!plain) failedDecrypt('decoy');									//give up
-
+	
 	$('#decoyOut').dialog("close");
 	showDecoyOutCheck.checked = false;
+	if(!plain) failedDecrypt('decoy');									//give up
 	readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decodeURI(nacl.util.encodeUTF8(plain)) + '</span>';
 }
 
