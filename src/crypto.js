@@ -173,7 +173,7 @@ function encryptList(listArray,isFileOut){
 						var lastLock = keyDecrypt(lastLockCipher);
 					} else {													//use permanent Lock if dummy doesn't exist
 						var lastLock = convertPubStr(Lock);
-						var firstMessage = true;						//to warn user
+						if(!turnstring) turnstring = 'reset';			//to warn recipient
 					}
 					var idKey = makeShared(lastLock,myKey);
 					var secdum = nacl.randomBytes(32),							//different dummy key for each recipient
@@ -363,6 +363,10 @@ function decryptList(){
 	padding = cipherArray[0].slice(20,120);
 	var cipher = cipherArray[cipherArray.length - 1];
 
+	if (type == '$' && theirEmail == myEmail){
+		readMsg.innerHTML = 'You cannot decrypt Read-once messages to yourself';
+		throw('Read-once message to myself')
+	}
 	if(type == '#'){														//signed mode
 		var sharedKey = makeShared(convertPubStr(theirLock),myKey),
 			idKey = sharedKey;
@@ -462,17 +466,15 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 		msgKeycipher = msgKeycipher.slice(79,-1);
 		var newLock = symDecrypt(newLockCipher,nonce24,idKey);
 
-		if(locDir[theirEmail][1] == null && locDir[theirEmail][2] == null){ var isVirgin = true }else{ var isVirgin = false };		//detect if this is the first message in an exchange (not a reset)
-
-		if(typeChar == 'r'){											//if reset type, delete ephemeral data first
-			locDir[theirEmail][1] = locDir[theirEmail][2] = null;
-		}
-
 		if(typeChar == 'p'){															//PFS mode: last Key and new Lock
 			var	sharedKey = makeShared(newLock,lastKey);
 
 		}else if(typeChar == 'r'){														//reset. lastKey is the permanent one
-			var	sharedKey = makeShared(newLock,myKey);
+			var agree = confirm('If you go ahead, the current Read-once conversation with the sender will be reset. This may be OK if this is a new message, but if it is an old one the conversation will go out of sync');
+			if(!agree) throw('reset decrypt canceled');
+			var	sharedKey = makeShared(newLock,myKey),
+				isReset = true;
+			locDir[theirEmail][1] = locDir[theirEmail][2] = null;					//if reset type, delete ephemeral data first
 
 		}else{																			//Read-once mode: last Key and last Lock
 			var lastLockCipher = locDir[theirEmail][2];
@@ -504,7 +506,7 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 
 	syncLocDir();															//everything OK, so store
 	readMsg.innerHTML = 'Decrypt successful';
-	if(isVirgin) readMsg.innerHTML = 'You have just decrypted the first message in a Read-once conversation. This message can be decrypted again, but doing so will cause the conversation to go out of sync. It is best to delete it to prevent this possibility';
+	if(isReset) readMsg.innerHTML = 'You have just decrypted the first message or one that resets a Read-once conversation. This message can be decrypted again, but doing so after more messages are exchanged will cause the conversation to go out of sync. It is best to delete it to prevent this possibility';
 	callKey = '';
 }
 
