@@ -388,18 +388,17 @@ function loadEncryptedFile(){
 		var fileName = fileToLoad.name;
 		var URLFromFileLoaded = fileLoadedEvent.target.result;
 		if(fileToLoad.type.slice(0,4) == "text"){
-			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '</a>';
-			decrypt()
+			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '</a>'
 		}else{
-			readBox.innerHTML = '<a download="' + fileName + '" href="' + URLFromFileLoaded + '">' + fileName + '</a>'
+			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + atob(URLFromFileLoaded.split(',')[1]) + '">' + fileName + '</a>'			//in case it wasn't saved as text
 		}
+		decrypt()
 	};
 	if(fileToLoad.type.slice(0,4) == "text"){
 		fileReader.readAsText(fileToLoad, "UTF-8")
 	}else{
 		fileReader.readAsDataURL(fileToLoad, "UTF-8")
 	}
-//	decrypt()
 }
 
 //used to download a packaged file

@@ -158,15 +158,19 @@ function makeNonce24(nonce){
 }
 
 //encrypt string with a symmetric key
-function symEncrypt(plainstr,nonce24,symKey){
-	var plain = nacl.util.decodeUTF8(plainstr),
-		cipher = nacl.secretbox(plain,nonce24,symKey);
+function symEncrypt(plainstr,nonce24,symKey,isCompressed){
+	if(isCompressed){
+		var plain = LZString.compressToUint8Array(plainstr)
+	}else{
+		var plain = nacl.util.decodeUTF8(plainstr)
+	}
+	var	cipher = nacl.secretbox(plain,nonce24,symKey);
 	return nacl.util.encodeBase64(cipher).replace(/=+$/,'')
 }
 
 needRecrypt = false;
 //decrypt string with a symmetric key
-function symDecrypt(cipherstr,nonce24,symKey,isDecoy){
+function symDecrypt(cipherstr,nonce24,symKey,isCompressed){
 	try{															//this may fail if the string is corrupted, hence the try
 		var cipher = nacl.util.decodeBase64(cipherstr);
 	}catch(err){
@@ -189,7 +193,11 @@ function symDecrypt(cipherstr,nonce24,symKey,isDecoy){
 			failedDecrypt('new')							//this will open the old Password dialog
 		}
 	}
-	return nacl.util.encodeUTF8(plain)
+	if(isCompressed){
+		return LZString.decompressFromUint8Array(plain)
+	}else{
+		return nacl.util.encodeUTF8(plain)
+	}
 }
 
 //takes appropriate UI action if decryption fails

@@ -89,9 +89,8 @@ function inviteEncrypt(){
 		var nonce = nacl.randomBytes(15),
 			nonce24 = makeNonce24(nonce),
 			noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
-			text = composeBox.innerHTML;
-		if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
-  		var cipherstr = symEncrypt(text,nonce24,myLockbin);
+			text = composeBox.innerHTML.trim();
+  		var cipherstr = symEncrypt(text,nonce24,myLockbin,true);												//the actual message is compressed
 		setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
 		composeBox.innerHTML = myezLock + "@" + noncestr + "-" + cipherstr;
 		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,70}/g).join("<br>");
@@ -142,8 +141,7 @@ function encryptList(listArray,isFileOut){
 		
 	var padding = decoyEncrypt(59,nonce24,myKey);					//this for decoy mode
 
-	if(!text.toLowerCase().match('data:;')) text = LZString.compressToBase64(text);
-	var cipher = symEncrypt(text,nonce24,msgKey);					//main encryption event, but don't add it yet
+	var cipher = symEncrypt(text,nonce24,msgKey,true);					//main encryption event including compression, but don't add the result yet
 
 	if(onceMode.checked){													//add type marker, nonce, and padding for decoy msg
 		var outString = myezLock + '$' + noncestr + padding
@@ -160,57 +158,65 @@ function encryptList(listArray,isFileOut){
 			}else{
 				var Lock = locDir[email][0]
 			}
-			if(!onceMode.checked){
+			if(!onceMode.checked){													//for Signed mode
 				var sharedKey = makeShared(convertPubStr(Lock),myKey),
 					cipher2 = nacl.util.encodeBase64(nacl.secretbox(msgKey,nonce24,sharedKey)).replace(/=+$/,''),
 					idTag = symEncrypt(Lock,nonce24,sharedKey);
-			}else{
-				var	turnstring = locDir[email][3];
+			}else{																	//for Read-once mode
 
 				if(email != myEmail){								//can't do Read-once to myself
-					var lastLockCipher = locDir[email][2];					//retrieve dummy Lock from storage, [0] is the permanent Lock by that email
+					var lastKeyCipher = locDir[email][1],
+						lastLockCipher = locDir[email][2],				//retrieve dummy Lock from storage, [0] is the permanent Lock by that name
+						turnstring = locDir[email][3],
+						secdum = nacl.randomBytes(32),							//different dummy key for each recipient
+						typeChar = '';
+
+					if(turnstring == 'reset'){
+						typeChar = 'r';
+						var resetMessage = true
+					}else if(turnstring == 'unlock'){
+						typeChar = 'p';
+						var pfsMessage = true
+					}else{
+						typeChar = 'o'
+					}
+										
+					if (lastKeyCipher){
+						var lastKey = nacl.util.decodeBase64(keyDecrypt(lastKeyCipher));
+					} else {													//use new dummy Key if stored dummy doesn't exist
+						var lastKey = secdum;
+						typeChar = 'p';
+						var pfsMessage = true
+					}
+										
+					if(!turnstring){										//initial message to be handled the same as a reset
+						typeChar = 'r';
+						var resetMessage = true
+					}
+
 					if (lastLockCipher) {								//if dummy exists, decrypt it first
-						var lastLock = keyDecrypt(lastLockCipher);
+						var lastLock = keyDecrypt(lastLockCipher)
 					} else {													//use permanent Lock if dummy doesn't exist
-						var lastLock = convertPubStr(Lock);
-						if(!turnstring) turnstring = 'reset';			//to warn recipient
+						var lastLock = convertPubStr(Lock)
 					}
+
+					var sharedKey = makeShared(lastLock,lastKey);
+					
 					var idKey = makeShared(lastLock,myKey);
-					var secdum = nacl.randomBytes(32),							//different dummy key for each recipient
-						pubdumstr = makePubStr(secdum);
-
-					if (turnstring!='lock'){								//out of sequence, use PFS mode
-						if(turnstring == 'reset'){
-							var typeChar = 'r';
-							var resetMessage = true
-						}else{
-							var typeChar = 'p';
-							var pfsMessage = true
-						};
-						var sharedKey = makeShared(lastLock,secdum);		//in PFS, use new dummy Key and stored Lock
-
-					}else{													//in sequence, proper Read-once mode
-						var typeChar = 'o';
-						var lastKeyCipher = locDir[email][1];						//Read-once mode uses previous Key and previous Lock
-						if (lastKeyCipher){
-							var lastKey = nacl.util.decodeBase64(keyDecrypt(lastKeyCipher));
-						} else {													//use new dummy Key if stored dummy Key doesn't exist
-							var lastKey = secdum;
-							typeChar = 'p';
-							var pfsMessage = true
-						}
-						var sharedKey = makeShared(lastLock,lastKey);
-					}
-
-					locDir[email][1] = keyEncrypt(nacl.util.encodeBase64(secdum));				//new Key is stored in the permanent database
-					if(turnstring != 'reset') locDir[email][3] = 'unlock';
-
-					syncChromeLock(email,JSON.stringify(locDir[email]));
 
 					var cipher2 = nacl.util.encodeBase64(nacl.secretbox(msgKey,nonce24,sharedKey)).replace(/=+$/,''),
-						idTag = symEncrypt(Lock,nonce24,idKey),
-						newLockCipher = symEncrypt(pubdumstr,nonce24,idKey);
+						idTag = symEncrypt(Lock,nonce24,idKey);
 
+					if(turnstring == 'unlock'){
+						var newLockCipher = symEncrypt(makePubStr(lastKey),nonce24,idKey);
+					}else{
+						var	newLockCipher = symEncrypt(makePubStr(secdum),nonce24,idKey);
+					}
+					if(turnstring != 'unlock'){
+						locDir[email][1] = keyEncrypt(nacl.util.encodeBase64(secdum));				//new Key is stored in the permanent database
+					}
+					if(turnstring != 'reset') locDir[email][3] = 'unlock';
+					
 				}else{
 					if(encryptArray.length < 2){
 						composeMsg.innerHTML = 'In Read-once mode, you must select recipients other than yourself.';
@@ -219,16 +225,16 @@ function encryptList(listArray,isFileOut){
 				}
 			}
 			if(onceMode.checked){
-				if(email != myEmail) outString = outString + '-' + idTag.slice(0,9) + '-' + newLockCipher + cipher2 + typeChar;
+				if(email != myEmail) outString += '-' + idTag.slice(0,9) + '-' + newLockCipher + cipher2 + typeChar;
 			}else{
-				outString = outString + '-' + idTag.slice(0,9) + '-' + cipher2;
+				outString += '-' + idTag.slice(0,9) + '-' + cipher2;
 			}
 		}
 	}
 	//all recipients done at this point
 
 	//finish off by adding the encrypted message and tags
-	outString = outString + '-' + cipher;
+	outString += '-' + cipher;
 	if(stegoMode.checked) outString = textStego(outString);
 	
 	if(isFileOut){
@@ -472,8 +478,7 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 		}else if(typeChar == 'r'){														//reset. lastKey is the permanent one
 			var agree = confirm('If you go ahead, the current Read-once conversation with the sender will be reset. This may be OK if this is a new message, but if it is an old one the conversation will go out of sync');
 			if(!agree) throw('reset decrypt canceled');
-			var	sharedKey = makeShared(newLock,myKey),
-				isReset = true;
+			var	sharedKey = makeShared(newLock,myKey);
 			locDir[theirEmail][1] = locDir[theirEmail][2] = null;					//if reset type, delete ephemeral data first
 
 		}else{																			//Read-once mode: last Key and last Lock
@@ -494,10 +499,9 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 		syncChromeLock(theirEmail,JSON.stringify(locDir[theirEmail]))
 	}
 }
-	//final decryption for the main message
-	var plainstr = symDecrypt(cipher,nonce24,msgKey);
+	//final decryption for the main message, which is also compressed
+	var plainstr = symDecrypt(cipher,nonce24,msgKey,true);
 
-	if(!plainstr.toLowerCase().match('data:;')) plainstr = LZString.decompressFromBase64(plainstr);
 	if(type != '@'){
 		readBox.innerHTML = plainstr;
 	}else{																	//add further instructions if it was an invitation
@@ -505,8 +509,16 @@ if(type == '@'){														//key for Invitation is the sender's Lock, otherwi
 	}
 
 	syncLocDir();															//everything OK, so store
-	readMsg.innerHTML = 'Decrypt successful';
-	if(isReset) readMsg.innerHTML = 'You have just decrypted the first message or one that resets a Read-once conversation. This message can be decrypted again, but doing so after more messages are exchanged will cause the conversation to go out of sync. It is best to delete it to prevent this possibility';
+
+	if(typeChar == 'r'){ 
+			readMsg.innerHTML = 'You have just decrypted the first message or one that resets a Read-once conversation. This message can be decrypted again, but doing so after more messages are exchanged will cause the conversation to go out of sync. It is best to delete it to prevent this possibility'
+		}else if(typeChar == 'o'){
+			readMsg.innerHTML = 'Decryption successful. This message cannot be decrypted again'
+		}else if(typeChar == 'p'){
+			readMsg.innerHTML = 'Decryption successful. This message will become un-decryptable after you reply'
+		}else{
+			readMsg.innerHTML = 'Decryption successful'
+		}
 	callKey = '';
 }
 
