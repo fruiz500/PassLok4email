@@ -137,7 +137,7 @@ function acceptKey(){
 			myKey = ed2curve.convertSecretKey(KeySgn);
 			myLockbin = nacl.sign.keyPair.fromSecretKey(KeySgn).publicKey;
 			myLock = nacl.util.encodeBase64(myLockbin).replace(/=+$/,'');
-			myezLock = changeBase(myLock,BASE64,BASE36,true)
+			myezLock = changeBase(myLock,base64,base36,true)
 		}
 		
 		checkPassword();									//make sure it was not a mistake by comparing Lock with stored Lock

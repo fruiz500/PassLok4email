@@ -93,7 +93,7 @@ function inviteEncrypt(){
   		var cipherstr = symEncrypt(text,nonce24,myLockbin,true);												//the actual message is compressed
 		setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
 		composeBox.innerHTML = myezLock + "@" + noncestr + "-" + cipherstr;
-		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,70}/g).join("<br>");
+		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,80}/g).join("<br>");
 		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li><li>If you don't use Chrome or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
 	
 		document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
@@ -207,12 +207,12 @@ function encryptList(listArray,isFileOut){
 					var cipher2 = nacl.util.encodeBase64(nacl.secretbox(msgKey,nonce24,sharedKey)).replace(/=+$/,''),
 						idTag = symEncrypt(Lock,nonce24,idKey);
 
-					if(turnstring == 'unlock'){
+					if(turnstring != 'lock'){															//if out of turn don't change the dummy Key, this includes reset
 						var newLockCipher = symEncrypt(makePubStr(lastKey),nonce24,idKey);
 					}else{
 						var	newLockCipher = symEncrypt(makePubStr(secdum),nonce24,idKey);
 					}
-					if(turnstring != 'unlock'){
+					if(turnstring == 'lock' || !lastKeyCipher){
 						locDir[email][1] = keyEncrypt(nacl.util.encodeBase64(secdum));				//new Key is stored in the permanent database
 					}
 					if(turnstring != 'reset') locDir[email][3] = 'unlock';
@@ -252,11 +252,11 @@ function encryptList(listArray,isFileOut){
 			composeBox.innerHTML = 'Invisible message below this line<div style="display:none !important">==' + outString + '==</div>'
 		}else{
 			if(onceMode.checked){
-				composeBox.innerHTML = '<pre>----------begin Read-once message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Read-once message encrypted with PassLok-----------</pre>'
+				composeBox.innerHTML = '<pre>----------begin Read-once message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,80}/g).join("<br>") + '<br><br>==---------end Read-once message encrypted with PassLok-----------</pre>'
 			} else if(isChatInvite){
-				composeBox.innerHTML = '<pre>----------begin Chat invitation encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Chat invitation encrypted with PassLok-----------</pre>'
+				composeBox.innerHTML = '<pre>----------begin Chat invitation encrypted with PassLok--------==<br><br>' + outString.match(/.{1,80}/g).join("<br>") + '<br><br>==---------end Chat invitation encrypted with PassLok-----------</pre>'
 			} else {
-				composeBox.innerHTML = '<pre>----------begin Signed message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,70}/g).join("<br>") + '<br><br>==---------end Signed message encrypted with PassLok-----------</pre>'
+				composeBox.innerHTML = '<pre>----------begin Signed message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,80}/g).join("<br>") + '<br><br>==---------end Signed message encrypted with PassLok-----------</pre>'
 			}
 		}
 	}
@@ -324,7 +324,7 @@ function stripHeaders(string){
 function isBase36(string){
 	var result = true;
 	for(var i = 0; i < string.length; i++){
-		if(BASE36.indexOf(string.charAt(i)) == '-1') result = false
+		if(base36.indexOf(string.charAt(i)) == '-1') result = false
 	}
 	return result
 }
@@ -335,7 +335,7 @@ function decryptList(){
 	var text = stripHeaders(readBox.innerHTML);
 	theirEmail = senderBox.innerHTML.trim();
 	if(isBase36(text.slice(0,50)) && !isBase36(text.charAt(50))){
-		theirLock = changeBase(text.slice(0,50),BASE36,BASE64,true)
+		theirLock = changeBase(text.slice(0,50),base36,base64,true)
 	}else{
 		readMsg.innerHTML = 'This message is not encrypted, but perhaps the attachments are';
 		throw('illegal Lock at the start')
@@ -549,7 +549,7 @@ function decoyEncrypt(length,nonce24,seckey){
 		var keyStripped = stripHeaders(keystr);
 
 		if (keyStripped.length == 43 || keyStripped.length == 50){						//the key is a Lock, so do asymmetric encryption
-			if (keyStripped.length == 50) keyStripped = changeBase(keyStripped.toLowerCase().replace(/l/g,'L'), BASE36, BASE64, true) //ezLock replaced by regular Lock
+			if (keyStripped.length == 50) keyStripped = changeBase(keyStripped.toLowerCase().replace(/l/g,'L'), base36, base64, true) //ezLock replaced by regular Lock
 			var sharedKey = makeShared(convertPubStr(keyStripped),seckey);
 		}else{
 			var sharedKey = wiseHash(keystr,nacl.util.encodeBase64(nonce24));			//symmetric encryption for true shared key

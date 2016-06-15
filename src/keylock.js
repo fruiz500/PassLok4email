@@ -254,8 +254,8 @@ function restoreTempLock(){
 }
 
 //Alphabets for base conversion. Used in making and reading the ezLock format
-var BASE36 = '0123456789abcdefghijkLmnopqrstuvwxyz';										//capital L so it won't be mistaken for 1
-var BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+var base36 = '0123456789abcdefghijkLmnopqrstuvwxyz';										//capital L so it won't be mistaken for 1
+var base64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 //changes the base of a number. inAlpha and outAlpha are strings containing the base code for the original and target bases, as in '0123456789' for decimal
 //adapted from http://snippetrepo.com/snippets/bignum-base-conversion, by kybernetikos
 function changeBase(number, inAlpha, outAlpha, isLock) {
