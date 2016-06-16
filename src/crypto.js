@@ -86,13 +86,13 @@ function inviteEncrypt(){
 	}else{
 		callKey = 'inviteEncrypt';
 		readKey();
-		var nonce = nacl.randomBytes(15),
+		var nonce = nacl.randomBytes(9),
 			nonce24 = makeNonce24(nonce),
 			noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
 			text = composeBox.innerHTML.trim();
   		var cipherstr = symEncrypt(text,nonce24,myLockbin,true);												//the actual message is compressed
 		setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
-		composeBox.innerHTML = myezLock + "@" + noncestr + "-" + cipherstr;
+		composeBox.innerHTML = myezLock + "@" + noncestr + cipherstr;
 		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,80}/g).join("<br>");
 		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li><li>If you don't use Chrome or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
 	
@@ -361,13 +361,18 @@ function decryptList(){
 	
 	var	type = text.charAt(0);
 	text = text.slice(1);
-	var cipherArray = text.split('-');
-	var stuffForId = myLock;
-
-	var noncestr = cipherArray[0].slice(0,20);
+	var cipherArray = text.split('-'),
+		stuffForId = myLock;
+	if(type == '@'){
+		var noncestr = text.slice(0,12),						//shorter nonce for invitations, no padding
+			cipher = text.slice(12);
+		padding = ''	
+	}else{
+		var noncestr = cipherArray[0].slice(0,20),
+			cipher = cipherArray[cipherArray.length - 1];
+		padding = cipherArray[0].slice(20,120)
+	}
 	nonce24 = makeNonce24(nacl.util.decodeBase64(noncestr));			//these are global variables so they can be read when decryption completes
-	padding = cipherArray[0].slice(20,120);
-	var cipher = cipherArray[cipherArray.length - 1];
 
 	if (type == '$' && theirEmail == myEmail){
 		readMsg.innerHTML = 'You cannot decrypt Read-once messages to yourself';
@@ -393,112 +398,112 @@ function decryptList(){
 		}
 	}
 	
-if(type == '@'){														//key for Invitation is the sender's Lock, otherwise, got to find it
-	var msgKey = nacl.util.decodeBase64(theirLock)
-}else{
-	var idTag = symEncrypt(stuffForId,nonce24,idKey).slice(0,9);
+	if(type == '@'){														//key for Invitation is the sender's Lock, otherwise, got to find it
+		var msgKey = nacl.util.decodeBase64(theirLock)
+	}else{
+		var idTag = symEncrypt(stuffForId,nonce24,idKey).slice(0,9);
 
-	//look for the id tag and return the string that follows it
-	for (i = 1; i < cipherArray.length; i++){
-		if (idTag == cipherArray[i]) {
-			var msgKeycipher = cipherArray[i+1];
-		}
-	}
-
-	if(typeof msgKeycipher == 'undefined'){							//may have been reset, so try again
-		if(theirLock){
-			lastKey = myKey;
-			idKey = makeShared(convertPubStr(theirLock),myKey);
-			idTag = symEncrypt(stuffForId,nonce24,idKey).slice(0,9);
-			for (i = 1; i < cipherArray.length; i++){
-				if (idTag == cipherArray[i]) {
-					var msgKeycipher = cipherArray[i+1];
-				}
+		//look for the id tag and return the string that follows it
+		for (i = 1; i < cipherArray.length; i++){
+			if (idTag == cipherArray[i]) {
+				var msgKeycipher = cipherArray[i+1];
 			}
 		}
-		if(typeof msgKeycipher == 'undefined'){						//the password may have changed, so try again with old password
-			if(!document.getElementById('oldPwd')){showOldKeyDialog(); throw('stopped for Old Password');}
-				if(oldPwdStr){
-					var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
-						oldKey = ed2curve.convertSecretKey(oldKeySgn),
-						oldLockbin = nacl.sign.keyPair.fromSecretKey(oldKeySgn).publicKey,
-						oldLock = nacl.util.encodeBase64(oldLockbin).replace(/=+$/,'');
-						
-				}else{													//prompt for old password
-					$('#oldKeyScr').dialog("open");
-					throw('stopped for old key input')
-				}
-				
-				if(type == '#'){
-					idKey = makeShared(convertPubStr(theirLock),oldKey)
-				}else{
-					if(lastKeyCipher){	
-						lastKey = nacl.util.decodeBase64(keyDecrypt(lastKeyCipher));
-						idKey = makeShared(convertPubStr(theirLock),lastKey);
-					}else{
-						lastKey = myKey;
-						idKey = makeShared(convertPubStr(theirLock),lastKey);
-					}
-				}
-				idTag = symEncrypt(oldLock,nonce24,idKey).slice(0,9);
+
+		if(typeof msgKeycipher == 'undefined'){							//may have been reset, so try again
+			if(theirLock){
+				lastKey = myKey;
+				idKey = makeShared(convertPubStr(theirLock),myKey);
+				idTag = symEncrypt(stuffForId,nonce24,idKey).slice(0,9);
 				for (i = 1; i < cipherArray.length; i++){
 					if (idTag == cipherArray[i]) {
-					var msgKeycipher = cipherArray[i+1];
+						var msgKeycipher = cipherArray[i+1];
+					}
 				}
 			}
-			if(typeof msgKeycipher != 'undefined'){				//got it finally
-				if(type == '#'){
-					sharedKey = makeShared(convertPubStr(theirLock),oldKey)
+			if(typeof msgKeycipher == 'undefined'){						//the password may have changed, so try again with old password
+				if(!document.getElementById('oldPwd')){showOldKeyDialog(); throw('stopped for Old Password');}
+					if(oldPwdStr){
+						var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
+							oldKey = ed2curve.convertSecretKey(oldKeySgn),
+							oldLockbin = nacl.sign.keyPair.fromSecretKey(oldKeySgn).publicKey,
+							oldLock = nacl.util.encodeBase64(oldLockbin).replace(/=+$/,'');
+						
+					}else{													//prompt for old password
+						$('#oldKeyScr').dialog("open");
+						throw('stopped for old key input')
+					}
+				
+					if(type == '#'){
+						idKey = makeShared(convertPubStr(theirLock),oldKey)
+					}else{
+						if(lastKeyCipher){	
+							lastKey = nacl.util.decodeBase64(keyDecrypt(lastKeyCipher));
+							idKey = makeShared(convertPubStr(theirLock),lastKey);
+						}else{
+							lastKey = myKey;
+							idKey = makeShared(convertPubStr(theirLock),lastKey);
+						}
+					}
+					idTag = symEncrypt(oldLock,nonce24,idKey).slice(0,9);
+					for (i = 1; i < cipherArray.length; i++){
+						if (idTag == cipherArray[i]) {
+						var msgKeycipher = cipherArray[i+1];
+					}
 				}
-			}else{													//otherwise really give up
-				if(type == '#'){
-					failedDecrypt('idSigned')
-				}else{
-					failedDecrypt('idReadonce')
+				if(typeof msgKeycipher != 'undefined'){				//got it finally
+					if(type == '#'){
+						sharedKey = makeShared(convertPubStr(theirLock),oldKey)
+					}
+				}else{													//otherwise really give up
+					if(type == '#'){
+						failedDecrypt('idSigned')
+					}else{
+						failedDecrypt('idReadonce')
+					}
 				}
 			}
 		}
-	}
 
-	//got the encrypted message key so now decrypt it, and finally the main message. The process for PFS and Read-once modes is more involved.
-	if (type == '#'){					//signed mode
-		var msgKey = nacl.secretbox.open(nacl.util.decodeBase64(msgKeycipher),nonce24,sharedKey);
-		if(!msgKey) failedDecrypt('signed');
+		//got the encrypted message key so now decrypt it, and finally the main message. The process for PFS and Read-once modes is more involved.
+		if (type == '#'){					//signed mode
+			var msgKey = nacl.secretbox.open(nacl.util.decodeBase64(msgKeycipher),nonce24,sharedKey);
+			if(!msgKey) failedDecrypt('signed');
 
 //for Read-once mode, first we separate the encrypted new Lock from the proper message key, then decrypt the new Lock and combine it with the stored Key (if any) to get the ephemeral shared Key, which unlocks the message Key. The particular type of encryption (Read-once or PFS) is indicated by the last character
-	}else{
-		var newLockCipher = msgKeycipher.slice(0,79),
-			typeChar = msgKeycipher.slice(-1);
-		msgKeycipher = msgKeycipher.slice(79,-1);
-		var newLock = symDecrypt(newLockCipher,nonce24,idKey);
+		}else{
+			var newLockCipher = msgKeycipher.slice(0,79),
+				typeChar = msgKeycipher.slice(-1);
+			msgKeycipher = msgKeycipher.slice(79,-1);
+			var newLock = symDecrypt(newLockCipher,nonce24,idKey);
 
-		if(typeChar == 'p'){															//PFS mode: last Key and new Lock
-			var	sharedKey = makeShared(newLock,lastKey);
+			if(typeChar == 'p'){															//PFS mode: last Key and new Lock
+				var	sharedKey = makeShared(newLock,lastKey);
 
-		}else if(typeChar == 'r'){														//reset. lastKey is the permanent one
-			var agree = confirm('If you go ahead, the current Read-once conversation with the sender will be reset. This may be OK if this is a new message, but if it is an old one the conversation will go out of sync');
-			if(!agree) throw('reset decrypt canceled');
-			var	sharedKey = makeShared(newLock,myKey);
-			locDir[theirEmail][1] = locDir[theirEmail][2] = null;					//if reset type, delete ephemeral data first
+			}else if(typeChar == 'r'){														//reset. lastKey is the permanent one
+				var agree = confirm('If you go ahead, the current Read-once conversation with the sender will be reset. This may be OK if this is a new message, but if it is an old one the conversation will go out of sync');
+				if(!agree) throw('reset decrypt canceled');
+				var	sharedKey = makeShared(newLock,myKey);
+				locDir[theirEmail][1] = locDir[theirEmail][2] = null;					//if reset type, delete ephemeral data first
 
-		}else{																			//Read-once mode: last Key and last Lock
-			var lastLockCipher = locDir[theirEmail][2];
-			if (lastLockCipher != null) {												//if stored dummy Lock exists, decrypt it
-				var lastLock = keyDecrypt(lastLockCipher)
-			} else {																	//use new dummy if no stored dummy
-				var lastLock = newLock
+			}else{																			//Read-once mode: last Key and last Lock
+				var lastLockCipher = locDir[theirEmail][2];
+				if (lastLockCipher != null) {												//if stored dummy Lock exists, decrypt it
+					var lastLock = keyDecrypt(lastLockCipher)
+				}else{																	//use new dummy if no stored dummy
+					var lastLock = newLock
+				}
+				var	sharedKey = makeShared(lastLock,lastKey);
 			}
-			var	sharedKey = makeShared(lastLock,lastKey);
+
+			var msgKey = nacl.secretbox.open(nacl.util.decodeBase64(msgKeycipher),nonce24,sharedKey);
+			if(!msgKey) failedDecrypt('readonce');
+			locDir[theirEmail][2] = keyEncrypt(newLock);										//store the new dummy Lock (final storage at end)
+			locDir[theirEmail][3] = 'lock';
+
+			syncChromeLock(theirEmail,JSON.stringify(locDir[theirEmail]))
 		}
-
-		var msgKey = nacl.secretbox.open(nacl.util.decodeBase64(msgKeycipher),nonce24,sharedKey);
-		if(!msgKey) failedDecrypt('readonce');
-		locDir[theirEmail][2] = keyEncrypt(newLock);										//store the new dummy Lock (final storage at end)
-		locDir[theirEmail][3] = 'lock';
-
-		syncChromeLock(theirEmail,JSON.stringify(locDir[theirEmail]))
 	}
-}
 	//final decryption for the main message, which is also compressed
 	var plainstr = symDecrypt(cipher,nonce24,msgKey,true);
 
