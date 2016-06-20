@@ -3,7 +3,7 @@
                 // Documentation - www.RTCMultiConnection.org
 				  // with some changes by F. Ruiz
 				
-				var chatpwd = location.hash.slice(22);
+				var chatpwd = decodeURI(location.hash).slice(22);
 
                 var connection = new RTCMultiConnection();
 
@@ -24,7 +24,8 @@
                     roomsList.insertBefore(tr, roomsList.firstChild);
 					
 				document.getElementById('user-name').addEventListener('keyup', function(e) {
-					if (e.keyCode == 13) tr.querySelector('.join').click();
+					var key = e.keyCode || e.which || e.keyChar;
+					if (key == 13) tr.querySelector('.join').click();
 				});
 								
 					document.getElementById('session-start').style.display = 'none';
@@ -301,7 +302,7 @@ var chatmsgStart = '';
 
 //gets chat type and kicks out those whose URL does not conform
 window.onload = function() {
-	var myURL = location.hash;
+	var myURL = decodeURI(location.hash);
 	if (!myURL.match('#') || myURL.length != 65) {
 		document.getElementById('session-start').innerHTML = '<span style="color:red">This page runs only from a PassLok chat invitation</span>';
 		throw('attempted to run without referral')

@@ -41,6 +41,23 @@ var rootElement = $(document),
 	decoyOutCreated = false,
 	bodyID = '';
 
+var	isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1,
+	isFirefox = typeof InstallTrigger !== 'undefined';
+	
+//set global variables indicating if there is a Chrome sync data area (Chrome), otherwise set to local (Firefox).
+if(chrome.storage){
+	if(chrome.storage.sync){
+		var ChromeSyncOn = true,
+			chromeStorage = chrome.storage.sync
+	}else{
+		var ChromeSyncOn = false,
+			chromeStorage = chrome.storage.local
+	}
+}else{
+	var ChromeSyncOn = false,
+		chromeStorage = localStorage
+}
+
 //html code for dialogs
 	
 //toolbar for rich text editing
@@ -160,6 +177,7 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 		'<button class="cssbutton" id="inviteBtn" value="Invite" style="background-color:#3896F9;color:white;" title="invite recipients to PassLok">Invite</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="compHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="richBtn" value="Rich" style="display:none;" title="display toolbar for rich text editing">Rich</button>&nbsp;&nbsp;'+
+		'<button class="cssbutton" id="moveBtn" value="Backup" style="display:none;" title="make an encrypted file containing local data, then offers to delete it">Backup</button>&nbsp;&nbsp;'+
 		'<input class="custom-file-input" type="file" id="loadFile" style="" title="open dialog to select file to load"/>'+
 		'<button class="cssbutton" id="interfaceBtn" value="Basic" style="" title="toggle between basic and advanced interface">Show all buttons</button>'+
 	'</div>'+
@@ -323,6 +341,7 @@ function showComposeDialog(emailList,bodyText,specialMessage) {
 			});
 		});
 		modal.find('#resetBtn2').click(resetPFS2);
+		modal.find('#moveBtn').click(moveDB);
  		
 		composeCreated = true;  
 	}else{
@@ -396,7 +415,7 @@ function showKeyDialog(isInit){
 		modal.find('#suggestKeyBtn').click(suggestKey);
 		modal.find('#showKey').click(showSec);
 		modal.find('#acceptKeyBtn').click(acceptKey);
-		modal.find('#pwd').keyup(function(){pwdKeyup(event)});
+		modal.find('#pwd').keyup(function(event){pwdKeyup(event)});
   
 		keyCreated = true;
 	}else{
@@ -422,7 +441,7 @@ function showOldKeyDialog(isInit){
 		modal.find('#showOldKey').click(showOldSec);
 		modal.find('#cancelOldKeyBtn').click(cancelOldKey);
 		modal.find('#acceptOldKeyBtn').click(acceptOldKey);
-		modal.find('#oldPwd').keyup(function(){oldPwdKeyup(event)});
+		modal.find('#oldPwd').keyup(function(event){oldPwdKeyup(event)});
   
 		oldKeyCreated = true;
 	}else{
@@ -522,7 +541,7 @@ function showDecoyInDialog(){
 		modal.find('#cancelDecoyInBtn').click(cancelDecoyIn);
 		modal.find('#acceptDecoyInBtn').click(encrypt);
 		modal.find('#decoyText').keyup(charsLeftDecoy);
-		modal.find('#decoyPwdIn').keyup(function(){decoyPwdInKeyup(event)});
+		modal.find('#decoyPwdIn').keyup(function(event){decoyPwdInKeyup(event)});
 		modal.find('#showDecoyInCheck').click(showDecoyPwdIn);
   
 		decoyInCreated = true;
@@ -542,7 +561,7 @@ function showDecoyOutDialog(){
 	//event listeners; the functions are defined elsewhere
 		modal.find('#cancelDecoyOutBtn').click(cancelDecoyOut);
 		modal.find('#acceptDecoyOutBtn').click(doDecoyDecrypt);
-		modal.find('#decoyPwdOut').keyup(function(){decoyPwdOutKeyup(event)});
+		modal.find('#decoyPwdOut').keyup(function(event){decoyPwdOutKeyup(event)});
 		modal.find('#showDecoyOutCheck').click(showDecoyPwdOut);
   
 		decoyOutCreated = true;

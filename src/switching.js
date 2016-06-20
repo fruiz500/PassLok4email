@@ -56,6 +56,7 @@ function updateComposeButtons(emailList){
 	for (var index = 0; index < emailList.length; index++){		//scan email array to separate those in the directory from those that are not
 		if(locDir[emailList[index].trim()]) allNew = false
 	}
+	if(emailList.length == 0){moveBtn.style.display = '';}else{moveBtn.style.display = 'none';}		//display backup button in Firefox
 	if(allNew){
 		encryptBtn.style.display = 'none';
 		encryptFileBtn.style.display = 'none';
@@ -159,6 +160,8 @@ function acceptKey(){
 			decrypt()
 		}else if(callKey == 'decryptItem'){
 			decryptItem()
+		}else if(callKey == 'movedb'){
+			moveDB()
 		}
 	},30);
 }
@@ -268,8 +271,9 @@ function pwdKeyup(evt){
 	if(pwd.value.trim() == ''){acceptKeyBtn.disabled = true;}else{acceptKeyBtn.disabled = false;};
 	newPwdAccepted = false;
 	acceptKeyBtn.style.background = '';
-	evt = evt || window.event
-	if (evt.keyCode == 13){acceptKey()} else{												//accept upon return, otherwise display strength
+	evt = evt || window.event;
+	var key = evt.keyCode || evt.which || evt.keyChar;
+	if (key == 13){acceptKey()} else{												//accept upon return, otherwise display strength
 		 return keyStrength(pwd.value,'pwd');
 	}
 }
@@ -283,16 +287,18 @@ function oldPwdKeyup(evt){
 
 //enter decoy Key from keyboard
 function decoyPwdInKeyup(evt){
-	evt = evt || window.event
-	if (evt.keyCode == 13){acceptDecoyIn()} else {
+	evt = evt || window.event;
+	var key = evt.keyCode || evt.which || evt.keyChar;
+	if (key == 13){acceptDecoyIn()} else {
 		return keyStrength(decoyPwdIn.value,'decoy')
 	}
 }
 
 //enter decoy Key from keyboard
 function decoyPwdOutKeyup(evt){
-	evt = evt || window.event
-	if (evt.keyCode == 13) doDecoyDecrypt()
+	evt = evt || window.event;
+	var key = evt.keyCode || evt.which || evt.keyChar;
+	if (key == 13) doDecoyDecrypt()
 }
 
 //writes five random dictionary words in the Password box
@@ -363,12 +369,12 @@ function loadFileAsURL(){
 		}
 		if(fileToLoad.type.slice(0,4) == "text"){
 			if(URLFromFileLoaded.slice(0,2) == '==' && URLFromFileLoaded.slice(-2) == '=='){
-				composeBox.innerHTML += '<br><a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '&nbsp;&nbsp;<button onClick="followLink(this);">Save</button></a>'
+				composeBox.innerHTML += '<br><a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '</a>'
 			}else{
 				composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
 			}
 		}else{
-			composeBox.innerHTML += '<br><a download="' + fileName + '" href="' + URLFromFileLoaded + '">' + fileName + '&nbsp;&nbsp;<button onClick="followLink(this);">Save</button></a>'
+			composeBox.innerHTML += '<br><a download="' + fileName + '" href="' + URLFromFileLoaded + '">' + fileName + '</a>'
 		}
 	};
 	if(fileToLoad.type.slice(0,4) == "text"){
@@ -401,14 +407,6 @@ function loadEncryptedFile(){
 	}
 }
 
-//used to download a packaged file
-function followLink(thisLink){
-	var downloadLink = document.createElement("a");
-	downloadLink.download = thisLink.parentElement.download;
-	downloadLink.href = thisLink.parentElement.href;
-	downloadLink.click();
-}
-
 var time10 = 0;														//to display time needed to process Password
 
 //things that should happen after the email program loads completely
@@ -418,7 +416,7 @@ window.addEventListener("load",function(){
 	showOldKeyDialog(true);
 	console.log(document.title);
 	getMyEmail();
-	retrieveAllSync();												//get data from sync storage
+	retrieveAllSync();												//get data from sync or local storage
 	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
   },1000)															//give it an extra second so everything is loaded
 })

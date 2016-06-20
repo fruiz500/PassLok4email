@@ -32,7 +32,7 @@
     // you can always override it!
     // www.RTCMultiConnection.org/docs/channel-id/
 //	window.RMCDefaultChannel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
-    window.RMCDefaultChannel = location.hash.slice(2,22).replace(/\/|:|#|%|\.|\[|\]/g, '').trim();	//modified by F. Ruiz so only random chatroom name is used
+    window.RMCDefaultChannel = decodeURI(location.hash).slice(2,22).replace(/\/|:|#|%|\.|\[|\]/g,'').trim();	//modified by F. Ruiz so only random chatroom name is used
 
     // www.RTCMultiConnection.org/docs/constructor/
     window.RTCMultiConnection = function(channel) {
@@ -3999,7 +3999,7 @@
     var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
     var isFirefox = typeof window.InstallTrigger !== 'undefined';
     var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-    var isChrome = !!window.chrome && !isOpera;
+    var isChrome = !!window.chrome && !isOpera && !isFirefox;
     var isIE = !!document.documentMode;
 
     var isPluginRTC = isSafari || isIE;

@@ -89,7 +89,7 @@ function syncChromeLock(name,data) {
 	var syncName = myEmail + '.' + name;
     var jsonfile = {};
     jsonfile[syncName.toLowerCase()] = data;
-    chrome.storage.sync.set(jsonfile);
+    chromeStorage.set(jsonfile);
 
 	//now update the list, also in Chrome sync
 	updateChromeSyncList();
@@ -100,13 +100,13 @@ function updateChromeSyncList(){
 	var ChromeSyncList = Object.keys(locDir).join('|');
 	var jsonfile = {};
 	jsonfile[myEmail+'.ChromeSyncList'] = ChromeSyncList;
-	chrome.storage.sync.set(jsonfile)
+	chromeStorage.set(jsonfile)
 }
 
 //to retrieve Lock from sync storage. The code specifying what to do with the item is here because the get operation is asynchronous
 function getChromeLock(name) {
 	var syncName = myEmail + '.' + name;
-    chrome.storage.sync.get(syncName.toLowerCase(), function (obj) {
+    chromeStorage.get(syncName.toLowerCase(), function (obj) {
 		var lockdata = obj[syncName.toLowerCase()];
 		if(lockdata){
 			storeChromeLock(name,lockdata)
@@ -117,14 +117,13 @@ function getChromeLock(name) {
 //this one is called by the above function
 function storeChromeLock(name,lockdata){
 	locDir[name] = JSON.parse(lockdata);
-//	chrome.storage.local[myEmail] = JSON.stringify(locDir);					//local storage is not used
 	updateChromeSyncList();
 }
 
 //to completely remove an entry
 function remChromeLock(name) {
 	var syncName = myEmail + '.' + name;
-    chrome.storage.sync.remove(syncName.toLowerCase());
+    chromeStorage.remove(syncName.toLowerCase());
 	updateChromeSyncList();
 }
 
@@ -150,7 +149,7 @@ var asyncLoop = function(o){
 //get Lock list from Chrome sync, then call an asynchronous loop to retrieve the data
 function retrieveAllSync(){
 	var syncName = myEmail + '.ChromeSyncList';
-	chrome.storage.sync.get(syncName, function (obj) {
+	chromeStorage.get(syncName, function (obj) {
 		var lockdata = obj[syncName];
 		if(lockdata){
 			var ChromeSyncList = lockdata.split('|');
@@ -162,10 +161,9 @@ function retrieveAllSync(){
 				functionToLoop : function(loop, i){
 					var syncName2 = myEmail + '.' + ChromeSyncList[i];
 					var lockdata2 = {};
-					chrome.storage.sync.get(syncName2.toLowerCase(), function (obj) {
+					chromeStorage.get(syncName2.toLowerCase(), function (obj) {
 						lockdata2 = obj[syncName2.toLowerCase()];
-						locDir[ChromeSyncList[i]] = JSON.parse(lockdata2);
-//						chrome.storage.local[myEmail] = JSON.stringify(locDir);
+						locDir[ChromeSyncList[i]] = JSON.parse(lockdata2)
 					});
 					loop();					
     			},
@@ -177,4 +175,55 @@ function retrieveAllSync(){
 
 		} else {introGreeting()}			//display special messages for a first-time user 
 	});
+}
+
+var wipeEnabled = false;
+//makes encrypted backup of the whole DB, then if confirmed wipes local data clean. This is taken from SeeOnce
+function moveDB(){
+	if(composeBox.innerHTML.match('href="data:,==~') && wipeEnabled){			//delete data the second time
+		locDir = {};
+		if(!ChromeSyncOn) chrome.storage.local.clear();	
+		composeMsg.innerHTML = 'Local data wiped';
+		moveBtn.style.background = '';
+		moveBtn.innerHTML = 'Backup';
+		wipeEnabled = false
+
+	}else{													//normal backup
+		callKey = 'movedb';
+		readKey();
+
+		//first clean out keys in locDir that don't have any real data
+		for (var Lock in locDir){
+			if (!locDir[Lock][0]){
+				delete locDir[Lock];
+				remChromeLock(Lock)		//remove from storage as well
+			}
+		}
+		if(!locDir && ChromeSyncOn) chrome.storage.sync.remove('ChromeSyncList');		//remove index if empty
+
+		//now encrypt it with the user Password
+		composeBox.innerHTML = 'The link below is an encrypted backup containing data needed to continue conversations in course. Right-click on it and save it locally. Load it as you would an encrypted attachment and the data will be restored.<br><br><a download="PLbak.txt" href="data:,==' + keyEncrypt(JSON.stringify(locDir)) + '=="><b>PassLok encrypted database; right-click and Save link as...</b></a><br><br>If now you click the button again, the data will be erased from the app.';
+		composeMsg.innerHTML = 'Backup in the box.<br>If you click the same button again, it will be wiped from this machine and others in sync. This cannot be undone.';
+		moveBtn.style.background = '#FB5216';
+		moveBtn.style.color = 'white';
+		moveBtn.innerHTML = 'Wipe';
+		wipeEnabled = true;
+		setTimeout(function() {
+			moveBtn.style.background = '';
+			moveBtn.style.color = '';
+			moveBtn.innerHTML = 'Backup';
+			wipeEnabled = false;
+		}, 10000)							//cancel after 10 seconds
+		selectMain();
+		updateComposeButtons('');
+		callKey = '';
+	}
+}
+
+//merges two objects; doesn't sort the keys
+function mergeObjects(obj1,obj2){
+    var obj3 = {};
+    for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+    for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+    return obj3;
 }

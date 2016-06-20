@@ -316,7 +316,7 @@ function keyDecrypt(cipherstr){
 function stripHeaders(string){
 	string = string.replace(/[\s\n]/g,'').replace(/&nbsp;/g,'');							//remove spaces, newlines
 	if(string.match('==')) string = string.split('==')[1];									//keep only PassLok item, if bracketed
-	string = string.replace(/<(.*?)>/gi,"").replace(/[^a-zA-Z0-9+\/@#$-]+/g,''); 			//takes out html tags and anything that is not base64 or a type marker
+	string = string.replace(/<(.*?)>/gi,"").replace(/[^a-zA-Z0-9+\/@#$-~]+/g,''); 		//takes out html tags and anything that is not base64 or a type marker
 	return string
 }
 
@@ -330,12 +330,27 @@ function isBase36(string){
 }
 
 var padding = '', nonce24;			//global variables involved in decoding secret message
-//decrypts a message encrypted for multiple recipients. Encryption can be Signed, Read-once, or an Invitation. This is detected automatically.
+//decrypts a message encrypted for multiple recipients. Encryption can be Signed, Read-once, or an Invitation. This is detected automatically. It can also be an encrypted database
 function decryptList(){
 	var text = stripHeaders(readBox.innerHTML);
 	theirEmail = senderBox.innerHTML.trim();
-	if(isBase36(text.slice(0,50)) && !isBase36(text.charAt(50))){
+	if(isBase36(text.slice(0,50)) && !isBase36(text.charAt(50))){					//find Lock located at the start
 		theirLock = changeBase(text.slice(0,50),base36,base64,true)
+		
+	}else if(text.charAt(0) == '~'){													//it's an encrypted database, so decrypt it and merge it
+		var agree = confirm('This is an encrypted local database. It will be loaded if you click OK, possibly replacing current data. This cannot be undone.');
+		if(!agree){
+			readBox.innerHTML = '';
+			readMsg.innerHTML = 'Backup merge canceled';
+			return
+		}
+		var newData = JSON.parse(keyDecrypt(text));
+		locDir = mergeObjects(locDir,newData);
+		syncLocDir();
+		readBox.innerHTML = '';
+		readMsg.innerHTML = 'Data from backup merged';
+		return
+		
 	}else{
 		readMsg.innerHTML = 'This message is not encrypted, but perhaps the attachments are';
 		throw('illegal Lock at the start')
