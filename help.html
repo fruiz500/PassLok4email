@@ -57,7 +57,7 @@ body {
         <h3>What is PassLok for Email?</h3>
   <div>
     <p>
-          <p>PassLok for Email is a Chrome extension that makes your email private by encrypting it end-to-end so only the intended recipients can decrypt your message. Currently it supports Gmail, Yahoo, and Outlook online. PassLok for Email is in no way associated with Google or any email service.</p>
+          <p>PassLok for Email is a Chrome and Firefox extension that makes your email private by encrypting it end-to-end so only the intended recipients can decrypt your message. Currently it supports Gmail, Yahoo, and Outlook online. PassLok for Email is in no way associated with Google, Mozilla, or any email service.</p>
     <p> You can encrypt rich text messages and files in <em>Signed mode</em>, which allows you and the recipients to decrypt them again as often as necessary, or in <em>Read-once mode</em>, which allows recipients to decrypt them only once.    </p>
     <p>You can also set up real-time secure chat sessions involving text, files, audio, or even video. The connection is direct between participants, with a server getting involved only at the start to help connect the participants to one another.</p>
     <p>Unlike most other email encryption apps, PassLok for Email does not involve any servers. It only communicates with the email page, and minimally so, in order to maintain a high level of security. Your secret Password (which you should <em>never</em> give to anyone), is not stored anywhere and remains in memory only as long as necessary to do its job.</p>
@@ -103,25 +103,40 @@ body {
   	  <li><strong>Encrypt to file</strong>: output is a file represented as a link, which you can right-click on and save locally, then possibly add to your email as an attachment; use this when the output is large</li>
     </ol>
   </div>
-  		<h3>What if my friends don't have Chrome?</h3>
+  		<h3>What if my friends don't have Chrome or Firefox?</h3>
   <div>
     <p>
-    	<p>If they don't have Chrome or are on a mobile platform (mobile Chrome does not yet support extensions), they can still use <strong>PassLok Privacy</strong>, which has an Email mode fully compatible with PassLok for Email, selectable on PassLok Privacy's <strong>Options</strong> tab. They will have to cut and paste between their email and the app, however, since PassLok Privacy does not connect to any other program, but otherwise they will be able to exchange encrypted material with you just as easily.</p>
-        <p>PassLok Privacy is available for free from <a href="https://passlok.com/app" target="_blank">https://passlok.com</a>, plus the <a href="https://chrome.google.com/webstore/detail/passlok-privacy/epcchpdljafmfegifkigklfcmkphfmbh" target= "_blank">Chrome</a>, and <a href="https://play.google.com/store/apps/details?id=com.fruiz500.passlok" target= "_blank">Android</a> app stores.</p>
+    	<p>If they don't have Chrome or Firefox or are on a mobile platform (mobile Chrome does not yet support extensions, and mobile Firefox only does on Android, and barely so), they can still use <strong>PassLok Privacy</strong>, which has an Email mode fully compatible with PassLok for Email, selectable on PassLok Privacy's <strong>Options</strong> tab. They will have to cut and paste between their email and the app, however, since PassLok Privacy does not connect to any other program, but otherwise they will be able to exchange encrypted material with you just as easily.</p>
+        <p>PassLok Privacy is available for free from <a href="https://passlok.com/app" target="_blank">https://passlok.com</a>, plus the <a href="https://chrome.google.com/webstore/detail/passlok-privacy/epcchpdljafmfegifkigklfcmkphfmbh" target= "_blank">Chrome</a>, <a href="https://addons.mozilla.org/en-US/firefox/addon/passlok-for-email/" target="_blank">Firefox</a>, and <a href="https://play.google.com/store/apps/details?id=com.fruiz500.passlok" target= "_blank">Android</a> app stores.</p>
   </div>
         <h3>Can I change my Password?</h3>
   <div>
     <p>
           <p>Sure! Just type in a new Password when you reload your email page. Since  data needed by Read-once mode is stored encrypted with the Password, you may be asked to supply the old Password in order to access that data.</p>
     <p>If you change your Password, recipients will see your next message as coming from an unknown source, and will be asked to accept the sender, but things will continue normally after that. Be sure to tell them that you have changed your Password.</p>
-    <p>For additional assurance, attach a short video clip of yourself reading the first few characters of any message encrypted by you. A good place to put the URL for the video is your email signature. If Chrome insists on converting the link into an actual video, put some parts of it in italics.</p>
+    <p>For additional assurance, attach a short video clip of yourself reading the first few characters of any message encrypted by you. A good place to put the URL for the video is your email signature. If your email service insists on converting the link into an actual video, put some parts of it in italics.</p>
     <p>If you use multiple email services or even multiple accounts for each service, PassLok will keep them separate even though you may have chosen to use the same Password. To the recipients, they will behave as completely separate senders.  </p>
   </div>
         <h3>Can I change machines?</h3>
   <div>
     <p>
-          <p>Sure you can! PassLok for Email syncs your data between machines as soon as you log into Chrome, provided the extension is enabled. All the sensitive data is encrypted before it is sent to Google servers.</p>
-    <p>If you want to make sure that your data has been wiped from a particular machine you were using, remove your login from Chrome on that machine by going to <strong>Settings</strong> on the Chrome menu, and clicking <strong>Disconnect your Google Account</strong>.</p></div>
+          <p>Sure you can! The process is a little different in Chrome and Firefox, though, because data is stored locally in Firefox but synced to the cloud in Chrome:</p>
+    <ol>
+            <li><em>Firefox</em>: </li>
+    </ol>
+          <ul>
+            <li>Open a Compose window in your email and then click the PassLok icon <em>without entering any recipient</em>. The dialog that appears contains a special <strong>Backup</strong> button. When you click it, PassLok for Email exncrypts all its data and places it in the dialog as a link. Right-click on it and select &quot;Save link as...&quot; so you can save it as a text file. Should you want to wipe the local data without deleting the app itself, PassLok will give you a chance to do this for ten secons, by clicking the same button again.</li>
+            <li>When you start PassLok for Email on a different machine, click on the PassLok icon for any incoming message,  load the backup file into that dialog as if it were an encrypted attachment, and enter the same Password as before. The data will be loaded, possibly modifying data that might already be there (PassLok will ask for confirmation) so you can continue conversations in course as in the previous machine.</li>
+          </ul>
+          <ol>
+            <li><em>Chrome</em>:</li>
+          </ol>
+          <ul>
+            <li>You can follow the same process as in Firefox, except that there is no local data to wipe. The synced data remains available even after a wipe, but you can always delete it by removing the app from your Chrome account. But below is a better way that is completely automatic.</li>
+            <li>The Chrome app syncs your data between machines as soon as you log into Chrome, provided the extension is enabled. All the sensitive data is encrypted before it is sent to Google servers. If you want to make sure that your data has been wiped from a particular machine you were using, remove your login from Chrome on that machine by going to <strong>Settings</strong> on the Chrome menu, and clicking <strong>Disconnect your Google Account</strong>.</li>
+          </ul>
+          <p>To summarize, the Chrome extension syncs automatically between machines, but this involves storing (encrypted) data in Google servers. The Firefox extension requires you to do this manually because Firefox does not support sync, but then no one holds any of your data even in encrypted form. Your pick.</p>
+  </div>
     	<h3>What is Read-once mode?</h3>
         <div>
 			<p>
@@ -136,7 +151,7 @@ body {
           <p>If you select <strong>Chat</strong> option at the bottom of the window before clicking <strong>Encrypt to email</strong> (you may need to click <strong>Show all buttons</strong> first) a dialog asks you what kind of real-time chat you want to set up. There are three choices: text and files, this plus audio, and all this plus video. You can also add a short message, such as the exact time to start the chat session.</p>
     <p>After you click <strong>OK</strong>, PassLok makes an encrypted chat invitation, which you can then send to the participants of the chat. This invitation contains the short message mentioned above (limit 43 characters) plus some data needed to establish the connection.</p>
     <p>When the recipients get your chat invitation, they will decrypt it like any other PassLok message and then the short message will pop up and ask for confirmation to continue (this is so they don't join the chat too early, if set for a later time). After this the chat will open on a separate tab and ask you to supply a name for yourself. When each participant does this, they connect directly to one another. They also may be asked to grant permission to feed audio or video when the connection takes place. The original sender connects exactly the same way, by decrypting the invitation he/she sent to the others.</p>
-    <p>If you get disconnected, just reload the chat tab in Chrome and type your alias again. The chat session ceases to exist when all participants close their chat tabs.</p>
+    <p>If you get disconnected, just reload the chat tab in your browser and type your alias again. The chat session ceases to exist when all participants close their chat tabs.</p>
     <p>All of this is explained in this video: <a href="https://www.youtube.com/watch?v=FH2qN5TUdSk" target="_blank">https://www.youtube.com/watch?v=FH2qN5TUdSk</a></p>
   </div>
         <h3>Can I encrypt files?</h3>
@@ -200,11 +215,11 @@ body {
     <p>1. <strong>Users are not authenticated</strong>. This means that someone could gain access to your correspondent's email account and impersonate him/her without your realizing it. From time to time you should ask your correspondents to send you something that only they could produce (for instance, a selfie picture where they do something you requested in your previous message). If your correspondent switches Password he/she should tell you about it, because PassLok for Email will warn you that his/her Password has changed. To further protect you against a "man in the middle," follow the instructions in the next help item.</p>
     <p>2. <strong>Not all messages have the same level of security</strong>:</p>
     <ol>
-            <li>Invitations have no security at all, as they can be read by anyone anytime. This is why you need to click the button twice.</li>
+            <li>Invitations have no security at all, as they can be read by anyone anytime. This is why PassLok asks you to click the button twice.</li>
             <li>Signed mode messages can be decrypted forever by anyone who has acquired the recipient's Password at the time of the encryption.</li>
-            <li>Messages initiating a Read-once exchange and Read-once messages encrypted right after a reset are secure against third parties reading them, but they can be decrypted indefinitely both by sender and recipient, just as Signed messages. The replies to those can be decrypted more than once, but only until a new reply is made. The second reply from either end is immediately undecryptable after the first read, but still a powerful enemy who obtains both Passwords and gains access to both machines would be able to reconstruct the plain contents. Third replies and beyond, however, become absolutely undecryptable by anyone as soon as the recipient decrypts them.</li>
+            <li>Messages initiating a Read-once exchange and Read-once messages encrypted right after a reset are secure against third parties reading them, but they can be decrypted indefinitely both by sender and recipient, just as Signed messages. The replies to those can be decrypted more than once, but only until a new reply is made. The second reply from either end is immediately undecryptable after the first read, but still a powerful enemy who obtains both Passwords and gains access to both machines might be able to reconstruct the plain contents. Third replies and beyond, however, become absolutely undecryptable by anyone as soon as the recipient decrypts them.</li>
           </ol>
-    <p>3. <strong>Hackers could change the code</strong> at the Google server, and thereby destroy all security without users realizing it. You can, however, inspect the code and compare it with the authentic code published at GitHub. Instructions for this are in a help item below.  </p>
+    <p>3. <strong>Hackers could change the code</strong> at the Google or Firefox servers, and thereby destroy all security without users realizing it. You can, however, inspect the code and compare it with the authentic code published at GitHub. Instructions for this are in a help item below.  </p>
   </div>
         <h3>Click here for instructions against a "man in the middle"</h3>
   <div>
@@ -225,6 +240,7 @@ body {
         <h3>How to authenticate the code</h3>
   <div>
     <p>
+    <p><em>Chrome extension:</em></p>
     <p>You can always inspect the code by opening a Developer console in Chrome (under the &quot;More Tools&quot; menu) and looking at the Sources tab &gt; Content Scripts &gt; top &gt;PassLok for Email. But a hacker with acces to the Google servers might have introduced subtle changes that are not easy to spot. Do this to defend against this possibility:</p>
     <ol>
       <li>Follow this link to the Chrome Extension Downloader app: <a href="http://chrome-extension-downloader.com/" target="_blank">http://chrome-extension-downloader.com/</a></li>
@@ -256,7 +272,7 @@ body {
 </div>
 <br>
 <address>
-      PassLok for Email 0.2 &#169; F. Ruiz 2016
+      PassLok for Email 0.3 &#169; F. Ruiz 2016
       </address>
 <ul>
         <li> engine: NaCl by D. Bernstein, W. Janssen, T. Lange, P. Schwabe, M. Dempsky, and A. Moon 2013</li>
