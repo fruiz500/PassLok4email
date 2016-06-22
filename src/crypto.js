@@ -92,11 +92,12 @@ function inviteEncrypt(){
 			text = composeBox.innerHTML.trim();
   		var cipherstr = symEncrypt(text,nonce24,myLockbin,true);												//the actual message is compressed
 		setTimeout(function(){composeMsg.innerHTML = "This invitation can be decrypted by anyone"},20);
-		composeBox.innerHTML = myezLock + "@" + noncestr + cipherstr;
-		composeBox.innerHTML = composeBox.innerHTML.match(/.{1,80}/g).join("<br>");
-		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li><li>If you don't use Chrome or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + composeBox.innerHTML + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
-	
-		document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
+		var output = myezLock + "@" + noncestr + cipherstr;
+		output = output.match(/.{1,80}/g).join("\n");
+		composeBox.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email Chrome extension by following this link: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li><li>If you don't use Chrome or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + output + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
+		var bodyElement = document.getElementById(bodyID);
+		bodyElement.insertBefore(composeBox,bodyElement.childNodes[0]);
+
 		$('#composeScr').dialog("close");
 		inviteRequested = false;
 		callKey = '';
@@ -238,7 +239,7 @@ function encryptList(listArray,isFileOut){
 	if(stegoMode.checked) outString = textStego(outString);
 	
 	if(isFileOut){
-		if(stegoMode.checked){
+		if(stegoMode.checked){										//no escapeHTML used below because outString is guaranteed to be free of unsafe characters
 			composeBox.innerHTML = '<a download="ChangeMe.txt" href="data:,==' + outString + '=="><b>PassLok Hidden message; right-click and Save link as... Make sure to change the name</b></a>'
 		}else if(onceMode.checked){
 			composeBox.innerHTML = '<a download="PLmso.txt" href="data:,==' + outString + '=="><b>PassLok Read-once message; right-click and Save link as...</b></a>'
@@ -268,12 +269,13 @@ function encryptList(listArray,isFileOut){
 	if(isFileOut){
 		composeMsg.innerHTML = "Contents encrypted into a file. Now save it, close this dialog, and attach the file to your email"
 	}else{
-		document.getElementById(bodyID).innerHTML = composeBox.innerHTML;
+		var bodyElement = document.getElementById(bodyID);
+		bodyElement.insertBefore(composeBox,bodyElement.childNodes[0]);
 	}
 	if(inviteArray.length != 0){		 
 		composeMsg.innerHTML = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:<br>' + inviteArray.join(', ') + '<br>You should send them an invitation first. You may close this dialog now'
 	}else if(!isFileOut){
-		$('#composeScr').dialog("close")		
+		$('#composeScr').dialog("close")
 	}
 }
 
@@ -521,11 +523,14 @@ function decryptList(){
 	}
 	//final decryption for the main message, which is also compressed
 	var plainstr = symDecrypt(cipher,nonce24,msgKey,true);
+	plainstr = plainstr.replace(/<script(.*?)script>/g,'');				//remove any scripts in output, just to be safe
 
+	readBox.innerHTML = '';	
 	if(type != '@'){
 		readBox.innerHTML = plainstr;
 	}else{																	//add further instructions if it was an invitation
-		readBox.innerHTML = "Congratulations! You have decrypted your first message with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt to email</b> button.</li><li>The encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>"
+		plainstr = "Congratulations! You have decrypted your first message with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address, if it's not there already, and a subject line, but <em>don't write your message yet</em>. Then click the <b>PassLok</b> logo (orange key near the bottom).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt to email</b> button.</li><li>The encrypted message will appear in the compose window. Add whatever plain text you want, and click <b>Send</b>.</li></ol>";
+		readBox.innerHTML = plainstr
 	}
 
 	syncLocDir();															//everything OK, so store

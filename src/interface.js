@@ -318,7 +318,7 @@ function showReadDialog(email,bodyText){
 	
 	readScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	senderBox.innerText = email;
-	readBox.innerHTML = bodyText;
+	readBox.innerHTML = bodyText.replace(/<script(.*?)script>/g,'');				//remove any scripts in output, just to be safe
 	resetSpan.style.display = 'none';
 	decrypt();
 }
@@ -381,7 +381,8 @@ function showComposeDialog(emailList,bodyText,specialMessage) {
 	
 	composeScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	if(emailList) composeRecipientsBox.innerText = emailList.join(', ');
-	composeBox.innerHTML = bodyText;
+	composeBox.innerHTML = bodyText.replace(/<script(.*?)script>/g,'');				//remove any scripts just to be safe;
+
 	if(bodyText.replace(/<(.*?)>/gi,"")){
 		composeMsg.innerHTML = "It is more secure to type the message <em>after</em> clicking the PassLok button";
 	}else{

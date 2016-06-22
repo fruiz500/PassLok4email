@@ -369,12 +369,12 @@ function loadFileAsURL(){
 		}
 		if(fileToLoad.type.slice(0,4) == "text"){
 			if(URLFromFileLoaded.slice(0,2) == '==' && URLFromFileLoaded.slice(-2) == '=='){
-				composeBox.innerHTML += '<br><a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '</a>'
+				composeBox.innerHTML += '<br><a download="' + fileName + '" href="data:,' + escapeHTML(URLFromFileLoaded) + '">' + fileName + '</a>'
 			}else{
 				composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
 			}
 		}else{
-			composeBox.innerHTML += '<br><a download="' + fileName + '" href="' + URLFromFileLoaded + '">' + fileName + '</a>'
+			composeBox.innerHTML += '<br><a download="' + fileName + '" href="' + escapeHTML(URLFromFileLoaded) + '">' + fileName + '</a>'
 		}
 	};
 	if(fileToLoad.type.slice(0,4) == "text"){
@@ -394,9 +394,9 @@ function loadEncryptedFile(){
 		var fileName = fileToLoad.name;
 		var URLFromFileLoaded = fileLoadedEvent.target.result;
 		if(fileToLoad.type.slice(0,4) == "text"){
-			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + URLFromFileLoaded + '">' + fileName + '</a>'
+			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + escapeHTML(URLFromFileLoaded) + '">' + fileName + '</a>'
 		}else{
-			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + atob(URLFromFileLoaded.split(',')[1]) + '">' + fileName + '</a>'			//in case it wasn't saved as text
+			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + atob(escapeHTML(URLFromFileLoaded).split(',')[1]) + '">' + fileName + '</a>'			//in case it wasn't saved as text
 		}
 		decrypt()
 	};
@@ -406,6 +406,16 @@ function loadEncryptedFile(){
 		fileReader.readAsDataURL(fileToLoad, "UTF-8")
 	}
 }
+
+//to sanitize strings sent to innerHTML, per Firefox suggestion
+function escapeHTML(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
 
 var time10 = 0;														//to display time needed to process Password
 
