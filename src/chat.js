@@ -3,7 +3,7 @@ function charsLeftChat(){
 	var chars = encodeURI(chatDate.value).replace(/%20/g, ' ').length;
 	var limit = 43;
 	if (chars <= limit){
-		chatMsg.innerHTML = chars + " characters out of " + limit + " used"
+		chatMsg.innerText = chars + " characters out of " + limit + " used"
 	}else{
 		chatMsg.innerHTML = '<span style="color:orange">Maximum length exceeded. The message will be truncated</span>'
 	}
@@ -12,7 +12,7 @@ function charsLeftChat(){
 //start making a Chat invitation
 function displayChat(){
 	showChatDialog();
-	isChatInvite = true;
+	isChatInvite = true
 }
 
 var isChatInvite = false;
@@ -30,16 +30,16 @@ function makeChat(){
 	var date = chatDate.value;
 	if(date.trim() == '') date = 'noDate';
 	while(date.length < 43) date += ' ';
-	var password = nacl.util.encodeBase64(nacl.randomBytes(32)).replace(/=+$/,'');
-	var chatRoom = makeChatRoom();
-	composeBox.innerHTML = date + type + chatRoom + password;
-	signedEncrypt();
+	var password = nacl.util.encodeBase64(nacl.randomBytes(32)).replace(/=+$/,''),
+		chatRoom = makeChatRoom();
+	composeBox.innerText = date + type + chatRoom + password;
+	signedEncrypt()
 }
 
 //makes a mostly anonymous chatRoom name from words on the blacklist
 function makeChatRoom(){
-	var blacklist = blackListExp.toString().slice(1,-2).split('|');
-	var	name = replaceVariants(blacklist[randomBlackIndex()]);
+	var blacklist = blackListExp.toString().slice(1,-2).split('|'),
+		name = replaceVariants(blacklist[randomBlackIndex()]);
 		//75% chance to add a second word
 	if(Math.floor(Math.random()*4)) name = name + ' ' + replaceVariants(blacklist[randomBlackIndex()]);
 	while(name.length < 20) name += ' ';
@@ -55,7 +55,7 @@ function replaceVariants(string){
 function randomBlackIndex(){
 	var index = 1;
 	while(index == 1 || index == 2){						//excluded indices
-		index = Math.floor(Math.random()*blackLength);
+		index = Math.floor(Math.random()*blackLength)
 	}
 	return index
 }
@@ -66,11 +66,11 @@ function openChat(){
 	if (typetoken.length == 107 && !typetoken.slice(-43).match(' ')){			//chat invite detected, so open chat
 		var date = typetoken.slice(0,43).trim();									//the first 43 characters are for the date and time etc.
 		if(date != 'noDate'){
-			var msgStart = "This chat invitation says:<br><br>" + date + "<br><br>"
+			var msgStart = "This chat invitation says:\n\n" + date + "\n\n"
 		}else{
 			var msgStart = ""
 		}
-		showAcceptChatDialog(msgStart + "If you go ahead, the chat session will open now.");
+		showAcceptChatDialog(msgStart + "If you go ahead, the chat session will open now.")
 	}
 }
 
@@ -82,6 +82,6 @@ function acceptChat(){
 
 	$('#acceptChatScr').dialog("close");
 
-	readBox.innerHTML = '';
-	readMsg.innerHTML = 'Chat session open on a separate tab. You may close this now.'
+	readBox.innerText = '';
+	readMsg.innerText = 'Chat session open on a separate tab. You may close this now.'
 }

@@ -2,12 +2,12 @@
 //stores new Lock, copies old one just in case
 function storeNewLock(){
 	if(locDir[theirEmail]){
-		tempLock = locDir[theirEmail][0];
+		tempLock = locDir[theirEmail][0]
 	}
 	locDir[theirEmail][0] = theirLock;
 	storeData(theirEmail);
 	$('#nameScr').dialog("close");
-	decrypt();
+	decrypt()
 }
 
 //to store data in Chrome sync
@@ -32,30 +32,30 @@ function resetPFS(){
 		setTimeout(function() {
 			resetRequested = false;
 			resetBtn.style.background = '';
-			resetBtn.style.color = '';
+			resetBtn.style.color = ''
 		}, 10000)								//forget request after 10 seconds
 
 	}else{
-		var email = senderBox.innerHTML.trim();
+		var email = senderBox.innerText.trim();
 		if ((locDir[email][1] == null) && (locDir[email][2] == null)){
-			readMsg.innerHTML = 'Nothing to reset';
+			readMsg.innerText = 'Nothing to reset';
 			throw('no Read-once data')
 		}
 		locDir[email][1] = locDir[email][2] = null;
 		locDir[email][3] = 'reset';
 		storeData(email);
-		readMsg.innerHTML = "Conversation reset. The next reply won't have perfect forward secrecy";
+		readMsg.innerText = "Conversation reset. The next reply won't have perfect forward secrecy";
 		resetBtn.style.background = '';
 		resetSpan.style.display = 'none';
-		resetRequested = false;
+		resetRequested = false
 	}
 }
 
 //same, but from the compose screen
 function resetPFS2(){
 	if(!resetRequested){				//sets flag so action happens on next click
-		if(composeRecipientsBox.innerHTML.split(', ').length > 1){
-			composeMsg.innerHTML = 'Can reset only a single correspondent';
+		if(composeRecipientsBox.innerText.split(', ').length > 1){
+			composeMsg.innerText = 'Can reset only a single correspondent';
 			return;
 		}
 		resetRequested = true;
@@ -65,22 +65,22 @@ function resetPFS2(){
 		setTimeout(function() {
 			resetRequested = false;
 			resetBtn2.style.background = '';
-			resetBtn2.style.color = '';
+			resetBtn2.style.color = ''
 		}, 10000)								//forget request after 10 seconds
 
 	}else{
-		var email = composeRecipientsBox.innerHTML.trim();
+		var email = composeRecipientsBox.innerText.trim();
 		if ((locDir[email][1] == null) && (locDir[email][2] == null)){
-			readMsg.innerHTML = 'Nothing to reset';
+			readMsg.innerText = 'Nothing to reset';
 			throw('no Read-once data')
 		}
 		locDir[email][1] = locDir[email][2] = null;
 		locDir[email][3] = 'reset';
 		storeData(email);
-		composeMsg.innerHTML = "Conversation reset. The next reply won't have perfect forward secrecy";
+		composeMsg.innerText = "Conversation reset. The next reply won't have perfect forward secrecy";
 		resetBtn2.style.background = '';
 		resetSpan2.style.display = 'none';
-		resetRequested = false;
+		resetRequested = false
 	}
 }
 
@@ -92,7 +92,7 @@ function syncChromeLock(name,data) {
     chromeStorage.set(jsonfile);
 
 	//now update the list, also in Chrome sync
-	updateChromeSyncList();
+	updateChromeSyncList()
 }
 
 //to update the stored list
@@ -111,20 +111,20 @@ function getChromeLock(name) {
 		if(lockdata){
 			storeChromeLock(name,lockdata)
 		}
-	});
+	})
 }
 
 //this one is called by the above function
 function storeChromeLock(name,lockdata){
 	locDir[name] = JSON.parse(lockdata);
-	updateChromeSyncList();
+	updateChromeSyncList()
 }
 
 //to completely remove an entry
 function remChromeLock(name) {
 	var syncName = myEmail + '.' + name;
     chromeStorage.remove(syncName.toLowerCase());
-	updateChromeSyncList();
+	updateChromeSyncList()
 }
 
 //save all to sync storage
@@ -141,9 +141,9 @@ var asyncLoop = function(o){
     var loop = function(){
         i++;
         if(i==o.length){o.callback(); return;}
-        o.functionToLoop(loop, i);
+        o.functionToLoop(loop, i)
     }
-    loop();//init
+    loop()	//init
 }
 
 //get Lock list from Chrome sync, then call an asynchronous loop to retrieve the data
@@ -165,27 +165,27 @@ function retrieveAllSync(){
 						lockdata2 = obj[syncName2.toLowerCase()];
 						locDir[ChromeSyncList[i]] = JSON.parse(lockdata2)
 					});
-					loop();					
+					loop()				
     			},
 	
     			callback : function(){	//not used here
 				}    
-			});			
+			})		
 //end of asynchronous loop, any code below won't wait for it to be done
 
 		} else {introGreeting()}			//display special messages for a first-time user 
-	});
+	})
 }
 
 var wipeEnabled = false;
 //makes encrypted backup of the whole DB, then if confirmed wipes local data clean. This is taken from SeeOnce
 function moveDB(){
-	if(composeBox.innerHTML.match('href="data:,==~') && wipeEnabled){			//delete data the second time
+	if(composeBox.innerText.match('href="data:,==~') && wipeEnabled){			//delete data the second time
 		locDir = {};
 		if(!ChromeSyncOn) chrome.storage.local.clear();	
-		composeMsg.innerHTML = 'Local data wiped';
+		composeMsg.innerText = 'Local data wiped';
 		moveBtn.style.background = '';
-		moveBtn.innerHTML = 'Backup';
+		moveBtn.innerText = 'Backup';
 		wipeEnabled = false
 
 	}else{													//normal backup
@@ -203,20 +203,20 @@ function moveDB(){
 
 		//now encrypt it with the user Password
 		composeBox.innerHTML = 'The link below is an encrypted backup containing data needed to continue conversations in course. Right-click on it and save it locally. Load it as you would an encrypted attachment and the data will be restored.<br><br><a download="PLbak.txt" href="data:,==' + keyEncrypt(JSON.stringify(locDir)) + '=="><b>PassLok encrypted database; right-click and Save link as...</b></a><br><br>If now you click the button again, the data will be erased from the app.';
-		composeMsg.innerHTML = 'Backup in the box.<br>If you click the same button again, it will be wiped from this machine and others in sync. This cannot be undone.';
+		composeMsg.innerText = 'Backup in the box.\nIf you click the same button again, it will be wiped from this machine and others in sync. This cannot be undone.';
 		moveBtn.style.background = '#FB5216';
 		moveBtn.style.color = 'white';
-		moveBtn.innerHTML = 'Wipe';
+		moveBtn.innerText = 'Wipe';
 		wipeEnabled = true;
 		setTimeout(function() {
 			moveBtn.style.background = '';
 			moveBtn.style.color = '';
-			moveBtn.innerHTML = 'Backup';
+			moveBtn.innerText = 'Backup';
 			wipeEnabled = false;
 		}, 10000)							//cancel after 10 seconds
 		selectMain();
 		updateComposeButtons('');
-		callKey = '';
+		callKey = ''
 	}
 }
 

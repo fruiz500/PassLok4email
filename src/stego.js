@@ -113,7 +113,7 @@ function toLetters(text){
 		var index = 0;
 		while (index < turns){
 			cover = cover + ' ' + coverText;
-			index++;
+			index++
 		};
 		capacity = encodableBits(cover)
 	}
@@ -129,7 +129,7 @@ function toLetters(text){
 			while(tempBits.length < charMappings[cover[i]].length){tempBits = tempBits + "0";} 			//Got to pad it out
 			finalString = finalString + charMappings[cover[i] + tempBits];
 			bitsIndex = bitsIndex + charMappings[cover[i]].length;
-			doneBits = doneBits + tempBits;
+			doneBits = doneBits + tempBits
 		}
 		i++;
 	}
@@ -145,17 +145,17 @@ function fromLetters(text){
 		if (charMappings[text[i]] === undefined ){
 		}else{
 			tempchar = charMappings[text[i]];
-			bintemp = bintemp + tempchar;
+			bintemp = bintemp + tempchar
 		}
 	}
 	for (i = 0; i < bintemp.length; i=i+7){
 		var mybyte = String.fromCharCode(parseInt(bintemp.substring(i,i+7),2));
 		if (mybyte == '\0'){
 		}else{
-			finalString = finalString + mybyte;
+			finalString = finalString + mybyte
 		}
 	}
-	readBox.innerHTML = finalString;
+	text2decrypt = finalString
 }
 
 //adds spaces that can be encoded if Chinese, Korean, or Japanese

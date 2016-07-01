@@ -321,6 +321,6 @@ window.onload = function() {
 		document.getElementById('session-start').innerHTML = '<span style="color:red">This page runs only from a PassLok chat invitation</span>';
 		throw('illegal chat type')
 	}
-	document.getElementById('chatmsg').innerHTML = chatmsgStart + '<span style="color:red">  Names chosen by the participants will appear here as they join. Since the chat session is not totally secure, you should authenticate each one before proceeding. When you are done with the chat, reload PassLok.</span>';
+	document.getElementById('chatmsg').innerHTML = chatmsgStart + '<span style="color:red">  Names chosen by the participants will appear here as they join. When you are done with the chat, close this tab.</span>';
 									
 }

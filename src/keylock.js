@@ -21,7 +21,7 @@ function keyStrength(pwd,location) {
 	var iter = Math.max(1,Math.min(20,Math.ceil(24 - entropy/5)));			//set the scrypt iteration exponent based on entropy: 1 for entropy >= 120, 20(max) for entropy <= 20
 
 	var seconds = time10/10000*Math.pow(2,iter-8);			//to tell the user how long it will take, in seconds
-	var msg = 'Password strength: ' + msg + '<br>Up to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process';
+	var msg = 'Password strength: ' + msg + '\nUp to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process';
 	if(location == 'pwd'){
 		keyMsg.innerHTML = msg
 	}else if(location == 'decoy'){
@@ -160,7 +160,11 @@ function makeNonce24(nonce){
 //encrypt string with a symmetric key
 function symEncrypt(plainstr,nonce24,symKey,isCompressed){
 	if(isCompressed){
-		var plain = LZString.compressToUint8Array(plainstr)
+		if(plainstr.match('="data:')){								//no compression if it includes a file
+			var plain = nacl.util.decodeUTF8(plainstr)
+		}else{
+			var plain = LZString.compressToUint8Array(plainstr)
+		}
 	}else{
 		var plain = nacl.util.decodeUTF8(plainstr)
 	}
@@ -174,7 +178,7 @@ function symDecrypt(cipherstr,nonce24,symKey,isCompressed){
 	try{															//this may fail if the string is corrupted, hence the try
 		var cipher = nacl.util.decodeBase64(cipherstr);
 	}catch(err){
-		readMsg.innerHTML = "This encrypted message seems to be corrupted or incomplete";
+		readMsg.innerText = "This encrypted message seems to be corrupted or incomplete";
 		throw('decodeBase64 failed')
 	}
 
@@ -194,10 +198,50 @@ function symDecrypt(cipherstr,nonce24,symKey,isCompressed){
 		}
 	}
 	if(isCompressed){
-		return LZString.decompressFromUint8Array(plain)
+		if(plain.join().match(",61,34,100,97,116,97,58,")){		//this is '="data:' after encoding
+			return result = nacl.util.encodeUTF8(plain)
+		}else{
+			return LZString.decompressFromUint8Array(plain)
+		}
 	}else{
-		return nacl.util.encodeUTF8(plain)
+		return result
 	}
+}
+
+//this one escapes dangerous characters, preserving non-breaking spaces
+function escapeHTML(str){
+	escapeHTML.replacements = { "&": "&amp;", '"': "&quot;", "'": "&#039;", "<": "&lt;", ">": "&gt;" };
+	str = str.replace(/&nbsp;/gi,'non-breaking-space')
+	str = str.replace(/[&"'<>]/g, function (m){
+		return escapeHTML.replacements[m];
+	});
+	return str.replace(/non-breaking-space/g,'&nbsp;')
+}
+
+//mess up all tags except those whitelisted: formatting, images, and links containing a web reference or a file
+function safeHTML(string){
+	//first mess up attributes with values not properly enclosed within quotes, because Chrome likes to complete those; extra replaces needed to preserve encrypted material
+	string = string.replace(/==/g,'double-equal').replace(/<(.*?)=[^"'](.*?)>/g,'').replace(/double-equal/g,'==');
+	//now escape every dangerous character; we'll recover tags and attributes on the whitelist later on
+	string = escapeHTML(string);
+	//make regular expressions containing whitelisted tags, attributes, and origins; sometimes two versions to account for single quotes
+	var allowedTags = '(b|i|strong|em|u|strike|sub|sup|blockquote|ul|ol|li|pre|div|span|a|h1|h2|h3|h4|h5|h6|p|pre|table|tbody|tr|td|img|br|wbr|hr|font)',
+		tagReg = new RegExp('&lt;(\/?)' + allowedTags + '(.*?)&gt;','gi'),
+		allowedAttribs = '(download|style|src|target|name|id|class|color|size|cellpadding|tabindex|type|start|align)',
+		attribReg1 = new RegExp(allowedAttribs + '=\&quot;(.*?)\&quot;','gi'),
+		attribReg2 = new RegExp(allowedAttribs + '=\&#039;(.*?)\&#039;','gi'),
+		allowedOrigins = '(http:\/\/|https:\/\/|mailto:\/\/|#)',
+		origReg1 = new RegExp('href=\&quot;' + allowedOrigins + '(.*?)\&quot;','gi'),
+		origReg2 = new RegExp('href=\&#039;' + allowedOrigins + '(.*?)\&#039;','gi');
+	//recover allowed tags
+	string = string.replace(tagReg,'<$1$2$3>');
+	//recover allowed attributes
+	string = string.replace(attribReg1,'$1="$2"').replace(attribReg2,"$1='$2'");
+	//recover file-containing links
+	string = string.replace(/href=\&quot;data:(.*?),(.*?)\&quot;/gi,'href="data:$1,$2"').replace(/href=\&#039;data:(.*?),(.*?)\&#039;/gi,"href='data:$1,$2'");
+	//recover web links and local anchors
+	string = string.replace(origReg1,'href="$1$2"').replace(origReg2,"href='$1$2'");
+	return string
 }
 
 //takes appropriate UI action if decryption fails
@@ -206,39 +250,39 @@ function failedDecrypt(marker){
 		$('#oldKeyScr').dialog("open");
 	}else if(marker == 'old'){
 		if(typeof(readScr) != "undefined"){
-			readMsg.innerHTML = 'The old Password has not worked either. Reload the email page and try again';
+			readMsg.innerText = 'The old Password has not worked either. Reload the email page and try again';
 			resetSpan.style.display = '';
 		}else if(typeof(composeScr) != "undefined"){
-			composeMsg.innerHTML = 'The old Password has not worked either. Reload the email page and try again';
+			composeMsg.innerText = 'The old Password has not worked either. Reload the email page and try again';
 			if(composeRecipientsBox.innerHTML.split(', ').length < 2 && onceMode.checked){
 				resetSpan2.style.display = '';				//display this only if one recipient
-				composeMsg.innerHTML = 'The old Password has not worked either. Try resetting the exchange with this recipient';
+				composeMsg.innerText = 'The old Password has not worked either. Try resetting the exchange with this recipient';
 			}
 		}
 	}else if(marker == 'readonce'){
 		restoreTempLock();
-		readMsg.innerHTML = 'Read-once messages can be decrypted <em>only once</em><br>You may want to reset the exchange with the button below';
+		readMsg.innerText = 'Read-once messages can be decrypted <em>only once</em><br>You may want to reset the exchange with the button below';
 		resetSpan.style.display = '';
 		callKey = ''
 	}else if(marker == 'signed'){
 		restoreTempLock();
-		readMsg.innerHTML = 'Decryption has Failed. Please check your Password';
+		readMsg.innerText = 'Decryption has Failed. Please check your Password';
 		callKey = ''
 	}else if(marker == 'idReadonce'){
 		restoreTempLock();
-		readMsg.innerHTML = 'Nothing found for you, or you are trying to decrypt a Read-once message for the 2nd time<br>You may want to reset the exchange with the button below';
+		readMsg.innerText = 'Nothing found for you, or you are trying to decrypt a Read-once message for the 2nd time\nYou may want to reset the exchange with the button below';
 		resetSpan.style.display = '';
 		callKey = ''
 	}else if(marker == 'idSigned'){
 		restoreTempLock();
-		readMsg.innerHTML = 'No message found for you';
+		readMsg.innerText = 'No message found for you';
 		callKey = ''
 	}else if(marker == 'decoy'){
-		readMsg.innerHTML = 'Hidden message not found';
+		readMsg.innerText = 'Hidden message not found';
 		callKey = ''
 	}else{
 		restoreTempLock();
-		readMsg.innerHTML = 'Decryption has Failed';
+		readMsg.innerText = 'Decryption has Failed';
 		callKey = ''		
 	}
 	throw('decryption failed')

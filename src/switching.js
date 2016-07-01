@@ -1,51 +1,53 @@
 ﻿//this is for showing and hiding text in key box and other password input boxes
 function showSec(){
 	if(showKey.checked){
-		pwd.type="TEXT";
+		pwd.type="TEXT"
 	}else{
-		pwd.type="PASSWORD";
+		pwd.type="PASSWORD"
 	}
 }
 
 //same, for old Key box
 function showOldSec(){
 	if(showOldKey.checked){
-		oldPwd.type="TEXT";
+		oldPwd.type="TEXT"
 	}else{
-		oldPwd.type="PASSWORD";
+		oldPwd.type="PASSWORD"
 	}
 }
 
 //same, for decoy In box
 function showDecoyPwdIn(){
 	if(showDecoyInCheck.checked){
-		decoyPwdIn.type="TEXT";
+		decoyPwdIn.type="TEXT"
 	}else{
-		decoyPwdIn.type="PASSWORD";
+		decoyPwdIn.type="PASSWORD"
 	}
 }
 
 //same, for decoy Out box
 function showDecoyPwdOut(){
 	if(showDecoyOutCheck.checked){
-		decoyPwdOut.type="TEXT";
+		decoyPwdOut.type="TEXT"
 	}else{
-		decoyPwdOut.type="PASSWORD";
+		decoyPwdOut.type="PASSWORD"
 	}
 }
 
 //to switch beteen basic and all buttons
 function switchButtons(){
-	if(interfaceBtn.innerHTML == 'Show all buttons'){
+	if(interfaceBtn.innerText == 'Show all buttons'){
 		encryptFileBtn.style.display = '';
 		richBtn.style.display = '';
 		checkBoxes.style.display = '';
-		interfaceBtn.innerHTML = 'Show main buttons'
+		interfaceBtn.innerText = 'Show main buttons';
+		composeMsg.innerHTML = "Now type in your message or load files, check your options, and click the appropriate <b>Encrypt</b> button"
 	}else{
 		encryptFileBtn.style.display = 'none';
 		richBtn.style.display = 'none';
 		checkBoxes.style.display = 'none';
-		interfaceBtn.innerHTML = 'Show all buttons'
+		interfaceBtn.innerText = 'Show all buttons';
+		composeMsg.innerHTML = "Now type in your message and click <b>Encrypt to email</b>"
 	}
 }
 
@@ -66,21 +68,21 @@ function updateComposeButtons(emailList){
 		richBtn.style.display = 'none';
 		niceEditor = true;						//to turn off nice editor
 		toggleRichText();
-		if(!firstTimeUser) setTimeout(function(){composeMsg.innerHTML = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20);
+		if(!firstTimeUser) setTimeout(function(){composeMsg.innerText = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20)
 	}else{
 		inviteBtn.style.display = 'none';
 		interfaceBtn.style.display = '';
 		encryptBtn.style.display = '';
-		if(interfaceBtn.innerHTML != 'Show all buttons'){
+		if(interfaceBtn.innerText != 'Show all buttons'){
 			encryptFileBtn.style.display = '';
 			checkBoxes.style.display = '';
 			richBtn.style.display = '';
-			checkBoxes.style.display = '';
+			checkBoxes.style.display = ''
 		}else{
 			encryptFileBtn.style.display = 'none';
 			checkBoxes.style.display = 'none';
 			richBtn.style.display = 'none';
-			checkBoxes.style.display = 'none';
+			checkBoxes.style.display = 'none'
 		}
 	}
 }
@@ -90,7 +92,7 @@ function readKey(){
 	resetTimer();
 	if(!myKey){
 		showKeyDialog();
-		throw('stopped for key input');
+		throw('stopped for key input')
 	}
 }
 
@@ -107,23 +109,23 @@ function resetTimer(){
 	keytimer = setTimeout(function() {
 		pwd.value = '';
 		myKey = '';
-		oldPwdStr = '';
+		oldPwdStr = ''
 	}, period);
 
 	//erase key at end of period, by a different way
 	if ((new Date().getTime() - keytime > period)) {
 		pwd.value = '';
 		myKey = '';
-		oldPwdStr = '';
+		oldPwdStr = ''
 	}
-    keytime = new Date().getTime();
+    keytime = new Date().getTime()
 }
 
 //converts user Password into binary format, resumes operation
 function acceptKey(){
 	var key = pwd.value.trim();
 	if(key == ''){
-		keyMsg.innerHTML = 'Please enter your Password';
+		keyMsg.innerText = 'Please enter your Password';
 		throw("no Password")
 	}
 	if(key.length < 4){
@@ -163,7 +165,7 @@ function acceptKey(){
 		}else if(callKey == 'movedb'){
 			moveDB()
 		}
-	},30);
+	},30)
 }
 
 var newPwdAccepted = false;
@@ -179,11 +181,11 @@ function checkPassword(){
 		setTimeout(function() {
 			newPwdAccepted = false;
 			acceptKeyBtn.style.background = '';
-			acceptKeyBtn.style.color = '';
+			acceptKeyBtn.style.color = ''
 		}, 10000)								//forget request after 10 seconds
 		throw('stopped for Password confirmation')
 	}else{															//new Password accepted, so store it and move on
-		newPwdAccepted = false;
+		newPwdAccepted = false
 	}
 }
 
@@ -214,33 +216,33 @@ function acceptCover(){
 //these do the same as the dialog close button, plus they display appropriate messages
 function cancelName(){
 	$('#nameScr').dialog("close");
-	readMsg.innerHTML = 'Name input canceled';
+	readMsg.innerText = 'Name input canceled'
 }
 
 function cancelOldKey(){
 	$('#oldKeyScr').dialog("close");
-	readMsg.innerHTML = 'Old Password canceled';
-	oldPwd.value = '';
+	readMsg.innerText = 'Old Password canceled';
+	oldPwd.value = ''
 }
 
 function cancelChat(){
 	$('#chatScr').dialog("close");
-	composeMsg.innerHTML = 'Chat canceled';
-	chatDate.value = '';
+	composeMsg.innerText = 'Chat canceled';
+	chatDate.value = ''
 }
 
 function cancelAcceptChat(){
 	$('#acceptChatScr').dialog("close");
-	chatMsg2.innerHTML = '';
-	readMsg.innerHTML = 'Chat canceled';
-	readBox.innerHTML = '';
+	chatMsg2.innerText = '';
+	readMsg.innerText = 'Chat canceled';
+	readBox.innerText = ''
 }
 
 function cancelStego(){
 	$('#coverScr').dialog("close");
-	composeMsg.innerHTML = 'Hiding canceled';
+	composeMsg.innerText = 'Hiding canceled';
 	coverBox.value = '';
-	stegoMode.checked = false;
+	stegoMode.checked = false
 }
 
 //opens screen to store new Lock obtained through a message
@@ -252,17 +254,17 @@ function openNewLock(){
 
 function cancelDecoyIn(){
 	$('#decoyIn').dialog("close");
-	composeMsg.innerHTML = 'Decoy encryption canceled';
+	composeMsg.innerText = 'Decoy encryption canceled';
 	decoyText.value = '';
 	decoyPwdIn.value = '';
-	showDecoyInCheck.checked = false;
+	showDecoyInCheck.checked = false
 }
 
 function cancelDecoyOut(){
 	$('#decoyOut').dialog("close");
-	readMsg.innerHTML = 'Decoy decryption canceled';
+	readMsg.innerText = 'Decoy decryption canceled';
 	decoyPwdOut.value = '';
-	showDecoyOutCheck.checked = false;
+	showDecoyOutCheck.checked = false
 }
 
 //displays Password strength and resets timer
@@ -274,7 +276,7 @@ function pwdKeyup(evt){
 	evt = evt || window.event;
 	var key = evt.keyCode || evt.which || evt.keyChar;
 	if (key == 13){acceptKey()} else{												//accept upon return, otherwise display strength
-		 return keyStrength(pwd.value,'pwd');
+		 return keyStrength(pwd.value,'pwd')
 	}
 }
 
@@ -324,7 +326,7 @@ setInterval(blinker, 1000); //Runs every second
 
 //for rich text editing
 function formatDoc(sCmd, sValue) {
-	  document.execCommand(sCmd, false, sValue); composeBox.focus();
+	  document.execCommand(sCmd, false, sValue); composeBox.focus()
 }
 
 var niceEditor = false;
@@ -334,13 +336,13 @@ function toggleRichText() {
 		toolBar1.style.display = 'none';
 		composeBox.style.borderTopLeftRadius = '15px';
 		composeBox.style.borderTopRightRadius = '15px';
-		richBtn.innerHTML = 'Rich';
+		richBtn.innerText = 'Rich';
 		niceEditor = false
 	} else {
 		toolBar1.style.display = 'block';
 		composeBox.style.borderTopLeftRadius = '0';
 		composeBox.style.borderTopRightRadius = '0';
-		richBtn.innerHTML = 'Plain';
+		richBtn.innerText = 'Plain';
 		niceEditor = true
 	}
 }
@@ -350,7 +352,7 @@ var firstTimeUser = false;
 function introGreeting(){
 	firstTimeKey.style.display = 'block';
 	keyMsg.innerHTML = 'The strength will appear here<br>Enter the Password and click <strong>OK</strong>';
-	firstTimeUser = true;
+	firstTimeUser = true
 }
 
 //to load a file into the compose dialog
@@ -358,31 +360,32 @@ function loadFileAsURL(){
 	var fileToLoad = loadFile.files[0];
 	var fileReader = new FileReader();
 	fileReader.onload = function(fileLoadedEvent){
-		var fileName = fileToLoad.name;
-		var URLFromFileLoaded = fileLoadedEvent.target.result;
+		var fileName = fileToLoad.name,
+			URLFromFileLoaded = fileLoadedEvent.target.result,
+			escapedName = escapeHTML(fileName);
 		if(URLFromFileLoaded.length > 2000000){
 			var reply = confirm("This file is larger than 1.5MB and Chrome won't save it. Do you want to continue loading it?");
 			if(!reply){
-				composeMsg.innerHTML = 'File load canceled';
+				composeMsg.innerText = 'File load canceled';
 				throw('file load canceled')
 			}
 		}
 		if(fileToLoad.type.slice(0,4) == "text"){
 			if(URLFromFileLoaded.slice(0,2) == '==' && URLFromFileLoaded.slice(-2) == '=='){
-				composeBox.innerHTML += '<br><a download="' + fileName + '" href="data:,' + escapeHTML(URLFromFileLoaded) + '">' + fileName + '</a>'
+				composeBox.innerHTML += '<br><a download="' + escapedName + '" href="data:,' + safeHTML(URLFromFileLoaded) + '">' + escapedName + '</a>'
 			}else{
 				composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
 			}
 		}else{
-			composeBox.innerHTML += '<br><a download="' + fileName + '" href="' + escapeHTML(URLFromFileLoaded) + '">' + fileName + '</a>'
+			composeBox.innerHTML += '<br><a download="' + escapedName + '" href="' + safeHTML(URLFromFileLoaded) + '">' + escapedName + '</a>'
 		}
 	};
 	if(fileToLoad.type.slice(0,4) == "text"){
 		fileReader.readAsText(fileToLoad, "UTF-8");
-		composeMsg.innerHTML = 'This is the content of file <strong>' + fileToLoad.name + '</strong>';
+		composeMsg.innerHTML = 'This is the content of file <strong>' + safeHTML(fileToLoad.name) + '</strong>'
 	}else{
 		fileReader.readAsDataURL(fileToLoad, "UTF-8");
-		composeMsg.innerHTML = 'The file has been loaded in encoded form. It is <strong>not encrypted.</strong>';
+		composeMsg.innerHTML = 'The file has been loaded in encoded form. It is <strong>not encrypted.</strong>'
 	}
 }
 
@@ -391,12 +394,11 @@ function loadEncryptedFile(){
 	var fileToLoad = loadEncrFile.files[0];
 	var fileReader = new FileReader();
 	fileReader.onload = function(fileLoadedEvent){
-		var fileName = fileToLoad.name;
 		var URLFromFileLoaded = fileLoadedEvent.target.result;
 		if(fileToLoad.type.slice(0,4) == "text"){
-			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + escapeHTML(URLFromFileLoaded) + '">' + fileName + '</a>'
+			text2decrypt = URLFromFileLoaded
 		}else{
-			readBox.innerHTML = '<a download="' + fileName + '" href="data:,' + atob(escapeHTML(URLFromFileLoaded).split(',')[1]) + '">' + fileName + '</a>'			//in case it wasn't saved as text
+			text2decrypt = atob(URLFromFileLoaded.split(',')[1])
 		}
 		decrypt()
 	};
@@ -407,15 +409,20 @@ function loadEncryptedFile(){
 	}
 }
 
-//to sanitize strings sent to innerHTML, per Firefox suggestion
-function escapeHTML(unsafe) {
-    return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
- }
+//to load an image into the compose box
+function loadImage(){
+	var fileToLoad = imgFile.files[0],
+		fileReader = new FileReader();
+	fileReader.onload = function(fileLoadedEvent){
+		var URLFromFileLoaded = fileLoadedEvent.target.result;
+		if(URLFromFileLoaded.slice(0,10) != 'data:image'){
+			composeMsg.innerText = 'This file is not a recognized image type';
+			return
+		}
+		composeBox.innerHTML += safeHTML('<img style="width:50%;" src="' + URLFromFileLoaded.replace(/=+$/,'') + '">')
+	};
+	fileReader.readAsDataURL(fileToLoad, "UTF-8")
+}
 
 var time10 = 0;														//to display time needed to process Password
 
