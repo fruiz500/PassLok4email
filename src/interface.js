@@ -390,7 +390,7 @@ function showComposeDialog(emailList,bodyText,specialMessage) {
 	
 	composeScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	if(emailList) composeRecipientsBox.innerText = emailList.join(', ');
-	composeBox.innerHTML = safeHTML(bodyText);											//sanitize before putting in
+	composeBox.innerHTML = safeHTML(bodyText);										//sanitize before putting in
 	document.getElementById(bodyID).innerText = '';
 
 	if(bodyText.replace(/<(.*?)>/gi,"")){
@@ -626,7 +626,7 @@ function composeIntercept(ev) {
 			var composeMenu = $(this).parents().eq(2);
 			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){							//insert PassLok icon right after the toolbar icons
 				var encryptionFormOptions = '<a href="#" class="passlok" data-title2="insert PassLok-encrypted text"><img src="'+PLicon+'" /></a>';
-				composeMenu.find('.n1tfz :nth-child(6) :first').parent().after(encryptionFormOptions);
+				composeMenu.find('.n1tfz :nth-child(5) :first').parent().after(encryptionFormOptions);
 
 				$(this).find('.passlok').click(function(){						//activate the button
 					var bodyDiv = $(this).parents().eq(11).find('.Am');
@@ -725,7 +725,7 @@ function composeIntercept(ev) {
 
 	//now the same for Outlook
   }else if(serviceName == 'outlook'){
-	var composeBoxes = $('._z_v._z_B, ._mcp_f6, ._mcp_73, ._mcp_25, ._mcp_D7').eq(-1).parent();				//toolbar at bottom, sometimes top
+	var composeBoxes = $('._mcp_93, ._mcp_55').eq(-1).parent();				//toolbar at bottom, sometimes top
 	if (composeBoxes && composeBoxes.length > 0){
 		composeBoxes.each(function(){
 			var composeMenu = $(this);
@@ -734,7 +734,7 @@ function composeIntercept(ev) {
 				composeMenu.append(encryptionFormOptions);
 
 				$(this).find('.passlok').click(function(){						//activate the button
-					var bodyDiv = $(this).parents().eq(3).find('._mcp_33, ._mcp_v4, ._mcp_67')[0];	//different class in old and new interface
+					var bodyDiv = $(this).parents().eq(3).find('._mcp_53, ._mcp_y4')[0]
 					bodyDiv.id = "bodyText";
 					bodyID = "bodyText";									//this global variable will be used to write the encrypted message
 					var bodyText = bodyDiv.innerHTML;
@@ -759,13 +759,13 @@ function composeIntercept(ev) {
 	
 //this part for reading messages
 
-	var viewTitleBar = rootElement.find('._rp_u1, ._rp_81').parent().eq(0);					//reply icon at top of message, old or new interface
+	var viewTitleBar = rootElement.find('._rp_u1, ._rp_81').eq(0).parents().eq(1);		//reply icon at top of message, old or new interface
 	if (viewTitleBar && viewTitleBar.length > 0){
 		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
-			if ($(this).find('.passlok').length === 0){
-				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+PLicon+'" /></a>');
+			if ($(this).parent().find('.passlok').length === 0){
+				$(this).before('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+PLicon+'" /></a>');
 				
-				$(this).find('.passlok').click(function(){
+				$(this).parent().find('.passlok').click(function(){
 					var email = $(this).parents().eq(2).find('._pe_l')[0].innerText.replace(/<(.*?)>/gi,"").trim();			//sender's address
 					if(!email.match('@')) email = email + '@outlook.com';
 					var bodyText = $(this).parents().eq(8).find('._rp_t4, ._rp_u4').eq(-1).html();							//got to re-find the body of the message

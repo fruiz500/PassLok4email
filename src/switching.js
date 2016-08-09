@@ -149,6 +149,7 @@ function acceptKey(){
 		syncChromeLock(myEmail,JSON.stringify(locDir[myEmail]));
 		
 		firstTimeUser = false;
+		firstTimeKey.style.display = 'none';
 		resetTimer();
 		$('#keyScr').dialog("close");
 		pwd.value = '';
