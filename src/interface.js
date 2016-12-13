@@ -320,7 +320,7 @@ function showReadDialog(email,bodyText){
 	}else{
 		modal = $('.passlok-read')
 	}
-	if (!modal.dialog("instance") || !modal.dialog("isOpen")) modal.dialog({width: 700, title: "PassLok decrypt"});
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")) modal.dialog({width: 700, height: "auto", title: "PassLok decrypt"});
 	
 	readScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	senderBox.innerText = email;
@@ -329,7 +329,7 @@ function showReadDialog(email,bodyText){
 	decrypt()
 }
   
-function showComposeDialog(emailList,bodyText,specialMessage) {
+function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	var modal;
 	if (!composeCreated) {
 		modal = $(composeHTML);
@@ -355,7 +355,14 @@ function showComposeDialog(emailList,bodyText,specialMessage) {
 		modal = $('.passlok-compose')
 	}
 
-	if (!modal.dialog("instance") || !modal.dialog("isOpen")) modal.dialog({modal: true, width: 800, title: "PassLok encrypt"});
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
+		if(isInit){
+			modal.dialog({modal: true, width: 800, title: "PassLok encrypt", autoOpen: false});
+			return
+		}else{
+			modal.dialog({modal: true, width: 800, title: "PassLok encrypt", autoOpen: true})
+		}
+	}
 	
 //event listeners for the rich text toolbar boxes and buttons
 	formatBlock.addEventListener("change", function() {formatDoc('formatBlock',this[this.selectedIndex].value);this.selectedIndex=0;});
@@ -626,7 +633,7 @@ function composeIntercept(ev) {
 			var composeMenu = $(this).parents().eq(2);
 			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){							//insert PassLok icon right after the toolbar icons
 				var encryptionFormOptions = '<a href="#" class="passlok" data-title2="insert PassLok-encrypted text"><img src="'+PLicon+'" /></a>';
-				composeMenu.find('.n1tfz :nth-child(5) :first').parent().after(encryptionFormOptions);
+				composeMenu.find('.n1tfz :nth-child(6) :first').parent().after(encryptionFormOptions);
 
 				$(this).find('.passlok').click(function(){						//activate the button
 					var bodyDiv = $(this).parents().eq(11).find('.Am');
@@ -725,7 +732,7 @@ function composeIntercept(ev) {
 
 	//now the same for Outlook
   }else if(serviceName == 'outlook'){
-	var composeBoxes = $('._mcp_93, ._mcp_55').eq(-1).parent();				//toolbar at bottom, sometimes top
+	var composeBoxes = $('._mcp_93, ._mcp_55, ._mcp_02').eq(-1).parent();				//toolbar at bottom, sometimes top
 	if (composeBoxes && composeBoxes.length > 0){
 		composeBoxes.each(function(){
 			var composeMenu = $(this);
@@ -734,7 +741,7 @@ function composeIntercept(ev) {
 				composeMenu.append(encryptionFormOptions);
 
 				$(this).find('.passlok').click(function(){						//activate the button
-					var bodyDiv = $(this).parents().eq(3).find('._mcp_53, ._mcp_y4')[0]
+					var bodyDiv = $(this).parents().eq(3).find('._mcp_53, ._mcp_y4, ._mcp_W1')[0]
 					bodyDiv.id = "bodyText";
 					bodyID = "bodyText";									//this global variable will be used to write the encrypted message
 					var bodyText = bodyDiv.innerHTML;
@@ -759,16 +766,16 @@ function composeIntercept(ev) {
 	
 //this part for reading messages
 
-	var viewTitleBar = rootElement.find('._rp_u1, ._rp_81').eq(0).parents().eq(1);		//reply icon at top of message, old or new interface
+	var viewTitleBar = rootElement.find('.ms-Icon--replyAll, ._rp_81').parents().eq(1);		//reply icon at top of message, old or new interface
 	if (viewTitleBar && viewTitleBar.length > 0){
 		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
-			if ($(this).parent().find('.passlok').length === 0){
+			if ($(this).parents().eq(0).find('.passlok').length === 0){
 				$(this).before('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+PLicon+'" /></a>');
 				
 				$(this).parent().find('.passlok').click(function(){
 					var email = $(this).parents().eq(2).find('._pe_l')[0].innerText.replace(/<(.*?)>/gi,"").trim();			//sender's address
 					if(!email.match('@')) email = email + '@outlook.com';
-					var bodyText = $(this).parents().eq(8).find('._rp_t4, ._rp_u4').eq(-1).html();							//got to re-find the body of the message
+					var bodyText = $(this).parents().eq(8).find('._rp_M4, ._rp_u4').eq(-1).html();							//got to re-find the body of the message
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog()
@@ -778,3 +785,17 @@ function composeIntercept(ev) {
 	}
   }
 }
+
+//things that should happen after the email program loads completely
+$( document ).ready(function() {
+    console.log( "ready!" );
+  setTimeout(function(){
+	showKeyDialog(true);											//initialize some dialogs, but don't show them
+	showOldKeyDialog(true);
+	showComposeDialog('','','',true);
+	console.log(document.title);
+	getMyEmail();
+	retrieveAllSync();												//get data from sync or local storage
+	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
+  },1000)															//give it an extra second so everything is loaded
+})

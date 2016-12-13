@@ -426,15 +426,3 @@ function loadImage(){
 }
 
 var time10 = 0;														//to display time needed to process Password
-
-//things that should happen after the email program loads completely
-window.addEventListener("load",function(){
-  setTimeout(function(){
-	showKeyDialog(true);											//initialize some dialogs, but don't show them
-	showOldKeyDialog(true);
-	console.log(document.title);
-	getMyEmail();
-	retrieveAllSync();												//get data from sync or local storage
-	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
-  },1000)															//give it an extra second so everything is loaded
-})
