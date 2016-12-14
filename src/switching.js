@@ -36,18 +36,18 @@ function showDecoyPwdOut(){
 
 //to switch beteen basic and all buttons
 function switchButtons(){
-	if(interfaceBtn.innerText == 'Show all buttons'){
+	if(interfaceBtn.textContent == 'Show all buttons'){
 		encryptFileBtn.style.display = '';
 		richBtn.style.display = '';
 		checkBoxes.style.display = '';
-		interfaceBtn.innerText = 'Show main buttons';
-		composeMsg.innerHTML = "Now type in your message or load files, check your options, and click the appropriate <b>Encrypt</b> button"
+		interfaceBtn.textContent = 'Show main buttons';
+		composeMsg.textContent = "Now type in your message or load files, check your options, and click the appropriate Encrypt button"
 	}else{
 		encryptFileBtn.style.display = 'none';
 		richBtn.style.display = 'none';
 		checkBoxes.style.display = 'none';
-		interfaceBtn.innerText = 'Show all buttons';
-		composeMsg.innerHTML = "Now type in your message and click <b>Encrypt to email</b>"
+		interfaceBtn.textContent = 'Show all buttons';
+		composeMsg.textContent = "Now type in your message and click Encrypt to Email"
 	}
 }
 
@@ -68,12 +68,12 @@ function updateComposeButtons(emailList){
 		richBtn.style.display = 'none';
 		niceEditor = true;						//to turn off nice editor
 		toggleRichText();
-		if(!firstTimeUser) setTimeout(function(){composeMsg.innerText = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20)
+		if(!firstTimeUser) setTimeout(function(){composeMsg.textContent = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20)
 	}else{
 		inviteBtn.style.display = 'none';
 		interfaceBtn.style.display = '';
 		encryptBtn.style.display = '';
-		if(interfaceBtn.innerText != 'Show all buttons'){
+		if(interfaceBtn.textContent != 'Show all buttons'){
 			encryptFileBtn.style.display = '';
 			checkBoxes.style.display = '';
 			richBtn.style.display = '';
@@ -125,11 +125,11 @@ function resetTimer(){
 function acceptKey(){
 	var key = pwd.value.trim();
 	if(key == ''){
-		keyMsg.innerText = 'Please enter your Password';
+		keyMsg.textContent = 'Please enter your Password';
 		throw("no Password")
 	}
 	if(key.length < 4){
-		keyMsg.innerHTML = '<span style="color:orange">This Password is too short</span>';
+		keyMsg.textContent = 'This Password is too short';
 		throw("short Password")
 	}
 	keyMsg.innerHTML = '<span class="blink" style="color:orange">LOADING...</span> for best speed, use at least a Medium Password';
@@ -176,7 +176,7 @@ function checkPassword(){
 	if(myLock == locDir[myEmail][0]) return;
 	if(!newPwdAccepted){											//first time: arm the button and wait for user to click again
 		newPwdAccepted = true;
-		keyMsg.innerHTML = "This is not the same Password as last time. If you click <strong>OK</strong> again, it will be accepted as your new Password";
+		keyMsg.textContent = "This is not the same Password as last time. If you click OK again, it will be accepted as your new Password";
 		acceptKeyBtn.style.background = '#FB5216';
 		acceptKeyBtn.style.color = 'white';
 		setTimeout(function() {
@@ -217,31 +217,31 @@ function acceptCover(){
 //these do the same as the dialog close button, plus they display appropriate messages
 function cancelName(){
 	$('#nameScr').dialog("close");
-	readMsg.innerText = 'Name input canceled'
+	readMsg.textContent = 'Name input canceled'
 }
 
 function cancelOldKey(){
 	$('#oldKeyScr').dialog("close");
-	readMsg.innerText = 'Old Password canceled';
+	readMsg.textContent = 'Old Password canceled';
 	oldPwd.value = ''
 }
 
 function cancelChat(){
 	$('#chatScr').dialog("close");
-	composeMsg.innerText = 'Chat canceled';
+	composeMsg.textContent = 'Chat canceled';
 	chatDate.value = ''
 }
 
 function cancelAcceptChat(){
 	$('#acceptChatScr').dialog("close");
-	chatMsg2.innerText = '';
-	readMsg.innerText = 'Chat canceled';
-	readBox.innerText = ''
+	chatMsg2.textContent = '';
+	readMsg.textContent = 'Chat canceled';
+	readBox.textContent = ''
 }
 
 function cancelStego(){
 	$('#coverScr').dialog("close");
-	composeMsg.innerText = 'Hiding canceled';
+	composeMsg.textContent = 'Hiding canceled';
 	coverBox.value = '';
 	stegoMode.checked = false
 }
@@ -249,13 +249,13 @@ function cancelStego(){
 //opens screen to store new Lock obtained through a message
 function openNewLock(){
 	showNameDialog();
-	nameMsg.innerHTML = 'This message from ' + theirEmail + ' was locked with a new Password. Click <strong>OK</strong> if you wish to accept it.';
+	nameMsg.textContent = 'This message from ' + theirEmail + ' was locked with a new Password. Click OK if you wish to accept it.';
 	throw('stopped to accept new Lock')
 }
 
 function cancelDecoyIn(){
 	$('#decoyIn').dialog("close");
-	composeMsg.innerText = 'Decoy encryption canceled';
+	composeMsg.textContent = 'Decoy encryption canceled';
 	decoyText.value = '';
 	decoyPwdIn.value = '';
 	showDecoyInCheck.checked = false
@@ -263,7 +263,7 @@ function cancelDecoyIn(){
 
 function cancelDecoyOut(){
 	$('#decoyOut').dialog("close");
-	readMsg.innerText = 'Decoy decryption canceled';
+	readMsg.textContent = 'Decoy decryption canceled';
 	decoyPwdOut.value = '';
 	showDecoyOutCheck.checked = false
 }
@@ -337,13 +337,13 @@ function toggleRichText() {
 		toolBar1.style.display = 'none';
 		composeBox.style.borderTopLeftRadius = '15px';
 		composeBox.style.borderTopRightRadius = '15px';
-		richBtn.innerText = 'Rich';
+		richBtn.textContent = 'Rich';
 		niceEditor = false
 	} else {
 		toolBar1.style.display = 'block';
 		composeBox.style.borderTopLeftRadius = '0';
 		composeBox.style.borderTopRightRadius = '0';
-		richBtn.innerText = 'Plain';
+		richBtn.textContent = 'Plain';
 		niceEditor = true
 	}
 }
@@ -352,7 +352,7 @@ var firstTimeUser = false;
 //special instructions displayed on first run
 function introGreeting(){
 	firstTimeKey.style.display = 'block';
-	keyMsg.innerHTML = 'The strength will appear here<br>Enter the Password and click <strong>OK</strong>';
+	keyMsg.textContent = 'The strength will appear here\nEnter the Password and click OK';
 	firstTimeUser = true
 }
 
@@ -367,7 +367,7 @@ function loadFileAsURL(){
 		if(URLFromFileLoaded.length > 2000000){
 			var reply = confirm("This file is larger than 1.5MB and Chrome won't save it. Do you want to continue loading it?");
 			if(!reply){
-				composeMsg.innerText = 'File load canceled';
+				composeMsg.textContent = 'File load canceled';
 				throw('file load canceled')
 			}
 		}
@@ -383,10 +383,10 @@ function loadFileAsURL(){
 	};
 	if(fileToLoad.type.slice(0,4) == "text"){
 		fileReader.readAsText(fileToLoad, "UTF-8");
-		composeMsg.innerHTML = 'This is the content of file <strong>' + safeHTML(fileToLoad.name) + '</strong>'
+		composeMsg.textContent = 'This is the content of file ' + safeHTML(fileToLoad.name)
 	}else{
 		fileReader.readAsDataURL(fileToLoad, "UTF-8");
-		composeMsg.innerHTML = 'The file has been loaded in encoded form. It is <strong>not encrypted.</strong>'
+		composeMsg.textContent = 'The file has been loaded in encoded form. It is NOT ENCRYPTED.'
 	}
 }
 
@@ -417,7 +417,7 @@ function loadImage(){
 	fileReader.onload = function(fileLoadedEvent){
 		var URLFromFileLoaded = fileLoadedEvent.target.result;
 		if(URLFromFileLoaded.slice(0,10) != 'data:image'){
-			composeMsg.innerText = 'This file is not a recognized image type';
+			composeMsg.textContent = 'This file is not a recognized image type';
 			return
 		}
 		composeBox.innerHTML += safeHTML('<img style="width:50%;" src="' + URLFromFileLoaded.replace(/=+$/,'') + '">')

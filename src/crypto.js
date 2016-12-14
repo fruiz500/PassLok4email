@@ -11,7 +11,7 @@ function encrypt(){
 	if(chatMode.checked){
 		displayChat()
 	}else{
-		var emailArray = composeRecipientsBox.innerText.split(',');
+		var emailArray = composeRecipientsBox.textContent.split(',');
 		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 		encryptList(emailArray,false);
 		isChatInvite = false	
@@ -23,7 +23,7 @@ function encrypt2file(){
 	callKey = 'encrypt2file';
 	readKey();
 	if(stegoMode.checked) enterCover();
-	var emailArray = composeRecipientsBox.innerText.split(',');
+	var emailArray = composeRecipientsBox.textContent.split(',');
 	for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 	encryptList(emailArray,true);
 	isChatInvite = false
@@ -44,14 +44,14 @@ function decrypt(){
 
 //same but for locking
 function signedEncrypt(){
-	var emailArray = composeRecipientsBox.innerText.split(',');
+	var emailArray = composeRecipientsBox.textContent.split(',');
 	for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 	encryptList(emailArray,false);
 	isChatInvite = false
 }
 
 function readOnceEncrypt(){
-	var emailArray = composeRecipientsBox.innerText.split(',');
+	var emailArray = composeRecipientsBox.textContent.split(',');
 	for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 	encryptList(emailArray,true)
 }
@@ -67,7 +67,7 @@ function inviteEncrypt(){
 			inviteRequested = false;
 			inviteBtn.style.background = '#3896F9';
 			callKey = '';
-		}, 10000)								//forget request after 10 seconds
+		}, 15000)								//forget request after 15 seconds
 
 	}else{
 		callKey = 'inviteEncrypt';
@@ -77,7 +77,7 @@ function inviteEncrypt(){
 			noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
 			text = composeBox.innerHTML.trim();
   		var cipherstr = symEncrypt(text,nonce24,myLockbin,true);												//the actual message is compressed
-		setTimeout(function(){composeMsg.innerText = "This invitation can be decrypted by anyone"},20);
+		setTimeout(function(){composeMsg.textContent = "This invitation can be decrypted by anyone"},20);
 		var output = myezLock + "@" + noncestr + cipherstr;
 		output = output.match(/.{1,80}/g).join("\n");
 		var outNode = document.createElement('div');
@@ -116,7 +116,7 @@ function encryptList(listArray,isFileOut){
 		}
 	}
 	if(encryptArray.length == 0 && listArray.indexOf(myEmail) == -1){
-		composeMsg.innerText = 'None of these recipients are in your directory. You should send them an invitation first.';
+		composeMsg.textContent = 'None of these recipients are in your directory. You should send them an invitation first.';
 		return
 	}
 	if(!onceMode.checked) encryptArray.push(myEmail);						//copy to myself unless read-once
@@ -208,7 +208,7 @@ function encryptList(listArray,isFileOut){
 					
 				}else{
 					if(encryptArray.length < 2){
-						composeMsg.innerText = 'In Read-once mode, you must select recipients other than yourself.';
+						composeMsg.textContent = 'In Read-once mode, you must select recipients other than yourself.';
 						throw('only myself for Read-once')
 					}
 				}
@@ -237,7 +237,7 @@ function encryptList(listArray,isFileOut){
 		}
 	}else{
 		if(stegoMode.checked){
-			outNode.innerText = outString
+			outNode.textContent = outString
 		}else if(invisibleMode.checked){
 			outNode.innerHTML = 'Invisible message below this line<div style="display:none !important">==' + outString + '==</div>'
 		}else{
@@ -257,15 +257,15 @@ function encryptList(listArray,isFileOut){
 	visibleMode.checked = true;
 	decoyMode.checked = false;
 	if(isFileOut){
-		composeMsg.innerText = "Contents encrypted into a file. Now save it, close this dialog, and attach the file to your email"
-		composeBox.innerText = '';
+		composeMsg.textContent = "Contents encrypted into a file. Now save it, close this dialog, and attach the file to your email"
+		composeBox.textContent = '';
 		composeBox.appendChild(outNode);
 	}else{
 		var bodyElement = document.getElementById(bodyID);
 		bodyElement.insertBefore(outNode,bodyElement.childNodes[0]);
 	}
 	if(inviteArray.length != 0){		 
-		composeMsg.innerText = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:\n' + inviteArray.join(', ') + '\nYou should send them an invitation first. You may close this dialog now'
+		composeMsg.textContent = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:\n' + inviteArray.join(', ') + '\nYou should send them an invitation first. You may close this dialog now'
 	}else if(!isFileOut){
 		$('#composeScr').dialog("close")
 	}
@@ -326,29 +326,29 @@ function isBase36(string){
 var padding = '', nonce24;			//global variables involved in decoding secret message
 //decrypts a message encrypted for multiple recipients. Encryption can be Signed, Read-once, or an Invitation. This is detected automatically. It can also be an encrypted database
 function decryptList(){
-	readBox.innerText = '';
+	readBox.textContent = '';
 	var text = stripHeaders(text2decrypt);											//get the data from a global variable holding it
-	theirEmail = senderBox.innerText.trim();
+	theirEmail = senderBox.textContent.trim();
 	if(isBase36(text.slice(0,50)) && !isBase36(text.charAt(50))){					//find Lock located at the start
 		theirLock = changeBase(text.slice(0,50),base36,base64,true)
 		
 	}else if(text.charAt(0) == '~'){													//it's an encrypted database, so decrypt it and merge it
 		var agree = confirm('This is an encrypted local database. It will be loaded if you click OK, possibly replacing current data. This cannot be undone.');
 		if(!agree){
-			readBox.innerText = '';
-			readMsg.innerText = 'Backup merge canceled';
+			readBox.textContent = '';
+			readMsg.textContent = 'Backup merge canceled';
 			return
 		}
 		var newData = JSON.parse(keyDecrypt(text));
 		locDir = mergeObjects(locDir,newData);
 		syncLocDir();
-		readBox.innerText = '';
-		readMsg.innerText = 'Data from backup merged';
+		readBox.textContent = '';
+		readMsg.textContent = 'Data from backup merged';
 		return
 		
 	}else{
-		readBox.innerText = '';
-		readMsg.innerText = 'This message is not encrypted, but perhaps the attachments are';
+		readBox.textContent = '';
+		readMsg.textContent = 'This message is not encrypted, but perhaps the attachments are';
 		throw('illegal Lock at the start')
 	}
 	
@@ -366,7 +366,7 @@ function decryptList(){
 	text = text.slice(50);
 	
 	if(theirLock && !text){
-		readMsg.innerText = "This message contains only the sender's Lock. Nothing to decrypt";
+		readMsg.textContent = "This message contains only the sender's Lock. Nothing to decrypt";
 		throw("empty message")
 	}
 	
@@ -386,7 +386,7 @@ function decryptList(){
 	nonce24 = makeNonce24(nacl.util.decodeBase64(noncestr));			//these are global variables so they can be read when decryption completes
 
 	if (type == '$' && theirEmail == myEmail){
-		readMsg.innerText = 'You cannot decrypt Read-once messages to yourself';
+		readMsg.textContent = 'You cannot decrypt Read-once messages to yourself';
 		throw('Read-once message to myself')
 	}
 	if(type == '?'){														//signed mode
@@ -519,7 +519,7 @@ function decryptList(){
 	var plainstr = symDecrypt(cipher,nonce24,msgKey,true);
 	plainstr = safeHTML(plainstr);										//sanitize what is about to be put in the DOM, based on a whitelist
 
-	readBox.innerText = '';	
+	readBox.textContent = '';	
 	if(type != '@'){
 		readBox.innerHTML = plainstr;
 	}else{																	//add further instructions if it was an invitation
@@ -530,13 +530,13 @@ function decryptList(){
 	syncLocDir();															//everything OK, so store
 
 	if(typeChar == 'r'){ 
-			readMsg.innerText = 'You have just decrypted the first message or one that resets a Read-once conversation. This message can be decrypted again, but doing so after more messages are exchanged will cause the conversation to go out of sync. It is best to delete it to prevent this possibility'
+			readMsg.textContent = 'You have just decrypted the first message or one that resets a Read-once conversation. This message can be decrypted again, but doing so after more messages are exchanged will cause the conversation to go out of sync. It is best to delete it to prevent this possibility'
 		}else if(typeChar == 'o'){
-			readMsg.innerText = 'Decryption successful. This message cannot be decrypted again'
+			readMsg.textContent = 'Decryption successful. This message cannot be decrypted again'
 		}else if(typeChar == 'p'){
-			readMsg.innerText = 'Decryption successful. This message will become un-decryptable after you reply'
+			readMsg.textContent = 'Decryption successful. This message will become un-decryptable after you reply'
 		}else{
-			readMsg.innerText = 'Decryption successful'
+			readMsg.textContent = 'Decryption successful'
 		}
 	callKey = ''
 }
@@ -546,9 +546,9 @@ function charsLeftDecoy(){
 	var chars = encodeURI(decoyText.value).replace(/%20/g, ' ').length;
 	var limit = 59;
 	if (chars <= limit){
-		decoyMsg.innerText = chars + " characters out of " + limit + " used"
+		decoyMsg.textContent = chars + " characters out of " + limit + " used"
 	}else{
-		decoyMsg.innerHTML = '<span style="color:orange">Maximum length exceeded. The message will be truncated</span>'
+		decoyMsg.textContent = 'Maximum length exceeded. The message will be truncated'
 	}
 }
 
@@ -604,7 +604,7 @@ function decoyDecrypt(cipher,nonce24,dummylock){
 	try{															//this may fail if the string is corrupted, hence the try
 		var cipher = nacl.util.decodeBase64(cipher);
 	}catch(err){
-		readMsg.innerText = "The hidden message seems to be corrupted or incomplete";
+		readMsg.textContent = "The hidden message seems to be corrupted or incomplete";
 		throw('decodeBase64 failed')
 	}
 

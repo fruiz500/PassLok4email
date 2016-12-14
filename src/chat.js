@@ -3,9 +3,9 @@ function charsLeftChat(){
 	var chars = encodeURI(chatDate.value).replace(/%20/g, ' ').length;
 	var limit = 43;
 	if (chars <= limit){
-		chatMsg.innerText = chars + " characters out of " + limit + " used"
+		chatMsg.textContent = chars + " characters out of " + limit + " used"
 	}else{
-		chatMsg.innerHTML = '<span style="color:orange">Maximum length exceeded. The message will be truncated</span>'
+		chatMsg.textContent = 'Maximum length exceeded. The message will be truncated'
 	}
 }
 
@@ -32,7 +32,7 @@ function makeChat(){
 	while(date.length < 43) date += ' ';
 	var password = nacl.util.encodeBase64(nacl.randomBytes(32)).replace(/=+$/,''),
 		chatRoom = makeChatRoom();
-	composeBox.innerText = date + type + chatRoom + password;
+	composeBox.textContent = date + type + chatRoom + password;
 	signedEncrypt()
 }
 
@@ -82,6 +82,6 @@ function acceptChat(){
 
 	$('#acceptChatScr').dialog("close");
 
-	readBox.innerText = '';
-	readMsg.innerText = 'Chat session open on a separate tab. You may close this now.'
+	readBox.textContent = '';
+	readMsg.textContent = 'Chat session open on a separate tab. You may close this now.'
 }

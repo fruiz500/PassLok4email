@@ -323,7 +323,7 @@ function showReadDialog(email,bodyText){
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")) modal.dialog({width: 700, height: "auto", title: "PassLok decrypt"});
 	
 	readScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
-	senderBox.innerText = email;
+	senderBox.textContent = email;
 	text2decrypt = safeHTML(bodyText);														//sanitize the stuff to be decrypted, just in case
 	resetSpan.style.display = 'none';
 	decrypt()
@@ -396,17 +396,17 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	imgFile.addEventListener('click', function(){this.value = '';});
 	
 	composeScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
-	if(emailList) composeRecipientsBox.innerText = emailList.join(', ');
+	if(emailList) composeRecipientsBox.textContent = emailList.join(', ');
 	composeBox.innerHTML = safeHTML(bodyText);										//sanitize before putting in
-	document.getElementById(bodyID).innerText = '';
+	document.getElementById(bodyID).textContent = '';
 
 	if(bodyText.replace(/<(.*?)>/gi,"")){
-		composeMsg.innerHTML = "It is more secure to type the message <em>after</em> clicking the PassLok button";
+		composeMsg.textContent = "It is more secure to type the message AFTER clicking the PassLok button";
 	}else{
-		if(interfaceBtn.innerText == 'Show all buttons'){
-			composeMsg.innerHTML = "Now type in your message and click <b>Encrypt to email</b>"
+		if(interfaceBtn.textContent == 'Show all buttons'){
+			composeMsg.textContent = "Now type in your message and click Encrypt to Email"
 		}else{
-			composeMsg.innerHTML = "Now type in your message or load files, check your options, and click the appropriate <b>Encrypt</b> button"
+			composeMsg.textContent = "Now type in your message or load files, check your options, and click the appropriate Encrypt button"
 		}
 	}
 	updateComposeButtons(emailList);
@@ -415,9 +415,9 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	composeBox.focus();
 	if(firstTimeUser){
 		showKeyDialog();											//enter Password first if this is the first time
-		composeMsg.innerHTML = "Now write your message and select either <em>Signed</em> (the message can be decrypted multiple times) or <em>Read-Once</em> (the message can be decrypted only once) at the bottom of this window, then click <b>Encrypt to email</b>. If the recipient is unknown to PassLok, you will have to click <b>Invite</b>, which is not secure, so be careful with what you write"
+		composeMsg.textContent = "Now write your message and select either Signed (the message can be decrypted multiple times) or Read-Once (the message can be decrypted only once) at the bottom of this window, then click Encrypt to Email. If the recipient is unknown to PassLok, you will have to click Invite, which is not secure, so be careful with what you write"
 	}
-	if(specialMessage) composeMsg.innerText = specialMessage
+	if(specialMessage) composeMsg.textContent = specialMessage
 }
   
 function showKeyDialog(isInit){
@@ -509,7 +509,7 @@ function showChatDialog(){
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
 		modal.dialog({modal:true, width: 600, autoOpen: true})
 	}
-	chatDate.value = composeBox.innerText.slice(0,43);
+	chatDate.value = composeBox.textContent.slice(0,43);
 	if(!myKey) showKeyDialog()
 }
 
@@ -528,7 +528,7 @@ function showAcceptChatDialog(message){
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
 		modal.dialog({modal: true, width: 600, autoOpen: true});
-		chatMsg2.innerText = message
+		chatMsg2.textContent = message
 	}
 }
 
@@ -753,7 +753,7 @@ function composeIntercept(ev) {
 					var emails = $(this).parents().eq(4).find('._pe_m, ._pe_o');		//element containing recipient addresses, different class
 					var emailList = [];
 					for(var i = 0; i < emails.length; i++){
-						var address = emails[i].innerText;
+						var address = emails[i].textContent;
 						if(!address.match('@')) address = address + '@outlook.com';
 						emailList.push(address)
 					}
@@ -773,7 +773,7 @@ function composeIntercept(ev) {
 				$(this).before('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+PLicon+'" /></a>');
 				
 				$(this).parent().find('.passlok').click(function(){
-					var email = $(this).parents().eq(2).find('._pe_l')[0].innerText.replace(/<(.*?)>/gi,"").trim();			//sender's address
+					var email = $(this).parents().eq(2).find('._pe_l')[0].textContent.replace(/<(.*?)>/gi,"").trim();			//sender's address
 					if(!email.match('@')) email = email + '@outlook.com';
 					var bodyText = $(this).parents().eq(8).find('._rp_M4, ._rp_u4').eq(-1).html();							//got to re-find the body of the message
 //					var subject = $(this).parents().eq(16).find('.hP').text();
@@ -787,13 +787,13 @@ function composeIntercept(ev) {
 }
 
 //things that should happen after the email program loads completely
-$( document ).ready(function() {
-    console.log( "ready!" );
+$(window).on('load',function() {
+//    console.log( "ready!" );
   setTimeout(function(){
 	showKeyDialog(true);											//initialize some dialogs, but don't show them
 	showOldKeyDialog(true);
 	showComposeDialog('','','',true);
-	console.log(document.title);
+//	console.log(document.title);
 	getMyEmail();
 	retrieveAllSync();												//get data from sync or local storage
 	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10

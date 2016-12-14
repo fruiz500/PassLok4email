@@ -178,7 +178,7 @@ function symDecrypt(cipherstr,nonce24,symKey,isCompressed){
 	try{															//this may fail if the string is corrupted, hence the try
 		var cipher = nacl.util.decodeBase64(cipherstr);
 	}catch(err){
-		readMsg.innerText = "This encrypted message seems to be corrupted or incomplete";
+		readMsg.textContent = "This encrypted message seems to be corrupted or incomplete";
 		throw('decodeBase64 failed')
 	}
 
@@ -250,39 +250,39 @@ function failedDecrypt(marker){
 		$('#oldKeyScr').dialog("open");
 	}else if(marker == 'old'){
 		if(typeof(readScr) != "undefined"){
-			readMsg.innerText = 'The old Password has not worked either. Reload the email page and try again';
+			readMsg.textContent = 'The old Password has not worked either. Reload the email page and try again';
 			resetSpan.style.display = '';
 		}else if(typeof(composeScr) != "undefined"){
-			composeMsg.innerText = 'The old Password has not worked either. Reload the email page and try again';
+			composeMsg.textContent = 'The old Password has not worked either. Reload the email page and try again';
 			if(composeRecipientsBox.innerHTML.split(', ').length < 2 && onceMode.checked){
 				resetSpan2.style.display = '';				//display this only if one recipient
-				composeMsg.innerText = 'The old Password has not worked either. Try resetting the exchange with this recipient';
+				composeMsg.textContent = 'The old Password has not worked either. Try resetting the exchange with this recipient';
 			}
 		}
 	}else if(marker == 'readonce'){
 		restoreTempLock();
-		readMsg.innerText = 'Read-once messages can be decrypted <em>only once</em><br>You may want to reset the exchange with the button below';
+		readMsg.textContent = 'Read-once messages can be decrypted <em>only once</em><br>You may want to reset the exchange with the button below';
 		resetSpan.style.display = '';
 		callKey = ''
 	}else if(marker == 'signed'){
 		restoreTempLock();
-		readMsg.innerText = 'Decryption has Failed. Please check your Password';
+		readMsg.textContent = 'Decryption has Failed. Please check your Password';
 		callKey = ''
 	}else if(marker == 'idReadonce'){
 		restoreTempLock();
-		readMsg.innerText = 'Nothing found for you, or you are trying to decrypt a Read-once message for the 2nd time\nYou may want to reset the exchange with the button below';
+		readMsg.textContent = 'Nothing found for you, or you are trying to decrypt a Read-once message for the 2nd time\nYou may want to reset the exchange with the button below';
 		resetSpan.style.display = '';
 		callKey = ''
 	}else if(marker == 'idSigned'){
 		restoreTempLock();
-		readMsg.innerText = 'No message found for you';
+		readMsg.textContent = 'No message found for you';
 		callKey = ''
 	}else if(marker == 'decoy'){
-		readMsg.innerText = 'Hidden message not found';
+		readMsg.textContent = 'Hidden message not found';
 		callKey = ''
 	}else{
 		restoreTempLock();
-		readMsg.innerText = 'Decryption has Failed';
+		readMsg.textContent = 'Decryption has Failed';
 		callKey = ''		
 	}
 	throw('decryption failed')
