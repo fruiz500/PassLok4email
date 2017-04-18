@@ -26,6 +26,8 @@ function keyStrength(pwd,location) {
 		keyMsg.innerHTML = msg
 	}else if(location == 'decoy'){
 		decoyInMsg.innerHTML = msg
+	}else if(location == 'image'){
+		stegoImageMsg.innerHTML = msg
 	}
 	return iter
 };
@@ -133,21 +135,18 @@ function hashTime10(){
 }
 
 //makes the DH public string of a DH secret key array. Returns a base64 string
-function makePubStr(sec){
-	var pub = nacl.box.keyPair.fromSecretKey(sec).publicKey;
-	return nacl.util.encodeBase64(pub).replace(/=+$/,'')
+function makePub(sec){
+	return pub = nacl.box.keyPair.fromSecretKey(sec).publicKey
 }
 
 //Diffie-Hellman combination of a DH public key array and a DH secret key array. Returns Uint8Array
-function makeShared(pubstr,sec){
-	var	pub = nacl.util.decodeBase64(pubstr);
+function makeShared(pub,sec){
 	return nacl.box.before(pub,sec)
 }
 
 //makes the DH public key (Montgomery) from a published Lock, which is a Signing public key (Edwards)
 function convertPubStr(Lock){
-	var pub = nacl.util.decodeBase64(Lock);
-	return nacl.util.encodeBase64(ed2curve.convertPublicKey(pub)).replace(/=+$/,'')
+	return ed2curve.convertPublicKey(nacl.util.decodeBase64(Lock))
 }
 
 //stretches nonce to 24 bytes
@@ -157,54 +156,29 @@ function makeNonce24(nonce){
 	return result
 }
 
-//encrypt string with a symmetric key
+//encrypt string with a symmetric Key, returns a uint8 array
 function symEncrypt(plainstr,nonce24,symKey,isCompressed){
-	if(isCompressed){
-		if(plainstr.match('="data:')){								//no compression if it includes a file
-			var plain = nacl.util.decodeUTF8(plainstr)
-		}else{
-			var plain = LZString.compressToUint8Array(plainstr)
-		}
-	}else{
+	if(!isCompressed || plainstr.match('="data:')){						//no compression if it includes a file
 		var plain = nacl.util.decodeUTF8(plainstr)
+	}else{
+		var plain = LZString.compressToUint8Array(plainstr)
 	}
-	var	cipher = nacl.secretbox(plain,nonce24,symKey);
-	return nacl.util.encodeBase64(cipher).replace(/=+$/,'')
+	return nacl.secretbox(plain,nonce24,symKey)
 }
 
-needRecrypt = false;
-//decrypt string with a symmetric key
-function symDecrypt(cipherstr,nonce24,symKey,isCompressed){
-	try{															//this may fail if the string is corrupted, hence the try
-		var cipher = nacl.util.decodeBase64(cipherstr);
-	}catch(err){
-		readMsg.textContent = "This encrypted message seems to be corrupted or incomplete";
-		throw('decodeBase64 failed')
-	}
-
-	var	plain = nacl.secretbox.open(cipher,nonce24,symKey);
-	if(!plain){													//failed, try old password
-		if(oldPwdStr){
-			var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
-				oldKey = ed2curve.convertSecretKey(oldKeySgn);
-			plain = nacl.secretbox.open(cipher,nonce24,oldKey);
-			if(!plain){
-				failedDecrypt('old')
-			}else{
-				needRecrypt = true							//record the fact that a new Password is being used
-			}
-		}else{
-			failedDecrypt('new')							//this will open the old Password dialog
-		}
-	}
-	if(isCompressed){
-		if(plain.join().match(",61,34,100,97,116,97,58,")){		//this is '="data:' after encoding
-			return result = nacl.util.encodeUTF8(plain)
-		}else{
-			return LZString.decompressFromUint8Array(plain)
-		}
+//decrypt string (or uint8 array) with a symmetric Key
+function symDecrypt(cipherStr,nonce24,symKey,isCompressed){
+	if(typeof cipherStr == 'string'){
+		var cipher = nacl.util.decodeBase64(cipherStr)
 	}else{
-		return result
+		var cipher = cipherStr
+	}
+	var	plain = nacl.secretbox.open(cipher,nonce24,symKey);					//decryption instruction
+	if(!plain) failedDecrypt('key');
+	if(!isCompressed || plain.join().match(",61,34,100,97,116,97,58,")){		//this is '="data:' after encoding
+		return nacl.util.encodeUTF8(plain)
+	}else{
+		return LZString.decompressFromUint8Array(plain)
 	}
 }
 
@@ -259,9 +233,9 @@ function failedDecrypt(marker){
 				composeMsg.textContent = 'The old Password has not worked either. Try resetting the exchange with this recipient';
 			}
 		}
-	}else if(marker == 'readonce'){
+	}else if(marker == 'read-once'){
 		restoreTempLock();
-		readMsg.textContent = 'Read-once messages can be decrypted <em>only once</em><br>You may want to reset the exchange with the button below';
+		readMsg.textContent = 'Read-once messages can be decrypted only once. You may want to reset the exchange with the button below';
 		resetSpan.style.display = '';
 		callKey = ''
 	}else if(marker == 'signed'){

@@ -2,9 +2,9 @@
 		@source: https://github.com/fruiz500/PassLok4email
 
         @licstart  The following is the entire license notice for the
-        code in this page.
+        code in this extension.
 
-        Copyright (C) 2016  Francisco Ruiz
+        Copyright (C) 2017  Francisco Ruiz
 
         The JavaScript and html code in this page is free software: you can
         redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@
 
 
         @licend  The above is the entire license notice
-        for the code in this page.
+        for the code in this extension.
 */
 
 //this file contains the interface and jQuery stuff to load the different parts of it and extract data from or inject into email client
@@ -39,6 +39,7 @@ var rootElement = $(document),
 	coverCreated = false,
 	decoyInCreated = false,
 	decoyOutCreated = false,
+	imageCreated = false,
 	bodyID = '';
 
 var	isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1,
@@ -151,6 +152,9 @@ var toolbarHTML = '<div id="toolBar1" style="display:none;">'+
 	   '<label for="imgFile">'+
 	   '<img class="intLink" title="Insert image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAAbFBMVEUAAAAAAAAmJibm5uaJiYnZ2dnn5+e5ubmBgYHNzc3z8/Pr6+vW1ta2trZ/f3/y8vLQ0NDPz8/Dw8OgoKCOjo54eHgcHBwGBgb+/v7T09PIyMi+vr6srKyEhIRqampiYmJbW1tPT08qKioRERGLOctyAAAAAXRSTlMAQObYZgAAAHJJREFUGNOtzkkShCAQRNFKbLsVsZ3nWe9/R8EAYeHSv6u3qEh6qo0/TkUiKULNbCglfZGSjf0vCvWZLTmxwBBXVGG1NO2D+hoIQ6IHmrKrciJDfgxIBGbPId12E//pUjOiyHydCGtFyQG3kWTcc4ro1U7vPAUU4TAxJQAAAABJRU5ErkJggg==" /></label>'+
 	'<input type="file" id="imgFile" style="display:none" />'+
+	'<label for="mainFile">'+
+	'<img class="intLink" title="Load a file" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAATlBMVEUAAAAAAAD19fVcXFwbGxsTExP8/PzT09NxcXFaWlo4ODg1NTUEBAT5+fnw8PDr6+vU1NTIyMi+vr6Xl5dsbGxnZ2dXV1dISEghISEMDAw0f0rSAAAAAXRSTlMAQObYZgAAAFBJREFUGNO9yEkOgCAQBMBmUxDc9/9/VJ2EjgkHb9axcJuceqQRtMq4aAdWkDr6xtW5jJRFx2MBu23fdS7eG6Vz0U8VytrKmhMnVoDQlOfbBQLIAl4FF2fyAAAAAElFTkSuQmCC" /></label>'+
+	'<input type="file" id="mainFile" style="display:none" />'+
 	'</div>'+
   '</div>';
   
@@ -160,10 +164,13 @@ var PLicon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+
 var readHTML = '<div class="passlok-read" id="readScr">'+
 	'<div id="readMsg" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
 	'<div id="readButtons" style="display: block;" align="center">'+
-		'<button class="cssbutton" id="readHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>&nbsp;&nbsp;'+
-		'<button class="cssbutton" id="decoyBtn" value="Decoy" style="" title="decrypt hidden message, if any">Decoy</button>&nbsp;&nbsp;'+
-		'<label for="loadEncrFile" title="open dialog to load an encrypted file"><span class="cssbutton">Decrypt file</span></label>&nbsp;&nbsp;'+
-		'<input type="file" id="loadEncrFile" style="display:none;"/>'+
+		'<button class="cssbutton" id="readHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>'+
+		'<span id="moreReadButtons" style="display:none">&nbsp;&nbsp;'+
+			'<label for="loadEncrFile" id="decryptFileBtn" title="open dialog to load an encrypted file or image" style=""><span class="cssbutton">Decrypt file / image</span></label>&nbsp;&nbsp;'+
+			'<input type="file" id="loadEncrFile" style="display:none;"/>'+
+			'<button class="cssbutton" id="decoyBtn" value="Decoy" style="" title="decrypt hidden message, if any">Hidden</button>'+
+		'</span>&nbsp;&nbsp;'+
+		'<button class="cssbutton" id="readInterfaceBtn" value="switch" style="" title="get more options">&#9658;</button>'+
 	'</div><br>'+
 	'From:<br><div id="senderBox" contenteditable="false" style="display:inline;"></div>'+
 	'<span id="resetSpan">&nbsp;&nbsp;'+
@@ -177,14 +184,15 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 	'<div id="composeMsg" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
 	'<div id="composeButtons" style="display: block;" align="center">'+
 		'<button class="cssbutton" id="encryptBtn" value="" style="background-color:#3896F9;color:white;" title="encrypt contents using the mode selected below">Encrypt to email</button>&nbsp;&nbsp;'+
-		'<button class="cssbutton" id="encryptFileBtn" value="" style="background-color:#80BCFB;color:white;display:none;" title="encrypt contents to file using the mode selected below">Encrypt to file</button>'+
+		'<span id="moreComposeButtons" style="display:none">'+
+			'<button class="cssbutton" id="encryptFileBtn" value="" style="background-color:#80BCFB;color:white;" title="encrypt contents to file using the mode selected below">Encrypt to file</button>&nbsp;&nbsp;'+
+			'<label for="encryptImageFile" title="encrypt content to image using the mode selected below"><span class="cssbutton" style="background-color:#80BCFB;color:white;">Encrypt to image</span></label>'+
+			'<input type="file" id="encryptImageFile" style="display:none;"/>'+
+		'</span>'+
 		'<button class="cssbutton" id="inviteBtn" value="Invite" style="background-color:#3896F9;color:white;" title="invite recipients to PassLok">Invite</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="compHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>&nbsp;&nbsp;'+
-		'<button class="cssbutton" id="richBtn" value="Rich" style="display:none;" title="display toolbar for rich text editing">Rich</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="moveBtn" value="Backup" style="display:none;" title="make an encrypted file containing local data, then offers to delete it">Backup</button>'+
-		'<label for="loadFile" title="open dialog to select file to load"><span class="cssbutton">Insert file</span></label>&nbsp;&nbsp;'+
-		'<input type="file" id="loadFile" style="display:none;"/>'+
-		'<button class="cssbutton" id="interfaceBtn" value="Basic" style="" title="toggle between basic and advanced interface">Show all buttons</button>'+
+		'<button class="cssbutton" id="interfaceBtn" value="Basic" style="" title="toggle between basic and advanced interface">&#9658;</button>'+
 	'</div>'+
 	'To:<br><div id="composeRecipientsBox" contenteditable="false" style="display:inline;"><span style=\"color:red\"><em>Nobody!</em> Please close this dialog and enter the recipients, then try again</span></div>'+
 	'<span id="resetSpan2">&nbsp;&nbsp;'+
@@ -197,11 +205,12 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
    		'<input type="radio" name="lockmodes" id="onceMode" title="the message can be decrypted only once"/>&nbsp; Read-once&nbsp;&nbsp;'+
 		'<input type="radio" name="lockmodes" id="chatMode" title="make an invitation to real-time chat"/>&nbsp; Chat&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;'+
    		'<input type="radio" name="outputmodes" id="visibleMode" title="output is gibberish text" checked/>&nbsp; Visible&nbsp;&nbsp;'+
-		'<input type="radio" name="outputmodes" id="stegoMode" title="output hidden as normal text"/>&nbsp; Hidden&nbsp;&nbsp;'+
-		'<span id="invisibleSpan">'+
-			'<input type="radio" name="outputmodes" id="invisibleMode" title="output packaged into an icon"/>&nbsp; Invisible&nbsp;&nbsp;'+
-		'</span>&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;'+
-		'<input type="checkbox" id="decoyMode" title="second message added"/>&nbsp; Decoy'+
+		'<input type="radio" name="outputmodes" id="stegoMode" title="output appears to be a normal text that you supply through a dialog"/>&nbsp; Concealed&nbsp;&nbsp;'+
+		'<input type="radio" name="outputmodes" id="invisibleMode" title="output is invisible text between two lines"/>'+
+		'&nbsp; Invisible&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;'+
+		'<input type="radio" name="fileModes" id="binaryMode" title="output file is binary" checked/>&nbsp; Binary file&nbsp;&nbsp;'+
+       '<input type="radio" name="fileModes" id="textMode" title="output file is text"/>&nbsp; Text file&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;'+
+		'<input type="checkbox" id="decoyMode" title="additional hidden message"/>&nbsp; Hidden msg.'+
 	'</div>'+
 '</div>';
 	
@@ -283,7 +292,7 @@ var coverHTML = '<div class="passlok-cover" id="coverScr">'+
 var decoyInHTML = '<div class="passlok-decoyin" id="decoyIn" align="center">'+
 	'<p id="decoyMsg">Enter the Hidden Message</p>'+
 	'<textarea id="decoyText" class="cssbox" style="width:95%;" name="text" rows="3"></textarea>'+
-	'<p id="decoyInMsg">Enter the Decoy Key or Lock</p>'+
+	'<p id="decoyInMsg">Enter the shared Key or Lock for the Hidden message</p>'+
 	'<input type="password" class="cssbox" id="decoyPwdIn" style="width:95%;" name="key"/><br><br>'+
 	'<input type="checkbox" id="showDecoyInCheck" title="reveal Key">&nbsp; Show&nbsp;&nbsp;'+
 	'<button class="cssbutton" id="cancelDecoyInBtn" value="Cancel" title="do not encrypt">Cancel</button>&nbsp;'+
@@ -292,12 +301,23 @@ var decoyInHTML = '<div class="passlok-decoyin" id="decoyIn" align="center">'+
 
 //Decoy message retrieval
 var decoyOutHTML = '<div class="passlok-decoyout" id="decoyOut" align="center">'+
-	'<p>Enter the Decoy Key</p>'+
+	'<p>Enter the Key for the Hidden message</p>'+
 	'<input type="password" class="cssbox" id="decoyPwdOut" style="width:95%;" name="key"/><br><br>'+
-	'<input type="checkbox" id="showDecoyOutCheck" title="reveal Password">&nbsp; Show&nbsp;'+
+	'<input type="checkbox" id="showDecoyOutCheck" title="reveal Key">&nbsp; Show&nbsp;'+
 	'<button class="cssbutton" id="cancelDecoyOutBtn" value="Cancel" title="stop decryption">Cancel</button>&nbsp;'+
 	'<button class="cssbutton" id="acceptDecoyOutBtn" value="OK" title="go on with decryption">OK</button>'+
 	'<p>The Hidden message will appear at the top of the decrypt window</p>'+
+'</div>';
+
+//Image steganography screen
+var imageHTML = '<div class="passlok-image" id="stegoImage" align="center">'+
+	'<br><br>'+
+	'<input type="text" class="cssbox" id="imagePwd" title="use a password for better undetectability" style="width:21%;padding:0px;" placeholder=" optional Password"/>&nbsp;'+
+	'<button class="cssbutton" id="encodePNGBtn" value="PNG Hide" title="encrypt into PNG image">Encrypt to PNG</button>&nbsp;'+
+	'<button class="cssbutton" id="encodeJPGBtn" value="JPG Hide" title="encrypt into JPG image">Encrypt to JPG</button>'+
+	'<button class="cssbutton" id="decodeImgBtn" value="Decrypt" title="extract hidden content and decrypt">Decrypt</button><br><br>'+
+	'<div id="stegoImageMsg" style="height:30px;"></div><br>'+
+	'<img id="previewImg" src="" width="100%"/>'+
 '</div>';
 
 //the following functions create popup boxes (modals) using jQuery UI, and extract data from the email client to populate some of them	  
@@ -313,20 +333,22 @@ function showReadDialog(email,bodyText){
 				console.log(response.farewell);
 			});
 		});
-		modal.find('#decoyBtn').click(doDecoyDecrypt); 
-		modal.find('#loadEncrFile').change(loadEncryptedFile);	
+		modal.find('#decoyBtn').click(doDecoyDecrypt);
+		modal.find('#loadEncrFile').change(loadEncryptedFile);
 		modal.find('#loadEncrFile').click(function(){this.value = '';});
+		modal.find('#decryptImageFile').click(function(){this.value = '';});	
+		modal.find('#readInterfaceBtn').click(switchReadButtons);
 		readCreated = true
 	}else{
 		modal = $('.passlok-read')
 	}
-	if (!modal.dialog("instance") || !modal.dialog("isOpen")) modal.dialog({width: 700, height: "auto", title: "PassLok decrypt"});
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")) modal.dialog({width: 600, height: "auto", title: "PassLok decrypt"});
 	
 	readScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	senderBox.textContent = email;
 	text2decrypt = safeHTML(bodyText);														//sanitize the stuff to be decrypted, just in case
 	resetSpan.style.display = 'none';
-	decrypt()
+	decrypt()																			//start decrypting right away
 }
   
 function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
@@ -337,10 +359,9 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	//event listeners; the functions are defined elsewhere
 		modal.find('#encryptBtn').click(encrypt);
 		modal.find('#encryptFileBtn').click(encrypt2file);
+		modal.find('#encryptImageFile').change(loadEncryptImage);
+		modal.find('#encryptImageFile').click(function(){this.value = '';});
 		modal.find('#inviteBtn').click(inviteEncrypt);
-		modal.find('#richBtn').click(toggleRichText);
-		modal.find('#loadFile').change(loadFileAsURL);
-		modal.find('#loadFile').click(function(){this.value = '';});
 		modal.find('#interfaceBtn').click(switchButtons);
 		modal.find('#compHelpBtn').click(function(){
 			chrome.runtime.sendMessage({newtab: "helpTab"}, function (response) {
@@ -394,6 +415,8 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	toolBar2.childNodes[20].addEventListener("click", function() {formatDoc('redo')});
 	imgFile.addEventListener('change', loadImage);
 	imgFile.addEventListener('click', function(){this.value = '';});
+	mainFile.addEventListener('change', loadFile);
+	mainFile.addEventListener('click', function(){this.value = '';});
 	
 	composeScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	if(emailList) composeRecipientsBox.textContent = emailList.join(', ');
@@ -403,16 +426,16 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	if(bodyText.replace(/<(.*?)>/gi,"")){
 		composeMsg.textContent = "It is more secure to type the message AFTER clicking the PassLok button";
 	}else{
-		if(interfaceBtn.textContent == 'Show all buttons'){
-			composeMsg.textContent = "Now type in your message and click Encrypt to Email"
+		if(encodeURI(interfaceBtn.textContent) == "%E2%96%BA"){
+			composeMsg.textContent = "Now type in your message and click Encrypt to email. More options with the arrow"
 		}else{
-			composeMsg.textContent = "Now type in your message or load files, check your options, and click the appropriate Encrypt button"
+			composeMsg.textContent = "Now type in your message or load images and files, check your options, and click the appropriate Encrypt button"
 		}
 	}
 	updateComposeButtons(emailList);
 	resetSpan2.style.display = 'none';
-	if(serviceName != 'google') invisibleSpan.style.display = 'none';
 	composeBox.focus();
+
 	if(firstTimeUser){
 		showKeyDialog();											//enter Password first if this is the first time
 		composeMsg.textContent = "Now write your message and select either Signed (the message can be decrypted multiple times) or Read-Once (the message can be decrypted only once) at the bottom of this window, then click Encrypt to Email. If the recipient is unknown to PassLok, you will have to click Invite, which is not secure, so be careful with what you write"
@@ -528,7 +551,7 @@ function showAcceptChatDialog(message){
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
 		modal.dialog({modal: true, width: 600, autoOpen: true});
-		chatMsg2.textContent = message
+		chatMsg2.innerText = message									//innerText because it contains newlines
 	}
 }
 
@@ -592,13 +615,37 @@ function showDecoyOutDialog(){
 	if(!myKey) showKeyDialog()
 }
 
+function showImageDialog(isInit){
+	var modal;
+	if (!imageCreated){
+		modal = $(imageHTML);
+  
+	//event listeners; the functions are defined elsewhere
+		modal.find('#encodePNGBtn').click(encodePNG);
+		modal.find('#encodeJPGBtn').click(encodeJPG);
+		modal.find('#decodeImgBtn').click(decodeImage);	
+		modal.find('#imagePwd').keyup(function(event){imagePwdKeyup(event)});	
+  
+		imageCreated = true
+	}else{
+		modal = $(".passlok-image")
+	}
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
+		if(isInit){
+			modal.dialog({width : 600, height: 600, autoOpen: false})
+		}else{
+			modal.dialog({modal: true, width: 600, height: 600, autoOpen: true})
+		}
+	}
+}
+
 //This animation strategy inspired by http://blog.streak.com/2012/11/how-to-detect-dom-changes-in-css.html
 //based on http://davidwalsh.name/detect-node-insertion changes will depend on CSS as well.
 var insertListener = function(event) {
 	if (event.animationName == "composeInserted") {
 		composeIntercept()
 	}
-};
+}
 
 document.addEventListener("animationstart", insertListener, false); // standard + firefox
 document.addEventListener("webkitAnimationStart", insertListener, false);
@@ -623,6 +670,7 @@ function getMyEmail(){
 	}
 }
 
+var soleRecipient = false;
 //detects compose or read areas and places buttons in them  
 function composeIntercept(ev) {
 	//start with Gmail
@@ -650,7 +698,8 @@ function composeIntercept(ev) {
 						emailList.push(emails.get(i).attributes['email'].value)
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
-					showComposeDialog(emailList,bodyText)
+					showComposeDialog(emailList,bodyText);
+					readKey()
 				});	  
 			}
 		});
@@ -665,10 +714,12 @@ function composeIntercept(ev) {
 				
 				$(this).find('.passlok').click(function(){
 					var email = $(this).parents().eq(5).find('.iw')[0].firstChild.attributes['email'].value;		//sender's address
+					var recipients = $(this).parents().eq(5).find('.g2');
+					soleRecipient = (recipients.length < 2);												//this is used when decrypting images	
 					var bodyElement = $(this).parents().eq(5).find('.a3s').eq(0);
 			 		var moreElement = bodyElement.find('.ajU');
 			 		if(moreElement.length > 0){
-				  		var bodyText = moreElement.eq(0).prev().html()
+						var bodyText = moreElement.eq(0).parent().html()
 			  		}else{
 				  		var bodyText = bodyElement.html()
 			  		}
@@ -706,7 +757,8 @@ function composeIntercept(ev) {
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 					var specialMessage = "Because of a bug in Yahoo, encrypting a message in a Reply window will be tricky unless you *disable Conversations* in Settings"
-					showComposeDialog(emailList,bodyText,specialMessage)
+					showComposeDialog(emailList,bodyText,specialMessage);
+					readKey()
 				});	  
 			}
 		});
@@ -721,6 +773,8 @@ function composeIntercept(ev) {
 				
 				$(this).find('.passlok').click(function(){
 					var email = $(this).parents().eq(2).find('.from, .lozenge-static.hcard')[0].attributes['data-address'].value;		//sender's address
+					var recipients = $(this).parents().eq(3).find('.hcard-mailto');
+					soleRecipient = (recipients.length < 2);
 					var bodyText = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0].innerHTML;
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
@@ -758,7 +812,8 @@ function composeIntercept(ev) {
 						emailList.push(address)
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
-					showComposeDialog(emailList,bodyText)
+					showComposeDialog(emailList,bodyText);
+					readKey()
 				});	  
 			}
 		});
@@ -775,6 +830,8 @@ function composeIntercept(ev) {
 				$(this).parent().find('.passlok').click(function(){
 					var email = $(this).parents().eq(2).find('._pe_l')[0].textContent.replace(/<(.*?)>/gi,"").trim();			//sender's address
 					if(!email.match('@')) email = email + '@outlook.com';
+					var recipients = $(this).parents().eq(2).find('._pe_l._pe_E');
+					soleRecipient = (recipients.length < 2);
 					var bodyText = $(this).parents().eq(8).find('._rp_M4, ._rp_u4').eq(-1).html();							//got to re-find the body of the message
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
@@ -788,12 +845,11 @@ function composeIntercept(ev) {
 
 //things that should happen after the email program loads completely
 $(window).on('load',function() {
-//    console.log( "ready!" );
   setTimeout(function(){
 	showKeyDialog(true);											//initialize some dialogs, but don't show them
 	showOldKeyDialog(true);
 	showComposeDialog('','','',true);
-//	console.log(document.title);
+	showImageDialog(true);
 	getMyEmail();
 	retrieveAllSync();												//get data from sync or local storage
 	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10

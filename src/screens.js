@@ -34,25 +34,42 @@ function showDecoyPwdOut(){
 	}
 }
 
-//to switch beteen basic and all buttons
+//to switch between basic and advanced interface in the Compose dialog
 function switchButtons(){
-	if(interfaceBtn.textContent == 'Show all buttons'){
-		encryptFileBtn.style.display = '';
-		richBtn.style.display = '';
+	if(encodeURI(interfaceBtn.textContent) == "%E2%96%BA"){		//right arrow character
+		moreComposeButtons.style.display = '';
 		checkBoxes.style.display = '';
-		interfaceBtn.textContent = 'Show main buttons';
-		composeMsg.textContent = "Now type in your message or load files, check your options, and click the appropriate Encrypt button"
+		interfaceBtn.innerHTML = '&#9668;';
+		toolBar1.style.display = 'block';
+		composeBox.style.borderTopLeftRadius = '0';
+		composeBox.style.borderTopRightRadius = '0';
+		composeMsg.textContent = "Now type in your message or load images and files, check your options, and click the appropriate Encrypt button"
 	}else{
-		encryptFileBtn.style.display = 'none';
-		richBtn.style.display = 'none';
+		moreComposeButtons.style.display = 'none';
 		checkBoxes.style.display = 'none';
-		interfaceBtn.textContent = 'Show all buttons';
-		composeMsg.textContent = "Now type in your message and click Encrypt to Email"
+		interfaceBtn.innerHTML = '&#9658;';
+		toolBar1.style.display = 'none';
+		composeBox.style.borderTopLeftRadius = '15px';
+		composeBox.style.borderTopRightRadius = '15px';
+		composeMsg.textContent = "Now type in your message and click Encrypt to email. More options with the arrow"
+	}
+}
+
+//ditto for the Read dialog
+function switchReadButtons(){
+	if(encodeURI(readInterfaceBtn.textContent) == "%E2%96%BA"){
+		moreReadButtons.style.display = '';
+		readInterfaceBtn.innerHTML = '&#9668;';
+		readMsg.textContent = "Click the big button to decrypt a file or an image, the small one to reveal a hidden message"
+	}else{
+		moreReadButtons.style.display = 'none';
+		readInterfaceBtn.innerHTML = '&#9658;';
+		readMsg.textContent = "Click the arrow to decrypt attachments or reveal a hidden message"
 	}
 }
 
 var allNew = false
-//removes some buttons depending on the recipients' list
+//removes some buttons in the Compose dialog depending on the recipients' list
 function updateComposeButtons(emailList){
 	allNew = true;	
 	for (var index = 0; index < emailList.length; index++){		//scan email array to separate those in the directory from those that are not
@@ -61,28 +78,23 @@ function updateComposeButtons(emailList){
 	if(emailList.length == 0){moveBtn.style.display = '';}else{moveBtn.style.display = 'none';}		//display backup button in Firefox
 	if(allNew){
 		encryptBtn.style.display = 'none';
-		encryptFileBtn.style.display = 'none';
+		moreComposeButtons.style.display = 'none';
 		inviteBtn.style.display = '';
 		interfaceBtn.style.display = 'none';
 		checkBoxes.style.display = 'none';
-		richBtn.style.display = 'none';
-		niceEditor = true;						//to turn off nice editor
-		toggleRichText();
 		if(!firstTimeUser) setTimeout(function(){composeMsg.textContent = 'None of these recipients are in your directory. You should send them an invitation first. The contents WILL NOT BE SECURE';},20)
 	}else{
 		inviteBtn.style.display = 'none';
 		interfaceBtn.style.display = '';
 		encryptBtn.style.display = '';
-		if(interfaceBtn.textContent != 'Show all buttons'){
-			encryptFileBtn.style.display = '';
-			checkBoxes.style.display = '';
-			richBtn.style.display = '';
-			checkBoxes.style.display = ''
-		}else{
-			encryptFileBtn.style.display = 'none';
+		if(encodeURI(interfaceBtn.textContent) == "%E2%96%BA"){
+			moreComposeButtons.style.display = 'none';
 			checkBoxes.style.display = 'none';
-			richBtn.style.display = 'none';
 			checkBoxes.style.display = 'none'
+		}else{
+			moreComposeButtons.style.display = '';
+			checkBoxes.style.display = '';
+			checkBoxes.style.display = ''
 		}
 	}
 }
@@ -109,7 +121,8 @@ function resetTimer(){
 	keytimer = setTimeout(function() {
 		pwd.value = '';
 		myKey = '';
-		oldPwdStr = ''
+		oldPwdStr = '';
+		imagePwd.value = ''
 	}, period);
 
 	//erase key at end of period, by a different way
@@ -157,6 +170,8 @@ function acceptKey(){
 			encrypt()
 		}else if(callKey == 'encrypt2file'){
 			encrypt2file()
+		}else if(callKey == 'encrypt2image'){
+			encrypt2image()
 		}else if(callKey == 'inviteEncrypt'){
 			inviteEncrypt()
 		}else if(callKey == 'decrypt'){
@@ -195,10 +210,8 @@ function acceptOldKey(){
 	$('#oldKeyScr').dialog("close");
 	oldPwdStr = oldPwd.value.trim();
 	oldPwd.value = '';
-	if(callKey == 'signedEncrypt'){
-		signedEncrypt()
-	}else if(callKey == 'readOnceEncrypt'){
-		readOnceEncrypt()
+	if(callKey == 'encrypt'){
+		encrypt()	
 	}else if(callKey == 'decrypt'){
 		decrypt()
 	}
@@ -268,6 +281,14 @@ function cancelDecoyOut(){
 	showDecoyOutCheck.checked = false
 }
 
+function showImageDecrypt(){
+	showImageDialog();
+	encodePNGBtn.style.display = 'none';
+	encodeJPGBtn.style.display = 'none';
+	decodeImgBtn.style.display = '';
+	stegoImageMsg.textContent = "Load the image with the first button, then write the Password if any, and click Decrypt"
+}
+
 //displays Password strength and resets timer
 function pwdKeyup(evt){
 	resetTimer();	
@@ -304,6 +325,21 @@ function decoyPwdOutKeyup(evt){
 	if (key == 13) doDecoyDecrypt()
 }
 
+//enter image Key from keyboard
+function imagePwdKeyup(evt){
+	evt = evt || window.event;
+	var key = evt.keyCode || evt.which || evt.keyChar;
+	if(decodeImgBtn.style.display == ''){
+		if (key == 13){
+			decodeImage()
+		}else{
+			return keyStrength(imagePwd.value,'image')
+		}
+	}else{
+		return keyStrength(imagePwd.value,'image')
+	}
+}
+
 //writes five random dictionary words in the Password box
 function suggestKey(){
 	var output = '';
@@ -325,27 +361,11 @@ function blinker() {
 }
 setInterval(blinker, 1000); //Runs every second
 
+var time10 = 0;														//to display time needed to process Password
+
 //for rich text editing
 function formatDoc(sCmd, sValue) {
 	  document.execCommand(sCmd, false, sValue); composeBox.focus()
-}
-
-var niceEditor = false;
-//function to toggle rich text editing on mainBox
-function toggleRichText() {
-	if(niceEditor) {
-		toolBar1.style.display = 'none';
-		composeBox.style.borderTopLeftRadius = '15px';
-		composeBox.style.borderTopRightRadius = '15px';
-		richBtn.textContent = 'Rich';
-		niceEditor = false
-	} else {
-		toolBar1.style.display = 'block';
-		composeBox.style.borderTopLeftRadius = '0';
-		composeBox.style.borderTopRightRadius = '0';
-		richBtn.textContent = 'Plain';
-		niceEditor = true
-	}
 }
 
 var firstTimeUser = false;
@@ -357,7 +377,7 @@ function introGreeting(){
 }
 
 //to load a file into the compose dialog
-function loadFileAsURL(){
+function loadFile(){
 	var fileToLoad = loadFile.files[0];
 	var fileReader = new FileReader();
 	fileReader.onload = function(fileLoadedEvent){
@@ -372,41 +392,17 @@ function loadFileAsURL(){
 			}
 		}
 		if(fileToLoad.type.slice(0,4) == "text"){
-			if(URLFromFileLoaded.slice(0,2) == '==' && URLFromFileLoaded.slice(-2) == '=='){
-				composeBox.innerHTML += '<br><a download="' + escapedName + '" href="data:,' + safeHTML(URLFromFileLoaded) + '">' + escapedName + '</a>'
-			}else{
-				composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
-			}
+			composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
 		}else{
 			composeBox.innerHTML += '<br><a download="' + escapedName + '" href="' + safeHTML(URLFromFileLoaded) + '">' + escapedName + '</a>'
 		}
-	};
+	}
 	if(fileToLoad.type.slice(0,4) == "text"){
 		fileReader.readAsText(fileToLoad, "UTF-8");
 		composeMsg.textContent = 'This is the content of file ' + safeHTML(fileToLoad.name)
 	}else{
 		fileReader.readAsDataURL(fileToLoad, "UTF-8");
 		composeMsg.textContent = 'The file has been loaded in encoded form. It is NOT ENCRYPTED.'
-	}
-}
-
-//same, but loading on the read screen and attempting decryption after load
-function loadEncryptedFile(){
-	var fileToLoad = loadEncrFile.files[0];
-	var fileReader = new FileReader();
-	fileReader.onload = function(fileLoadedEvent){
-		var URLFromFileLoaded = fileLoadedEvent.target.result;
-		if(fileToLoad.type.slice(0,4) == "text"){
-			text2decrypt = URLFromFileLoaded
-		}else{
-			text2decrypt = atob(URLFromFileLoaded.split(',')[1])
-		}
-		decrypt()
-	};
-	if(fileToLoad.type.slice(0,4) == "text"){
-		fileReader.readAsText(fileToLoad, "UTF-8")
-	}else{
-		fileReader.readAsDataURL(fileToLoad, "UTF-8")
 	}
 }
 
@@ -420,9 +416,85 @@ function loadImage(){
 			composeMsg.textContent = 'This file is not a recognized image type';
 			return
 		}
-		composeBox.innerHTML += safeHTML('<img style="width:50%;" src="' + URLFromFileLoaded.replace(/=+$/,'') + '">')
+		composeBox.innerHTML += safeHTML('<img style="width:80%;" src="' + URLFromFileLoaded.replace(/=+$/,'') + '">')
 	};
 	fileReader.readAsDataURL(fileToLoad, "UTF-8")
 }
 
-var time10 = 0;														//to display time needed to process Password
+//loads a file or image from the read dialog and starts decryption
+function loadEncryptedFile(){
+	readKey();
+	var fileToLoad = loadEncrFile.files[0];
+	var fileReader = new FileReader();
+	fileReader.onload = function(fileLoadedEvent){
+		var URLFromFileLoaded = fileLoadedEvent.target.result;
+		if(URLFromFileLoaded.slice(0,10) == "data:image"){						//if it's an image, trigger image decryption
+			previewImg.onload = function(){
+				encodePNGBtn.style.display = 'none';
+				encodeJPGBtn.style.display = 'none';
+				decodeImgBtn.style.display = '';
+				
+				//populate the image Password box
+				var reg = new RegExp(myEmail,'g'),
+					filteredEmail = senderBox.textContent.replace(reg,'').trim();
+				if(filteredEmail && soleRecipient){									//don't do it unless I am the only recipient
+					imagePwd.value = nacl.util.encodeBase64(makeShared(convertPubStr(locDir[filteredEmail][0]),myKey)).replace(/=+$/,'');
+					stegoImageMsg.textContent =  'The image Password has been pre-filled since you are the only recipient. Check and click Decrypt';
+				}else{
+					imagePwd.value = '';
+					stegoImageMsg.textContent =  'Now type in the Password, if any, and click Decrypt'
+				}
+				
+				showImageDialog()
+			}
+        	previewImg.style.display = 'block';
+        	previewImg.src = URLFromFileLoaded;
+		}else if(URLFromFileLoaded.match(',')){						          //otherwise normal decryption
+			text2decrypt = URLFromFileLoaded.split(',')[1].replace(/=+$/,'');	//binary case
+			decrypt()
+		}else{
+			text2decrypt = URLFromFileLoaded;									//text case
+			decrypt()
+		}
+	}
+	if(fileToLoad.type.slice(0,4) == "text"){
+		fileReader.readAsText(fileToLoad, "UTF-8")
+	}else{
+		fileReader.readAsDataURL(fileToLoad, "UTF-8")
+	}
+}
+
+//loads an image and starts image encryption
+var loadEncryptImage = function(e) {
+	if(!composeBox.textContent){
+		composeMsg.textContent = 'Nothing to encrypt';
+		return
+	}
+	readKey();
+    var reader = new FileReader();
+    reader.onload = function(event) {
+        previewImg.style.display = 'block';
+        previewImg.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+	previewImg.onload = function(){
+		encodePNGBtn.style.display = '';
+		encodeJPGBtn.style.display = '';
+		decodeImgBtn.style.display = 'none';
+		encrypt2image();
+		
+		//try to populate the image Password box
+		var reg = new RegExp(myEmail,'g'),
+			emailArray = composeRecipientsBox.textContent.replace(reg,'').split(',');
+		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
+		emailArray = emailArray.filter(Boolean);
+		if(emailArray.length == 1){
+			imagePwd.value = nacl.util.encodeBase64(makeShared(convertPubStr(locDir[emailArray[0]][0]),myKey)).replace(/=+$/,'')
+		}else{
+			imagePwd.value = ''
+		}
+		
+		updateCapacity();
+		showImageDialog()
+	}
+}

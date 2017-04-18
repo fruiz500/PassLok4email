@@ -9,13 +9,13 @@ function charsLeftChat(){
 	}
 }
 
+var isChatInvite = false;
 //start making a Chat invitation
 function displayChat(){
 	showChatDialog();
 	isChatInvite = true
 }
 
-var isChatInvite = false;
 //continues making a chat invite after the user has chosen the chat type
 function makeChat(){
 	$('#chatScr').dialog("close");
@@ -33,7 +33,14 @@ function makeChat(){
 	var password = nacl.util.encodeBase64(nacl.randomBytes(32)).replace(/=+$/,''),
 		chatRoom = makeChatRoom();
 	composeBox.textContent = date + type + chatRoom + password;
-	signedEncrypt()
+	var emailArray = composeRecipientsBox.textContent.split(',');
+	for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
+	if(callKey == 'encrypt2image'){
+		encryptList(emailArray,false,true)
+	}else{
+		encryptList(emailArray,false,false)
+	}
+	isChatInvite = false
 }
 
 //makes a mostly anonymous chatRoom name from words on the blacklist
@@ -66,7 +73,7 @@ function openChat(){
 	if (typetoken.length == 107 && !typetoken.slice(-43).match(' ')){			//chat invite detected, so open chat
 		var date = typetoken.slice(0,43).trim();									//the first 43 characters are for the date and time etc.
 		if(date != 'noDate'){
-			var msgStart = "This chat invitation says:\n\n" + date + "\n\n"
+			var msgStart = "This chat invitation says:\n\n " + date + " \n\n"
 		}else{
 			var msgStart = ""
 		}
@@ -83,5 +90,5 @@ function acceptChat(){
 	$('#acceptChatScr').dialog("close");
 
 	readBox.textContent = '';
-	readMsg.textContent = 'Chat session open on a separate tab. You may close this now.'
+	readMsg.textContent = 'Chat session open in a separate tab. You may close this now.'
 }

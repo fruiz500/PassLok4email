@@ -1,30 +1,25 @@
 @-webkit-keyframes composeInserted {  
     from { clip: rect(1px, auto, auto, auto); }
       to { clip: rect(0px, auto, auto, auto); }
-    }
-
+}
 .n1tfz, td[class="gH acX"]{			<!--this is for Gmail-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
-    }
-	
+}	
 .bottomToolbar, .thread-info, .msg-date{  <!--this is for Yahoo-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
-    }
-
+}
 .ms-Icon--replyAll, ._rp_81, ._mcp_93, ._mcp_55, ._mcp_02{	<!--this is for Outlook-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
-    }
-
+}
 .ui-widget-header{
     background: none;
     background-color: #ccc;
     border: none;
     border-radius: 10px;
 }
-
 .ui-dialog{
     /* The background color of the dialog */
     background: white;
@@ -33,13 +28,11 @@
     font-size: small;
     border-radius: 10px;
 }
-
 .ui-widget-overlay.custom-overlay{
     background-color: black;
     background-image: none;
     opacity: 0.7;
 }
-
 .ui-icon,.ui-widget-content .ui-icon{
 	background-image:url("chrome-extension://__MSG_@@extension_id__/lib/images/ui-icons_222222_256x240.png")
 }
@@ -55,36 +48,32 @@
 .ui-state-active .ui-icon{
 	background-image:url("chrome-extension://__MSG_@@extension_id__/lib/images/ui-icons_ef8c08_256x240.png")
 }
-
 a:hover {
   color: red;
   position: relative;
 }
-
 a[data-title]:hover:after {
-  content: attr(data-title);
-  padding: 4px 8px;
-  font-size: small;
-  color: white;
-  position: absolute;
-  left: 0;
-  top: 100%;
-  z-index: 1000;
-  background-color: black;
+	content: attr(data-title);
+	padding: 4px 8px;
+	font-size: small;
+ 	color: white;
+	position: absolute;
+	left: 0;
+	top: 100%;
+	z-index: 1000;
+	background-color: black;
 }
-
 a[data-title2]:hover:after {
-  content: attr(data-title2);
-  padding: 4px 8px;
-  font-size: small;
-  color: white;
-  position: absolute;
-  left: 1;
-  top: -10%;
-  z-index: 1000;
-  background-color: black;
+	content: attr(data-title2);
+	padding: 4px 8px;
+	font-size: small;
+	color: white;
+	position: absolute;
+	left: 1;
+	top: -10%;
+	z-index: 1000;
+	background-color: black;
 }
-
 select {
 	-webkit-appearance: button;
 	-webkit-user-select: none;
@@ -110,40 +99,38 @@ img.intLink {
 	border-radius: 8px;
 }
 .intLink:hover {
-		text-decoration: none;
-		cursor: pointer;
-		background: #d4d4d4;	
+	text-decoration: none;
+	cursor: pointer;
+	background: #d4d4d4;	
 }
-	.cssbutton {
-		-webkit-border-radius: 10px;
-  		border-radius: 10px;
-  		font-family: Arial;
-
-  		padding: 8px;
-  		text-decoration: none;
-		border:0px;
-		margin-right: -2px;
-		color: #666666;
-  		background: #e6e6e6;
-	}
-	.cssbutton:hover {
-		text-decoration: none;
-		cursor: pointer;
-		background: #d4d4d4;
-	}
-
-	.cssbox {
-		-webkit-border-radius: 15px;
-  		border-radius: 15px;
-  		padding: 15px;
-  		text-decoration: none;
-		width: 100%;
-		-webkit-appearance: none;
-		box-sizing: border-box;
-   	 	-webkit-box-sizing:border-box;
-		-webkit-box-shadow: none;
-		box-shadow: none;
-		color: #000000;
-		border:1px solid #dedede;
-		overflow: auto;
-	}
+.cssbutton {
+	-webkit-border-radius: 10px;
+  	border-radius: 10px;
+  	font-family: Arial;
+  	padding: 8px;
+  	text-decoration: none;
+	border:0px;
+	margin-right: -2px;
+	color: #666666;
+  	background: #e6e6e6;
+}
+.cssbutton:hover {
+	text-decoration: none;
+	cursor: pointer;
+	background: #d4d4d4;
+}
+.cssbox {
+	-webkit-border-radius: 15px;
+  	border-radius: 15px;
+  	padding: 15px;
+  	text-decoration: none;
+	width: 100%;
+	-webkit-appearance: none;
+	box-sizing: border-box;
+   	 -webkit-box-sizing:border-box;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	color: #000000;
+	border:1px solid #dedede;
+	overflow: auto;
+}
