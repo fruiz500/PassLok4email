@@ -57,10 +57,10 @@ function decrypt(){
 	callKey = 'decrypt';
 	readKey();
 	var text = text2decrypt;
-	if(text.match('==')) text = text.split('==')[1];
 	text = text.replace(/<(.*?)>/gi,"");
 	if(text.match('\u2004') || text.match('\u2005') || text.match('\u2006')) fromLetters(text);		//if hidden text
 	if(text.match('\u00ad')) fromInvisible(text);
+	if(text2decrypt.match('==')) text2decrypt = text2decrypt.split('==')[1];
 	decryptList();
 	openChat()
 }
