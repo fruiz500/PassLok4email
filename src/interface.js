@@ -663,8 +663,7 @@ function getMyEmail(){
 	if(serviceName == 'google'){
 		myEmail = document.title.split('-')[1].trim()
 	}else if(serviceName == 'yahoo'){
-		var parts = document.title.split('-');
-		myEmail = parts[parts.length - 2].trim() + '@yahoo.com'
+		myEmail = document.title.match(/[a-z0-9]+@yahoo.com/)[0]
 	}else if(serviceName == 'outlook'){
 		myEmail = document.title.split('-')[1].trim() + '@outlook.com'
 	}
@@ -733,27 +732,33 @@ function composeIntercept(ev) {
 
 	//now the same for Yahoo
   }else if(serviceName == 'yahoo'){
-	var composeBoxes = $('.bottomToolbar');												//toolbar at bottom of window
+	var composeBoxes = $('.bottomToolbar,[data-test-id="compose-toolbar-styler"]');											//toolbar at bottom of window
 	if (composeBoxes && composeBoxes.length > 0){
 		composeBoxes.each(function(){
 			var composeMenu = $(this).parents().eq(0);
 			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){							//insert PassLok icon right after the toolbar icons
 				var encryptionFormOptions = '<a href="#" class="passlok" data-title2="insert PassLok-encrypted text"><img src="'+PLicon+'" /></a>';
-				composeMenu.find('.draft-delete-btn').after(encryptionFormOptions);
+				composeMenu.find('.draft-delete-btn,.en_N.J_x.o_h.cZ1RN91d_n').after(encryptionFormOptions);
 
 				$(this).find('.passlok').click(function(){						//activate the button
-					var bodyDiv = $(this).parents().eq(3).find('.cm-rtetext');
+					var bodyDiv = $(this).parents().eq(3).find('.cm-rtetext,[data-test-id="rte"]').eq(0);
 					bodyID = bodyDiv.attr('id');									//this global variable will be used to write the encrypted message, should be "rtetext"
+					if(!bodyID){bodyID = "bodyText"; bodyDiv.attr('id', "bodyText")};
 					var bodyText = bodyDiv.html();				//TODO: yahoo needs a fix for the reply window
-					bodyText = bodyText.split('<div class="qtdSeparateBR"')[0];	//take out quoted stuff
+					bodyText = bodyText.split('<hr')[0];	//take out quoted stuff
 					//PREVIOUS THREAD MESSAGES OPTIONAL
 //					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
 //					if(extraText) bodyText += extraText;
 
 					var emails = $(this).parents().eq(3).find('.cm-to').find('span');		//element containing recipient addresses
+					var emailsNew = $(this).parents().eq(3).find('.pill-content');			//same for new look
+					if(emailsNew) isNewYahoo = true;											//set flag for new yahoo
 					var emailList = [];
 					for(var i = 0; i < emails.length - 1; i++){
 						emailList.push(emails.get(i).attributes['data-address'].value)
+					}
+					for(var i = 0; i < emailsNew.length; i++){
+						emailList.push(emailsNew.get(i).title.match(/<(.*?)>/)[1])
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 					var specialMessage = "Because of a bug in Yahoo, encrypting a message in a Reply window will be tricky unless you *disable Conversations* in Settings"
@@ -765,17 +770,31 @@ function composeIntercept(ev) {
 	}
 
 //this part for reading messages
-	var viewTitleBar = $('.thread-info, .msg-date');					//title bar at top of message, regular and no-conversations style
+	var viewTitleBar = $('.thread-info, .msg-date, [data-test-id="message-date"]');					//title bar at top of message, regular and no-conversations style
 	if (viewTitleBar && viewTitleBar.length > 0){
 		viewTitleBar.each(function(v) {											//insert PassLok icon right before the other stuff, if there is encrypted data
 			if ($(this).find('.passlok').length === 0){
 				$(this).prepend('<a href="#" class="passlok" data-title="decrypt with PassLok"><img src="'+PLicon+'" /></a>');
 				
 				$(this).find('.passlok').click(function(){
-					var email = $(this).parents().eq(2).find('.from, .lozenge-static.hcard')[0].attributes['data-address'].value;		//sender's address
-					var recipients = $(this).parents().eq(3).find('.hcard-mailto');
-					soleRecipient = (recipients.length < 2);
-					var bodyText = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0].innerHTML;
+					var email = $(this).parents().eq(2).find("span.D_F").eq(1).text();		//sender's address
+					if(!email) email = $(this).parents().eq(2).find('.from, .lozenge-static.hcard')[0].attributes['data-address'].value;			//old format
+					if(email.match(/<(.*?)>/)) email = email.match(/<(.*?)>/)[1]; 			//remove brackets
+					var recipients = $(this).parents().eq(2).find("span.C4_Z2aVTcY");		//to see how many
+					if(recipients){
+						soleRecipient = (recipients.length < 3)
+					}else{
+						recipients = $(this).parents().eq(3).find('.hcard-mailto');			//old format														
+						soleRecipient = (recipients.length < 2)
+					}
+					var bodyElem = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0];							//old format
+					if(bodyElem){
+						var bodyText = bodyElem.innerText
+					}else{
+						bodyElem = $(this).parents().eq(2).find(".msg-body");														//new format
+						var bodyText = bodyElem.text()
+					}
+//					if(!bodyElem) bodyText = $(this).parents('.thread-item-list, .base-card').find('.email-wrapped')[0].innerHTML;		//old format
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog()
