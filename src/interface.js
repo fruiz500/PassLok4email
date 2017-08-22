@@ -674,13 +674,13 @@ var soleRecipient = false;
 function composeIntercept(ev) {
 	//start with Gmail
   if(serviceName == 'google'){
-	var composeBoxes = $('.n1tfz');												//toolbar at bottom of window
+	var composeBoxes = $('.btC');												//toolbar at bottom of window
 	if (composeBoxes && composeBoxes.length > 0){
 		composeBoxes.each(function(){
 			var composeMenu = $(this).parents().eq(2);
 			if (composeMenu && composeMenu.length > 0 && composeMenu.find('.passlok').length === 0){							//insert PassLok icon right after the toolbar icons
 				var encryptionFormOptions = '<a href="#" class="passlok" data-title2="insert PassLok-encrypted text"><img src="'+PLicon+'" /></a>';
-				composeMenu.find('.n1tfz :nth-child(6) :first').parent().after(encryptionFormOptions);
+				composeMenu.find('.btC :nth-child(6) :first').parent().after(encryptionFormOptions);
 
 				$(this).find('.passlok').click(function(){						//activate the button
 					var bodyDiv = $(this).parents().eq(11).find('.Am');

@@ -129,7 +129,8 @@ function resetTimer(){
 	if ((new Date().getTime() - keytime > period)) {
 		pwd.value = '';
 		myKey = '';
-		oldPwdStr = ''
+		oldPwdStr = '';
+		imagePwd.value = ''
 	}
     keytime = new Date().getTime()
 }

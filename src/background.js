@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener(
                 sendResponse({farewell: "goodbye"});
             }else if(request.newtab == "chatTab") {
 				var typetoken = request.typetoken;
-				chrome.tabs.create({url: 'chat/index.html#' + typetoken.slice(43)});
+				chrome.tabs.create({url: 'https://passlok.com/chat/index.html#' + typetoken.slice(43)});
 				sendResponse({farewell: "goodbye"});
 			}
       }

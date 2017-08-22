@@ -100,7 +100,7 @@ function inviteEncrypt(){
 		output = output.match(/.{1,80}/g).join("\n");
 		var outNode = document.createElement('div');
 		outNode.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email extension by following one of these links: <ul><li>Chrome:&nbsp; https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Firefox:&nbsp; https://addons.mozilla.org/en-US/firefox/addon/passlok-for-email/</li></ul></li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li><li>When asked whether to accept my new Password (which you don't know), go ahead and click <b>OK</b>.</li><li>If you don't use Chrome or Firefox, or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com/app</li></ol><br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + output + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
-		if(!isNewYahoo) outNode.contentEditable = 'true';
+		if(typeof(isNewYahoo) == "undefined") outNode.contentEditable = 'true';
 		var bodyElement = document.getElementById(bodyID);
 		bodyElement.insertBefore(outNode,bodyElement.childNodes[0]);
 
@@ -301,7 +301,7 @@ if(!isImageOut){																//normal output, not to image
 }else{																			//no extra text if output is to image
 	outNode.textContent = outString
 }
-	if(!isNewYahoo) outNode.contentEditable = 'true';
+	if(typeof(isNewYahoo) == "undefined") outNode.contentEditable = 'true';
 	syncLocDir();
 	callKey = '';
 	visibleMode.checked = true;
