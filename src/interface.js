@@ -338,15 +338,33 @@ function showReadDialog(email,bodyText){
 		modal.find('#loadEncrFile').click(function(){this.value = '';});
 		modal.find('#decryptImageFile').click(function(){this.value = '';});	
 		modal.find('#readInterfaceBtn').click(switchReadButtons);
+		
 		readCreated = true
 	}else{
 		modal = $('.passlok-read')
 	}
-	if (!modal.dialog("instance") || !modal.dialog("isOpen")) modal.dialog({width: 600, height: "auto", title: "PassLok decrypt"});
+	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
+		modal.dialog({width: 600, height: "auto", title: "PassLok decrypt"});
+				
+	//Firefox no longer makes global variables for DOM elements, so here they are
+		readScr = document.getElementById('readScr');
+		readMsg = document.getElementById('readMsg');
+		readButtons = document.getElementById('readButtons');
+		readHelpBtn = document.getElementById('readHelpBtn');
+		moreReadButtons = document.getElementById('moreReadButtons');
+		decryptFileBtn = document.getElementById('decryptFileBtn');
+		loadEncrFile = document.getElementById('loadEncrFile');
+		decoyBtn = document.getElementById('decoyBtn');
+		readInterfaceBtn = document.getElementById('readInterfaceBtn');
+		senderBox = document.getElementById('senderBox');
+		resetSpan = document.getElementById('resetSpan');
+		resetBtn = document.getElementById('resetBtn');
+		readBox = document.getElementById('readBox')
+	}
 	
 	readScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	senderBox.textContent = email;
-	text2decrypt = safeHTML(bodyText);														//sanitize the stuff to be decrypted, just in case
+	text2decrypt = bodyText;		//safeHTML was applied here in a previous version, but it sometimes caused the encrypted text to be filtered out
 	resetSpan.style.display = 'none';
 	decrypt()																			//start decrypting right away
 }
@@ -370,7 +388,7 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 		});
 		modal.find('#resetBtn2').click(resetPFS2);
 		modal.find('#moveBtn').click(moveDB);
- 		
+	 		
 		composeCreated = true 
 	}else{
 		modal = $('.passlok-compose')
@@ -383,7 +401,43 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 		}else{
 			modal.dialog({modal: true, width: 800, title: "PassLok encrypt", autoOpen: true})
 		}
-	}
+		
+	//global variables for DOM elements, which Firefox no longer makes automatically
+		toolBar1 = document.getElementById('toolBar1');
+		formatBlock = document.getElementById('formatBlock');
+		fontName = document.getElementById('fontName');
+		fontSize = document.getElementById('fontSize');
+		foreColor = document.getElementById('foreColor');
+		backColor = document.getElementById('backColor');
+		toolBar2 = document.getElementById('toolBar2');
+		imgFile = document.getElementById('imgFile');
+		mainFile = document.getElementById('mainFile');
+		composeScr = document.getElementById('composeScr');
+		composeMsg = document.getElementById('composeMsg');
+		composeButtons = document.getElementById('composeButtons');
+		encryptBtn = document.getElementById('encryptBtn');
+		moreComposeButtons = document.getElementById('moreComposeButtons');
+		encryptFileBtn = document.getElementById('encryptFileBtn');
+		encryptImageFile = document.getElementById('encryptImageFile');
+		inviteBtn = document.getElementById('inviteBtn');
+		compHelpBtn = document.getElementById('compHelpBtn');
+		moveBtn = document.getElementById('moveBtn');
+		interfaceBtn = document.getElementById('interfaceBtn');
+		composeRecipientsBox = document.getElementById('composeRecipientsBox');
+		resetSpan2 = document.getElementById('resetSpan2');
+		resetBtn2 = document.getElementById('resetBtn2');
+		composeBox = document.getElementById('composeBox');
+		checkBoxes = document.getElementById('checkBoxes');
+		signedMode = document.getElementById('signedMode');
+		onceMode = document.getElementById('onceMode');
+		chatMode = document.getElementById('chatMode');
+		visibleMode = document.getElementById('visibleMode');
+		stegoMode = document.getElementById('stegoMode');
+		invisibleMode = document.getElementById('invisibleMode');
+		binaryMode = document.getElementById('binaryMode');
+		textMode = document.getElementById('textMode');
+		decoyMode = document.getElementById('decoyMode')
+//	}
 	
 //event listeners for the rich text toolbar boxes and buttons
 	formatBlock.addEventListener("change", function() {formatDoc('formatBlock',this[this.selectedIndex].value);this.selectedIndex=0;});
@@ -417,7 +471,7 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	imgFile.addEventListener('click', function(){this.value = '';});
 	mainFile.addEventListener('change', loadFile);
 	mainFile.addEventListener('click', function(){this.value = '';});
-	
+	}
 	composeScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	if(emailList) composeRecipientsBox.textContent = emailList.join(', ');
 	composeBox.innerHTML = safeHTML(bodyText);										//sanitize before putting in
@@ -467,9 +521,20 @@ function showKeyDialog(isInit){
 			modal.dialog({width : 600, autoOpen: false})
 		}else{
 			modal.dialog({modal: true, width: 600, autoOpen: true});
-			if(!myEmail) keyMsg.innerHTML = '<span style="color:red;">PassLok has not loaded properly. Please reload your email page</span>'
+			if(!myEmail) document.getElementById('keyMsg').innerHTML = '<span style="color:red;">PassLok has not loaded properly. Please reload your email page</span>'
 		}
+				
+	//global variables for DOM elements, required by Firefox
+		keyScr = document.getElementById('keyScr');
+		firstTimeKey = document.getElementById('firstTimeKey');
+		suggestKeyBtn = document.getElementById('suggestKeyBtn');
+		keyMsg = document.getElementById('keyMsg');
+		pwd = document.getElementById('pwd');
+		showKey = document.getElementById('showKey');
+		acceptKeyBtn = document.getElementById('acceptKeyBtn');
+		fiveMin = document.getElementById('fiveMin')		
 	}
+	
 	pwd.type = 'password'
 }
 
@@ -494,6 +559,14 @@ function showOldKeyDialog(isInit){
 		}else{
 			modal.dialog({modal: true, width: 600, autoOpen: true})
 		}
+						
+	//global variables for DOM elements, required by Firefox
+		oldKeyScr = document.getElementById('oldKeyScr');
+		oldKeyMsg = document.getElementById('oldKeyMsg');
+		oldPwd = document.getElementById('oldPwd');
+		showOldKey = document.getElementById('showOldKey');
+		cancelOldKeyBtn = document.getElementById('cancelOldKeyBtn');
+		acceptOldKeyBtn = document.getElementById('acceptOldKeyBtn')
 	}
 }
 
@@ -511,7 +584,13 @@ function showNameDialog(){
 		modal = $(".passlok-name")
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
-		modal.dialog({modal: true, width: 600, autoOpen: true})
+		modal.dialog({modal: true, width: 600, autoOpen: true});
+						
+	//global variables for DOM elements, required by Firefox
+		nameScr = document.getElementById('nameScr');
+		nameMsg = document.getElementById('nameMsg');
+		cancelNameBtn = document.getElementById('cancelNameBtn');
+		acceptNameBtn = document.getElementById('acceptNameBtn')
 	}
 }
 
@@ -530,8 +609,19 @@ function showChatDialog(){
 		modal = $(".passlok-chat")
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
-		modal.dialog({modal:true, width: 600, autoOpen: true})
+		modal.dialog({modal:true, width: 600, autoOpen: true});
+						
+	//global variables for DOM elements, required by Firefox
+		chatScr = document.getElementById('chatScr');
+		chatMsg = document.getElementById('chatMsg');
+		dataChat = document.getElementById('dataChat');
+		audioChat = document.getElementById('audioChat');
+		videoChat = document.getElementById('videoChat');
+		chatDate = document.getElementById('chatDate');
+		cancelChatBtn = document.getElementById('cancelChatBtn');
+		makeChatBtn = document.getElementById('makeChatBtn')
 	}
+	
 	chatDate.value = composeBox.textContent.slice(0,43);
 	if(!myKey) showKeyDialog()
 }
@@ -544,13 +634,20 @@ function showAcceptChatDialog(message){
 	//event listeners; the functions are defined elsewhere
 		modal.find('#cancelChat2Btn').click(cancelAcceptChat);
 		modal.find('#acceptChatBtn').click(acceptChat);
-  
+ 
 		acceptChatCreated = true
 	}else{
 		modal = $(".passlok-acceptchat")
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
 		modal.dialog({modal: true, width: 600, autoOpen: true});
+					
+	//global variables for DOM elements, required by Firefox
+		acceptChatScr = document.getElementById('acceptChatScr');
+		chatMsg2 = document.getElementById('chatMsg2');
+		cancelChat2Btn = document.getElementById('cancelChat2Btn');
+		acceptChatBtn = document.getElementById('acceptChatBtn');
+	
 		chatMsg2.innerText = message									//innerText because it contains newlines
 	}
 }
@@ -563,13 +660,20 @@ function showCoverDialog(){
 	//event listeners; the functions are defined elsewhere
 		modal.find('#cancelCoverBtn').click(cancelStego);
 		modal.find('#acceptCoverBtn').click(acceptCover);
-  
+
 		coverCreated = true
 	}else{
 		modal = $(".passlok-cover")
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
 		modal.dialog({modal: true, width: 700, autoOpen: true});
+			
+	//global variables for DOM elements, required by Firefox
+		coverScr = document.getElementById('coverScr');	
+		coverMsg = document.getElementById('coverMsg');
+		coverBox = document.getElementById('coverBox');
+		cancelCoverBtn = document.getElementById('cancelCoverBtn');
+		acceptCoverBtn = document.getElementById('acceptCoverBtn')
 	}
 }
 
@@ -590,7 +694,17 @@ function showDecoyInDialog(){
 		modal = $(".passlok-decoyin")
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
-		modal.dialog({modal:true, width: 600, autoOpen: true})
+		modal.dialog({modal:true, width: 600, autoOpen: true});
+		
+		//global variables for DOM elements, required by Firefox
+		decoyIn = document.getElementById('decoyIn');
+		decoyMsg = document.getElementById('decoyMsg');
+		decoyText = document.getElementById('decoyText');
+		decoyInMsg = document.getElementById('decoyInMsg');
+		decoyPwdIn = document.getElementById('decoyPwdIn');
+		showDecoyInCheck = document.getElementById('showDecoyInCheck');
+		cancelDecoyInBtn = document.getElementById('cancelDecoyInBtn');
+		acceptDecoyInBtn = document.getElementById('acceptDecoyInBtn')
 	}
 }
 
@@ -610,7 +724,14 @@ function showDecoyOutDialog(){
 		modal = $(".passlok-decoyout")
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
-		modal.dialog({modal:true, width: 600, autoOpen: true})
+		modal.dialog({modal:true, width: 600, autoOpen: true});
+			
+	//global variables for DOM elements, required by Firefox
+		decoyOut = document.getElementById('decoyOut');
+		decoyPwdOut = document.getElementById('decoyOutPwd');
+		showDecoyOutCheck = document.getElementById('showDecoyOutCheck');
+		cancelDecoyOutBtn = document.getElementById('cancelDecoyOutBtn');
+		acceptDecoyOutBtn = document.getElementById('acceptDecoyOutBtn')
 	}
 	if(!myKey) showKeyDialog()
 }
@@ -636,6 +757,15 @@ function showImageDialog(isInit){
 		}else{
 			modal.dialog({modal: true, width: 600, height: 600, autoOpen: true})
 		}
+		
+	//global variables for DOM elements, required by Firefox
+		stegoImage = document.getElementById('stegoImage');
+		imagePwd = document.getElementById('imagePwd');
+		encodePNGBtn = document.getElementById('encodePNGBtn');
+		encodeJPGBtn = document.getElementById('encodeJPGBtn');
+		decodeImgBtn = document.getElementById('decodeImgBtn');
+		stegoImageMsg = document.getElementById('stegoImageMsg');
+		previewImg = document.getElementById('previewImg')
 	}
 }
 
@@ -863,7 +993,7 @@ function composeIntercept(ev) {
 }
 
 //things that should happen after the email program loads completely
-$(window).on('load',function() {
+$(document).ready(function() {
   setTimeout(function(){
 	showKeyDialog(true);											//initialize some dialogs, but don't show them
 	showOldKeyDialog(true);
@@ -872,5 +1002,5 @@ $(window).on('load',function() {
 	getMyEmail();
 	retrieveAllSync();												//get data from sync or local storage
 	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
-  },1000)															//give it an extra second so everything is loaded
+  },5000)															//give it a few extra seconds so everything is loaded
 })

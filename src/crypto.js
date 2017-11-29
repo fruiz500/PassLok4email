@@ -537,7 +537,7 @@ function decryptList(){
 			}
 		}
 
-		if(typeof msgKeycipher == 'undefined'){							//may have been reset, so try again
+		if(typeof(msgKeycipher) == 'undefined'){							//may have been reset, so try again
 			if(theirLock){
 				lastKey = myKey;
 				idKey = makeShared(convertPubStr(theirLock),myKey);
@@ -553,7 +553,7 @@ function decryptList(){
 					}
 				}
 			}
-			if(typeof msgKeycipher == 'undefined'){						//the password may have changed, so try again with old password
+			if(typeof(msgKeycipher) == 'undefined'){						//the password may have changed, so try again with old password
 				if(!document.getElementById('oldPwd')){showOldKeyDialog(); throw('stopped for Old Password');}
 				if(oldPwdStr){
 					var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
@@ -588,7 +588,7 @@ function decryptList(){
 						var msgKeycipher = cipherArray[i].slice(8)
 					}
 				}
-				if(typeof msgKeycipher != 'undefined'){				//got it finally
+				if(typeof(msgKeycipher) != 'undefined'){				//got it finally
 					if(type == 'S'){
 						sharedKey = makeShared(convertPubStr(theirLock),oldKey)
 					}
