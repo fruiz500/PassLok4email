@@ -645,7 +645,7 @@ function decryptList(){
 
 	//final decryption for the main message, which is also compressed
 	var plainstr = symDecrypt(cipher,nonce24,msgKey,true);
-	plainstr = safeHTML(plainstr);										//sanitize what is about to be put in the DOM, based on a whitelist
+	plainstr = decryptSanitizer(plainstr);										//sanitize what is about to be put in the DOM, based on a whitelist
 
 	readBox.textContent = '';	
 	if(type != 'g'){
@@ -725,13 +725,14 @@ function decoyDecrypt(cipher,dummylock){
 	if(typeof(decoyPwdOut) == "undefined"){
 		showDecoyOutDialog();
 		throw ("stopped for decoy input")			
-	}	
-	if (!decoyPwdOut.value.trim()){					//stop to display the decoy key entry form if there is no key entered
+	}
+	var decoyOut = document.getElementById('decoyPwdOut');
+	if (!decoyOut.value.trim()){					//stop to display the decoy key entry form if there is no key entered
 		showDecoyOutDialog();
 		throw ("stopped for decoy input")
 	}
-	var keyStr = decoyPwdOut.value;
-	decoyPwdOut.value = ""	;
+	var keyStr = decoyOut.value;
+	decoyOut.value = ""	;
 
 	var nonce = cipher.slice(0,9),
 		cipherMsg = cipher.slice(9),
@@ -746,7 +747,7 @@ function decoyDecrypt(cipher,dummylock){
 	$('#decoyOut').dialog("close");
 	showDecoyOutCheck.checked = false;
 	if(!plain) failedDecrypt('decoy');									//give up
-	readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + safeHTML(decodeURI(nacl.util.encodeUTF8(plain))) + '</span>'
+	readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decryptSanitizer(decodeURI(nacl.util.encodeUTF8(plain))) + '</span>'
 }
 
 //does decoy decryption after a button is clicked

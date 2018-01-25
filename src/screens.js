@@ -1,36 +1,40 @@
 ﻿//this is for showing and hiding text in key box and other password input boxes
 function showSec(){
+	var pwdBox = document.getElementById('pwd');
 	if(showKey.checked){
-		pwd.type="TEXT"
+		pwdBox.type="TEXT"
 	}else{
-		pwd.type="PASSWORD"
+		pwdBox.type="PASSWORD"
 	}
 }
 
 //same, for old Key box
 function showOldSec(){
+	var oldPwdBox = document.getElementById('oldPwd');
 	if(showOldKey.checked){
-		oldPwd.type="TEXT"
+		oldPwdBox.type="TEXT"
 	}else{
-		oldPwd.type="PASSWORD"
+		oldPwdBox.type="PASSWORD"
 	}
 }
 
 //same, for decoy In box
 function showDecoyPwdIn(){
+	var decoyBoxIn = document.getElementById('decoyPwdIn');
 	if(showDecoyInCheck.checked){
-		decoyPwdIn.type="TEXT"
+		decoyBoxIn.type="TEXT"
 	}else{
-		decoyPwdIn.type="PASSWORD"
+		decoyBoxIn.type="PASSWORD"
 	}
 }
 
 //same, for decoy Out box
 function showDecoyPwdOut(){
+	var decoyBoxOut = document.getElementById('decoyPwdOut');
 	if(showDecoyOutCheck.checked){
-		decoyPwdOut.type="TEXT"
+		decoyBoxOut.type="TEXT"
 	}else{
-		decoyPwdOut.type="PASSWORD"
+		decoyBoxOut.type="PASSWORD"
 	}
 }
 
@@ -270,16 +274,16 @@ function openNewLock(){
 function cancelDecoyIn(){
 	$('#decoyIn').dialog("close");
 	composeMsg.textContent = 'Decoy encryption canceled';
-	decoyText.value = '';
-	decoyPwdIn.value = '';
-	showDecoyInCheck.checked = false
+	document.getElementById('decoyText').value = '';
+	document.getElementById('decoyPwdIn').value = '';
+	document.getElementById('showDecoyInCheck').checked = false
 }
 
 function cancelDecoyOut(){
 	$('#decoyOut').dialog("close");
 	readMsg.textContent = 'Decoy decryption canceled';
-	decoyPwdOut.value = '';
-	showDecoyOutCheck.checked = false
+	document.getElementById('decoyPwdOut').value = '';
+	document.getElementById('showDecoyOutCheck').checked = false
 }
 
 function showImageDecrypt(){
@@ -379,7 +383,7 @@ function introGreeting(){
 
 //to load a file into the compose dialog
 function loadFile(){
-	var fileToLoad = loadFile.files[0];
+	var fileToLoad = mainFile.files[0];
 	var fileReader = new FileReader();
 	fileReader.onload = function(fileLoadedEvent){
 		var fileName = fileToLoad.name,
@@ -395,12 +399,12 @@ function loadFile(){
 		if(fileToLoad.type.slice(0,4) == "text"){
 			composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
 		}else{
-			composeBox.innerHTML += '<br><a download="' + escapedName + '" href="' + safeHTML(URLFromFileLoaded) + '">' + escapedName + '</a>'
+			composeBox.innerHTML += '<br><a download="' + escapedName + '" href="' + decryptSanitizer(URLFromFileLoaded) + '">' + escapedName + '</a>'
 		}
 	}
 	if(fileToLoad.type.slice(0,4) == "text"){
 		fileReader.readAsText(fileToLoad, "UTF-8");
-		composeMsg.textContent = 'This is the content of file ' + safeHTML(fileToLoad.name)
+		composeMsg.textContent = 'This is the content of file ' + decryptSanitizer(fileToLoad.name)
 	}else{
 		fileReader.readAsDataURL(fileToLoad, "UTF-8");
 		composeMsg.textContent = 'The file has been loaded in encoded form. It is NOT ENCRYPTED.'
@@ -417,7 +421,7 @@ function loadImage(){
 			composeMsg.textContent = 'This file is not a recognized image type';
 			return
 		}
-		composeBox.innerHTML += safeHTML('<img style="width:80%;" src="' + URLFromFileLoaded.replace(/=+$/,'') + '">')
+		composeBox.innerHTML += decryptSanitizer('<img style="width:80%;" src="' + URLFromFileLoaded.replace(/=+$/,'') + '">')
 	};
 	fileReader.readAsDataURL(fileToLoad, "UTF-8")
 }

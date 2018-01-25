@@ -456,7 +456,7 @@ function decodePNG(){
 	decryptList();
 	openChat();
 	if(result2){
-		readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + safeHTML(LZString.decompressFromBase64(fromBin(result2[0]))) + '</span>'
+		readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decryptSanitizer(LZString.decompressFromBase64(fromBin(result2[0]))) + '</span>'
 	}
 }
 
@@ -506,7 +506,7 @@ var decodeJPG = function(){
 		decryptList();
 		openChat();
 		if(result2){
-			readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + safeHTML(LZString.decompressFromBase64(fromBin(result2[0]))) + '</span>'
+			readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decryptSanitizer(LZString.decompressFromBase64(fromBin(result2[0]))) + '</span>'
 		}
 	})
 }

@@ -218,6 +218,20 @@ function safeHTML(string){
 	return string
 }
 
+//detects the presence of data URI scheme and offers to use the safeHTML filter rather than DOMPurify, which removes that content
+function decryptSanitizer(string){
+	if(string.indexOf('href="data:') == -1){		//check the absence of a link containing data
+		var result = DOMPurify.sanitize(string)
+	}else{											//otherwise ask the user what to do
+		if(confirm('The decrypted material seems to contain binary data, which might lead to unsafe execution in Firefox. If you click OK, it will be preserved, otherwise it will be removed.')){
+			var result = safeHTML(string)
+		}else{
+			var result = DOMPurify.sanitize(string)
+		}		
+	}
+	return result
+}
+
 //takes appropriate UI action if decryption fails
 function failedDecrypt(marker){
 	if(marker == 'new'){

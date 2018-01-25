@@ -2,14 +2,14 @@
  "name": "PassLok for Email",
  "short_name": "PassLok",
  "description": "High security encryption for email. PassLok is in no way associated with Gmail, Yahoo, or Outlook.",
- "version": "0.4.5",
+ "version": "0.4.6",
  "manifest_version": 2,
  "icons": {
  "16": "favicon.ico",
  "48": "passlok-icon48.png",
  "128": "passlok-touch-icon128.png"
  },
- "content_security_policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'",
+ "content_security_policy": "default-src 'self'; img-src 'self' data:; style-src 'self'",
 "permissions":[
 	"storage",
 	"tabs",
@@ -47,6 +47,7 @@
 		"lib/ed2curve.js",
 		"lib/scrypt-async.js",
 		"lib/lz-string.js",
+		"lib/purify.js",
 		"lib/jssteg.js",
 		"lib/jsstegencoder.js",
 		"lib/jsstegdecoder.js",

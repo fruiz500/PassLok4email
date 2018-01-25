@@ -4,7 +4,7 @@
         @licstart  The following is the entire license notice for the
         code in this extension.
 
-        Copyright (C) 2017  Francisco Ruiz
+        Copyright (C) 2018  Francisco Ruiz
 
         The JavaScript and html code in this page is free software: you can
         redistribute it and/or modify it under the terms of the GNU
@@ -474,7 +474,7 @@ function showComposeDialog(emailList,bodyText,specialMessage,isInit) {
 	}
 	composeScr.style.maxHeight = document.documentElement.clientHeight*0.8 + 'px';
 	if(emailList) composeRecipientsBox.textContent = emailList.join(', ');
-	composeBox.innerHTML = safeHTML(bodyText);										//sanitize before putting in
+	composeBox.innerHTML = decryptSanitizer(bodyText);										//sanitize before putting in
 	document.getElementById(bodyID).textContent = '';
 
 	if(bodyText.replace(/<(.*?)>/gi,"")){
@@ -708,7 +708,7 @@ function showDecoyInDialog(){
 	}
 }
 
-function showDecoyOutDialog(){
+function showDecoyOutDialog(isInit){
 	var modal;
 	if (!decoyOutCreated){
 		modal = $(decoyOutHTML);
@@ -724,7 +724,11 @@ function showDecoyOutDialog(){
 		modal = $(".passlok-decoyout")
 	}
 	if (!modal.dialog("instance") || !modal.dialog("isOpen")){
-		modal.dialog({modal:true, width: 600, autoOpen: true});
+		if(isInit){
+			modal.dialog({width: 600, autoOpen: false})
+		}else{
+			modal.dialog({modal:true, width: 600, autoOpen: true})
+		}
 			
 	//global variables for DOM elements, required by Firefox
 		decoyOut = document.getElementById('decoyOut');
@@ -733,7 +737,7 @@ function showDecoyOutDialog(){
 		cancelDecoyOutBtn = document.getElementById('cancelDecoyOutBtn');
 		acceptDecoyOutBtn = document.getElementById('acceptDecoyOutBtn')
 	}
-	if(!myKey) showKeyDialog()
+	if(!myKey && !isInit) showKeyDialog()
 }
 
 function showImageDialog(isInit){
@@ -999,6 +1003,7 @@ $(document).ready(function() {
 	showOldKeyDialog(true);
 	showComposeDialog('','','',true);
 	showImageDialog(true);
+//	showDecoyOutDialog(true);
 	getMyEmail();
 	retrieveAllSync();												//get data from sync or local storage
 	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
