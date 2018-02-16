@@ -794,6 +794,7 @@ if(serviceName.match('google')){ serviceName = 'google'
 
 //to retrieve the user's own email address
 function getMyEmail(){
+  if(document.title){
 	if(serviceName == 'google'){
 		myEmail = document.title.split('-')[1].trim()
 	}else if(serviceName == 'yahoo'){
@@ -801,6 +802,7 @@ function getMyEmail(){
 	}else if(serviceName == 'outlook'){
 		myEmail = document.title.split('-')[1].trim() + '@outlook.com'
 	}
+  }
 }
 
 var soleRecipient = false;
