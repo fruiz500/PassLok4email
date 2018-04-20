@@ -2,7 +2,7 @@
     from { clip: rect(1px, auto, auto, auto); }
       to { clip: rect(0px, auto, auto, auto); }
 }
-.btC, td[class="gH acX"]{			<!--this is for Gmail-->
+.btC, td[class="gH acX bAm"]{			<!--this is for Gmail-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
 }	
@@ -10,7 +10,7 @@
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
 }
-.ms-Icon--replyAll, ._rp_81, ._mcp_93, ._mcp_55, ._mcp_02{	<!--this is for Outlook-->
+.ms-Icon--replyAll, ._rp_81, ._mcp_93, ._mcp_55, ._mcp_02, ._mcp_I2{	<!--this is for Outlook-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
 }
