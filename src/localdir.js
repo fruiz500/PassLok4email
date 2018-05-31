@@ -202,8 +202,8 @@ function moveDB(){
 		if(!locDir && ChromeSyncOn) chrome.storage.sync.remove('ChromeSyncList');		//remove index if empty
 
 		//now encrypt it with the user Password
-		composeBox.innerHTML = 'The link below is an encrypted backup containing data needed to continue conversations in course. Right-click on it and save it locally. Load it as you would an encrypted attachment and the data will be restored.<br><br><a download="PLbak.txt" href="data:,==' + keyEncrypt(JSON.stringify(locDir)) + '=="><b>PassLok encrypted database; right-click and Save link as...</b></a><br><br>If now you click the button again, the data will be erased from the app.';
-		composeMsg.textContent = 'Backup in the box.\nIf you click the same button again, it will be wiped from this machine and others in sync. This cannot be undone.';
+		composeBox.innerHTML = 'The link below is an encrypted backup containing data needed to continue conversations in course. Right-click on it and save it locally. To restore it, load it as you would an encrypted attachment.<br><br><a download="PLbak.txt" href="data:,==' + keyEncrypt(JSON.stringify(locDir)) + '=="><b>PassLok encrypted database; right-click and Save link as...</b></a><br><br>If now you click the button again while it is red, the data will be erased from the app.';
+		composeMsg.textContent = 'Backup in the box.\nIf you click the button again while red, it will be wiped from this machine and others in sync. This cannot be undone.';
 		moveBtn.style.background = '#FB5216';
 		moveBtn.style.color = 'white';
 		moveBtn.textContent = 'Wipe';
@@ -214,7 +214,6 @@ function moveDB(){
 			moveBtn.textContent = 'Backup';
 			wipeEnabled = false;
 		}, 10000)							//cancel after 10 seconds
-		selectMain();
 		updateComposeButtons('');
 		callKey = ''
 	}

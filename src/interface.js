@@ -227,7 +227,7 @@ var keyHTML = '<div class="passlok-key" id="keyScr">'+
 			'<button class="cssbutton" id="suggestKeyBtn" value="Suggest" title="suggest a Password made of five common words">Suggest</button><br></div><br>'+
 		'</div>'+
 	'<div id="keyMsg" align="center" style="height:50px;"></div>'+
-	'<input type="password" class="cssbox" autocomplete="off" id="pwd" style="" name="text" placeholder="Enter your Password here" align="center"><br><br><br><br>'+
+	'<input type="password" class="cssbox" autocomplete="off" id="myPwd" style="" name="text" placeholder="Enter your Password here" align="center"><br><br><br><br>'+
 	'<div align="center">'+
 		'<input type="checkbox" id="showKey" title="reveal box contents">&nbsp;Show&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptKeyBtn" value="OK" style="" title="accept Password">OK</button>'+
@@ -248,7 +248,7 @@ var oldKeyHTML = '<div class="passlok-oldkey" id="oldKeyScr">'+
 
 //change name dialog
 var nameHTML = '<div class="passlok-name" id="nameScr">'+
-	'<div id="nameMsg" align="center" style="height:50px;">This message was locked with a new Password. Please click <strong>OK</strong> to accept it</div><br><br>'+
+	'<div id="nameMsg" align="center" style="height:50px;">The sender has encrypted this with a new Password. Please click <strong>OK</strong> to accept it from now on</div><br><br>'+
 	'<div align="center">'+
 		'<button class="cssbutton" id="cancelNameBtn" value="Cancel" style="" title="cancel change">Cancel</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptNameBtn" value="OK" style="" title="accept change">OK</button>'+
@@ -510,7 +510,7 @@ function showKeyDialog(isInit){
 		modal.find('#suggestKeyBtn').click(suggestKey);
 		modal.find('#showKey').click(showSec);
 		modal.find('#acceptKeyBtn').click(acceptKey);
-		modal.find('#pwd').keyup(function(event){pwdKeyup(event)});
+		modal.find('#myPwd').keyup(function(event){pwdKeyup(event)});
   
 		keyCreated = true
 	}else{
@@ -529,13 +529,13 @@ function showKeyDialog(isInit){
 		firstTimeKey = document.getElementById('firstTimeKey');
 		suggestKeyBtn = document.getElementById('suggestKeyBtn');
 		keyMsg = document.getElementById('keyMsg');
-		pwd = document.getElementById('pwd');
+		myPwd = document.getElementById('myPwd');
 		showKey = document.getElementById('showKey');
 		acceptKeyBtn = document.getElementById('acceptKeyBtn');
 		fiveMin = document.getElementById('fiveMin')		
 	}
 	
-	pwd.type = 'password'
+	myPwd.type = 'password'
 }
 
 function showOldKeyDialog(isInit){
@@ -852,12 +852,7 @@ function composeIntercept(ev) {
 					var recipients = $(this).parents().eq(5).find('.g2');
 					soleRecipient = (recipients.length < 2);												//this is used when decrypting images	
 					var bodyElement = $(this).parents().eq(5).find('.a3s').eq(0);
-			 		var moreElement = bodyElement.find('.ajU');
-			 		if(moreElement.length > 0){
-						var bodyText = moreElement.eq(0).parent().html()
-			  		}else{
-				  		var bodyText = bodyElement.html()
-			  		}
+					var bodyText = bodyElement.html().split('ajU"')[0];					//leave out quoted text
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog()
@@ -1010,5 +1005,5 @@ $(document).ready(function() {
 	getMyEmail();
 	retrieveAllSync();												//get data from sync or local storage
 	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
-  },5000)															//give it a few extra seconds so everything is loaded
+  },10000)															//give it a few extra seconds so everything is loaded
 })

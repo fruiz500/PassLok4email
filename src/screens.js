@@ -1,6 +1,6 @@
 ﻿//this is for showing and hiding text in key box and other password input boxes
 function showSec(){
-	var pwdBox = document.getElementById('pwd');
+	var pwdBox = document.getElementById('myPwd');
 	if(showKey.checked){
 		pwdBox.type="TEXT"
 	}else{
@@ -123,7 +123,7 @@ function resetTimer(){
 
 	//start timer to reset Password box
 	keytimer = setTimeout(function() {
-		pwd.value = '';
+		myPwd.value = '';
 		myKey = '';
 		oldPwdStr = '';
 		imagePwd.value = ''
@@ -131,7 +131,7 @@ function resetTimer(){
 
 	//erase key at end of period, by a different way
 	if ((new Date().getTime() - keytime > period)) {
-		pwd.value = '';
+		myPwd.value = '';
 		myKey = '';
 		oldPwdStr = '';
 		imagePwd.value = ''
@@ -141,7 +141,7 @@ function resetTimer(){
 
 //converts user Password into binary format, resumes operation
 function acceptKey(){
-	var key = pwd.value.trim();
+	var key = myPwd.value.trim();
 	if(key == ''){
 		keyMsg.textContent = 'Please enter your Password';
 		throw("no Password")
@@ -170,7 +170,7 @@ function acceptKey(){
 		firstTimeKey.style.display = 'none';
 		resetTimer();
 		$('#keyScr').dialog("close");
-		pwd.value = '';
+		myPwd.value = '';
 		if (callKey == 'encrypt'){					//now complete whatever was being done when the Password was found missing
 			encrypt()
 		}else if(callKey == 'encrypt2file'){
@@ -297,13 +297,13 @@ function showImageDecrypt(){
 //displays Password strength and resets timer
 function pwdKeyup(evt){
 	resetTimer();	
-	if(pwd.value.trim() == ''){acceptKeyBtn.disabled = true;}else{acceptKeyBtn.disabled = false;};
+	if(myPwd.value.trim() == ''){acceptKeyBtn.disabled = true;}else{acceptKeyBtn.disabled = false;};
 	newPwdAccepted = false;
 	acceptKeyBtn.style.background = '';
 	evt = evt || window.event;
 	var key = evt.keyCode || evt.which || evt.keyChar;
 	if (key == 13){acceptKey()} else{												//accept upon return, otherwise display strength
-		 return keyStrength(pwd.value,'pwd')
+		 return keyStrength(myPwd.value,'pwd')
 	}
 }
 
@@ -354,8 +354,8 @@ function suggestKey(){
 		rand = rand.replace(/0/g,'o').replace(/1/g,'i').replace(/2/g,'z').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/8/g,'b').replace(/9/g,'g');
 		output = output + ' ' + rand;
 	}
-	pwd.type="TEXT";
-	pwd.value = output.trim();
+	myPwd.type="TEXT";
+	myPwd.value = output.trim();
 	showKey.checked = true
 }
 
