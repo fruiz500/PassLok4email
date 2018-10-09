@@ -213,7 +213,9 @@ var composeHTML = '<div class="passlok-compose" id="composeScr">'+
 		'<input type="checkbox" id="decoyMode" title="additional hidden message"/>&nbsp; Hidden msg.'+
 	'</div>'+
 '</div>';
-	
+
+var eyeImg ="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAASFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACrhKybAAAAF3RSTlMA5Qyz9kEFh3rd1sjDoGsfHRKwQIp+Qzv02bEAAACJSURBVCjPvVBJEoQgDMwCAfeFmfH/P51KkFKL0qN9SXdDVngRy8joHPK4XGyJbtvhohz+3G0ndHPxp0b1mojSqqyZsk+tqphFVN6S8cH+g3wQgwCrGtT3VjhB0BB26QGgN0aAGhDIZP/wUHLrUrk5g4RT83rcbxn3WJA90Y/zgs8nqY94d/b38AeFUhCT+3yIqgAAAABJRU5ErkJggg==",
+	hideImg = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAb1BMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABt6r1GAAAAJHRSTlMAFNTiDPTNBvnaulFBAe/osrGBZCXSwIdnLhzIqKd7XFRLSjAYduwyAAAAuklEQVQoz62QRxbDIAwFhWkhwb07PeH+Z4wQPMjCS89KegP6AjiWSbF9oVzBQNyNlKZZ/s+wwpvLyXlkp7P5umiIcYDIwB0ZLWzrTb3GSQYbMsjDl3wj0fj6TDmpK7F60nnLeDCW2h6rgioBVZgmwlwUJoo6bkC7KRQ9iQ/MzuWtXyjKKcTpmVc8mht4Nu5NV+Y/UAKItaY7byHsOeSkp48uQSahO+kiISfD+ha/nbcLwxwFuzB1hUP5AR4JF1hy2DV7AAAAAElFTkSuQmCC";
 //key screen	
 var keyHTML = '<div class="passlok-key" id="keyScr">'+
 	'<div id="firstTimeKey" align="left" style="width:95%; display:none;">'+
@@ -227,9 +229,11 @@ var keyHTML = '<div class="passlok-key" id="keyScr">'+
 			'<button class="cssbutton" id="suggestKeyBtn" value="Suggest" title="suggest a Password made of five common words">Suggest</button><br></div><br>'+
 		'</div>'+
 	'<div id="keyMsg" align="center" style="height:50px;"></div>'+
-	'<input type="password" class="cssbox" autocomplete="off" id="myPwd" style="" name="text" placeholder="Enter your Password here" align="center"><br><br><br><br>'+
+	'<input type="password" class="cssbox" autocomplete="off" id="myPwd" style="" name="text" placeholder="Enter your Password here" align="center">'+
+	'<img id="showKey" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
+	'<br><br><br><br>'+
 	'<div align="center">'+
-		'<input type="checkbox" id="showKey" title="reveal box contents">&nbsp;Show&nbsp;&nbsp;'+
+//		'<input type="checkbox" id="showKey" title="reveal box contents">&nbsp;Show&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptKeyBtn" value="OK" style="" title="accept Password">OK</button>'+
 	'</div><br>'+
 	'<span id="fiveMin"><p>You will need to re-enter your Password if you do not use it for 5 minutes or reload your email app</p></span>'+
@@ -238,9 +242,11 @@ var keyHTML = '<div class="passlok-key" id="keyScr">'+
 //old key dialog
 var oldKeyHTML = '<div class="passlok-oldkey" id="oldKeyScr">'+
 	'<div id="oldKeyMsg" align="center" style="height:50px;">Looks like you may have changed your Password recently. If you want to continue this conversation, please write the previous Password in the box below and click <strong>OK</strong><br><br>This may also have popped because you tried to decrypt a Read-once message for the 2nd time</div><br>'+
-	'<input type="password" class="cssbox" id="oldPwd" style="" name="oldPwd" placeholder="Enter the previous Password here." align="center"><br><br>'+
+	'<input type="password" class="cssbox" id="oldPwd" style="" name="oldPwd" placeholder="Enter the previous Password here." align="center">'+
+	'<img id="showOldKey" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
+	'<br><br>'+
 	'<div align="center">'+
-		'<input type="checkbox" id="showOldKey" title="reveal box contents">&nbsp;Show&nbsp;'+
+//		'<input type="checkbox" id="showOldKey" title="reveal box contents">&nbsp;Show&nbsp;'+
 		'<button class="cssbutton" id="cancelOldKeyBtn" value="Cancel" style="" title="cancel old Password">Cancel</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptOldKeyBtn" value="OK" style="" title="accept old Password">OK</button>'+
 	'</div>'+
@@ -293,8 +299,10 @@ var decoyInHTML = '<div class="passlok-decoyin" id="decoyIn" align="center">'+
 	'<p id="decoyMsg">Enter the Hidden Message</p>'+
 	'<textarea id="decoyText" class="cssbox" style="width:95%;" name="text" rows="3"></textarea>'+
 	'<p id="decoyInMsg">Enter the shared Key or Lock for the Hidden message</p>'+
-	'<input type="password" class="cssbox" id="decoyPwdIn" style="width:95%;" name="key"/><br><br>'+
-	'<input type="checkbox" id="showDecoyInCheck" title="reveal Key">&nbsp; Show&nbsp;&nbsp;'+
+	'<input type="password" class="cssbox" id="decoyPwdIn" style="width:95%;" name="key"/>'+
+	'<img id="showDecoyInCheck" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
+	'<br><br>'+
+//	'<input type="checkbox" id="showDecoyInCheck" title="reveal Key">&nbsp; Show&nbsp;&nbsp;'+
 	'<button class="cssbutton" id="cancelDecoyInBtn" value="Cancel" title="do not encrypt">Cancel</button>&nbsp;'+
 	'<button class="cssbutton" id="acceptDecoyInBtn" value="OK" title="go on with encryption">OK</button>'+
 '</div>';
@@ -302,8 +310,10 @@ var decoyInHTML = '<div class="passlok-decoyin" id="decoyIn" align="center">'+
 //Decoy message retrieval
 var decoyOutHTML = '<div class="passlok-decoyout" id="decoyOut" align="center">'+
 	'<p>Enter the Key for the Hidden message</p>'+
-	'<input type="password" class="cssbox" id="decoyPwdOut" style="width:95%;" name="key"/><br><br>'+
-	'<input type="checkbox" id="showDecoyOutCheck" title="reveal Key">&nbsp; Show&nbsp;'+
+	'<input type="password" class="cssbox" id="decoyPwdOut" style="width:95%;" name="key"/>'+
+	'<img id="showDecoyOutCheck" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
+	'<br><br>'+
+//	'<input type="checkbox" id="showDecoyOutCheck" title="reveal Key">&nbsp; Show&nbsp;'+
 	'<button class="cssbutton" id="cancelDecoyOutBtn" value="Cancel" title="stop decryption">Cancel</button>&nbsp;'+
 	'<button class="cssbutton" id="acceptDecoyOutBtn" value="OK" title="go on with decryption">OK</button>'+
 	'<p>The Hidden message will appear at the top of the decrypt window</p>'+
@@ -834,7 +844,10 @@ function composeIntercept(ev) {
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 					showComposeDialog(emailList,bodyText);
-					readKey()
+					if(!myKey){
+						showKeyDialog();
+						return
+					}
 				});	  
 			}
 		});
@@ -894,7 +907,10 @@ function composeIntercept(ev) {
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 					var specialMessage = "Because of a bug in Yahoo, encrypting a message in a Reply window will be tricky unless you *disable Conversations* in Settings"
 					showComposeDialog(emailList,bodyText,specialMessage);
-					readKey()
+					if(!myKey){
+						showKeyDialog();
+						return
+					}
 				});	  
 			}
 		});
@@ -963,7 +979,10 @@ function composeIntercept(ev) {
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 					showComposeDialog(emailList,bodyText);
-					readKey()
+					if(!myKey){
+						showKeyDialog();
+						return
+					}
 				});	  
 			}
 		});

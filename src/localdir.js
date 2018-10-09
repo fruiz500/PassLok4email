@@ -39,7 +39,7 @@ function resetPFS(){
 		var email = senderBox.textContent.trim();
 		if ((locDir[email][1] == null) && (locDir[email][2] == null)){
 			readMsg.textContent = 'Nothing to reset';
-			throw('no Read-once data')
+			return
 		}
 		locDir[email][1] = locDir[email][2] = null;
 		locDir[email][3] = 'reset';
@@ -72,7 +72,7 @@ function resetPFS2(){
 		var email = composeRecipientsBox.textContent.trim();
 		if ((locDir[email][1] == null) && (locDir[email][2] == null)){
 			readMsg.textContent = 'Nothing to reset';
-			throw('no Read-once data')
+			return
 		}
 		locDir[email][1] = locDir[email][2] = null;
 		locDir[email][3] = 'reset';

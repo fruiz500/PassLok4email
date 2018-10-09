@@ -1,40 +1,48 @@
 ﻿//this is for showing and hiding text in key box and other password input boxes
 function showSec(){
 	var pwdBox = document.getElementById('myPwd');
-	if(showKey.checked){
-		pwdBox.type="TEXT"
+	if(pwdBox.type=="password"){
+		pwdBox.type="text";
+		showKey.src = hideImg
 	}else{
-		pwdBox.type="PASSWORD"
+		pwdBox.type="password";
+		showKey.src = eyeImg
 	}
 }
 
 //same, for old Key box
 function showOldSec(){
 	var oldPwdBox = document.getElementById('oldPwd');
-	if(showOldKey.checked){
-		oldPwdBox.type="TEXT"
+	if(oldPwdBox.type=="password"){
+		oldPwdBox.type="text";
+		showOldKey.src = hideImg
 	}else{
-		oldPwdBox.type="PASSWORD"
+		oldPwdBox.type="password";
+		showOldKey.src = eyeImg
 	}
 }
 
 //same, for decoy In box
 function showDecoyPwdIn(){
 	var decoyBoxIn = document.getElementById('decoyPwdIn');
-	if(showDecoyInCheck.checked){
-		decoyBoxIn.type="TEXT"
+	if(decoyBoxIn.type=="password"){
+		decoyBoxIn.type="text";
+		showDecoyInCheck.src = hideImg
 	}else{
-		decoyBoxIn.type="PASSWORD"
+		decoyBoxIn.type="password";
+		showDecoyInCheck.src = eyeImg
 	}
 }
 
 //same, for decoy Out box
 function showDecoyPwdOut(){
 	var decoyBoxOut = document.getElementById('decoyPwdOut');
-	if(showDecoyOutCheck.checked){
-		decoyBoxOut.type="TEXT"
+	if(decoyBoxOut.type=="password"){
+		decoyBoxOut.type="text";
+		showDecoyOutCheck.src = hideImg
 	}else{
-		decoyBoxOut.type="PASSWORD"
+		decoyBoxOut.type="password";
+		showDecoyOutCheck.src = eyeImg
 	}
 }
 
@@ -103,15 +111,6 @@ function updateComposeButtons(emailList){
 	}
 }
 
-//The key expires after 5 minutes of not being used, this function keeps it alive
-function readKey(){
-	resetTimer();
-	if(!myKey){
-		showKeyDialog();
-		throw('stopped for key input')
-	}
-}
-
 //global variables used for password expiration
 var keytimer = 0,
 	keytime = new Date().getTime();
@@ -144,11 +143,11 @@ function acceptKey(){
 	var key = myPwd.value.trim();
 	if(key == ''){
 		keyMsg.textContent = 'Please enter your Password';
-		throw("no Password")
+		return
 	}
 	if(key.length < 4){
 		keyMsg.textContent = 'This Password is too short';
-		throw("short Password")
+		return
 	}
 	keyMsg.innerHTML = '<span class="blink" style="color:orange">LOADING...</span> for best speed, use at least a Medium Password';
 
@@ -204,7 +203,7 @@ function checkPassword(){
 			acceptKeyBtn.style.background = '';
 			acceptKeyBtn.style.color = ''
 		}, 10000)								//forget request after 10 seconds
-		throw('stopped for Password confirmation')
+		return
 	}else{															//new Password accepted, so store it and move on
 		newPwdAccepted = false
 	}
@@ -268,7 +267,7 @@ function cancelStego(){
 function openNewLock(){
 	showNameDialog();
 	nameMsg.textContent = 'This message from ' + theirEmail + ' was locked with a new Password. Click OK if you wish to accept it.';
-	throw('stopped to accept new Lock')
+	return
 }
 
 function cancelDecoyIn(){
@@ -354,9 +353,10 @@ function suggestKey(){
 		rand = rand.replace(/0/g,'o').replace(/1/g,'i').replace(/2/g,'z').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/8/g,'b').replace(/9/g,'g');
 		output = output + ' ' + rand;
 	}
-	myPwd.type="TEXT";
+	myPwd.type="text";
 	myPwd.value = output.trim();
-	showKey.checked = true
+	showKey.checked = true;
+	keyStrength(output.trim(),true)
 }
 
 //to blink text
@@ -393,7 +393,7 @@ function loadFile(){
 			var reply = confirm("This file is larger than 1.5MB and Chrome won't save it. Do you want to continue loading it?");
 			if(!reply){
 				composeMsg.textContent = 'File load canceled';
-				throw('file load canceled')
+				return
 			}
 		}
 		if(fileToLoad.type.slice(0,4) == "text"){
@@ -428,7 +428,10 @@ function loadImage(){
 
 //loads a file or image from the read dialog and starts decryption
 function loadEncryptedFile(){
-	readKey();
+	if(!myKey){
+		showKeyDialog();
+		return
+	}
 	var fileToLoad = loadEncrFile.files[0];
 	var fileReader = new FileReader();
 	fileReader.onload = function(fileLoadedEvent){
@@ -475,7 +478,10 @@ var loadEncryptImage = function(e) {
 		composeMsg.textContent = 'Nothing to encrypt';
 		return
 	}
-	readKey();
+	if(!myKey){
+		showKeyDialog();
+		return
+	}
     var reader = new FileReader();
     reader.onload = function(event) {
         previewImg.style.display = 'block';

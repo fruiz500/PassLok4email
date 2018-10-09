@@ -4,13 +4,17 @@ function encrypt(){
 	if(stegoMode.checked){var lengthLimit = 10000}else{var lengthLimit = 71000};
 	if(!chatMode.checked && composeBox.innerHTML.length > lengthLimit){
 		var reply = confirm("This item is too long to be encrypted directly into the email and likely will be clipped by the server, rendering it undecryptable. We suggest to cancel and instead encrypt to file or to image, then attach the resulting file to your email");
-		if(!reply) throw('text is too long for encrypting to email')
+		if(!reply) return
 	}
 	if(stegoMode.checked) enterCover();
 	if(chatMode.checked){
 		displayChat()
-	}else if(composeBox.textContent){
-		readKey();
+	}else if(composeBox.innerHTML){
+		resetTimer();
+		if(!myKey){
+			showKeyDialog();
+			return
+		}
 		var emailArray = composeRecipientsBox.textContent.split(',');
 		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 		encryptList(emailArray,false,false);
@@ -26,7 +30,11 @@ function encrypt2file(){
 	if(chatMode.checked){
 		displayChat()
 	}else if(composeBox.textContent){
-		readKey();
+		resetTimer();
+		if(!myKey){
+			showKeyDialog();
+			return
+		}
 		if(stegoMode.checked) enterCover();
 		var emailArray = composeRecipientsBox.textContent.split(',');
 		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
@@ -43,7 +51,11 @@ function encrypt2image(){
 	if(chatMode.checked){
 		displayChat()
 	}else{
-		readKey();
+		resetTimer();
+		if(!myKey){
+			showKeyDialog();
+			return
+		}
 		var emailArray = composeRecipientsBox.textContent.split(',');
 		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
 		encryptList(emailArray,false,true);
@@ -55,7 +67,11 @@ var text2decrypt = '';
 //function that starts it all when the read screen loads
 function decrypt(){
 	callKey = 'decrypt';
-	readKey();
+	resetTimer();
+	if(!myKey){
+		showKeyDialog();
+		return
+	}
 	var text = text2decrypt;
 	text = text.replace(/<(.*?)>/gi,"");
 	if(text.match('\u2004') || text.match('\u2005') || text.match('\u2006')) fromLetters(text);		//if hidden text
@@ -88,7 +104,10 @@ function inviteEncrypt(){
 
 	}else{
 		callKey = 'inviteEncrypt';
-		readKey();
+		if(!myKey){
+			showKeyDialog();
+			return
+		}
 		var nonce = nacl.randomBytes(9),
 			nonce24 = makeNonce24(nonce),
 			noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
@@ -166,6 +185,7 @@ function encryptList(listArray,isFileOut,isImageOut){
 	}
 		
 	var padding = decoyEncrypt(75,myKey);						//this for decoy mode
+	if(!padding) return;
 
 	var cipher = symEncrypt(text,nonce24,msgKey,true);					//main encryption event including compression, but don't add the result yet
 		
@@ -243,7 +263,7 @@ function encryptList(listArray,isFileOut,isImageOut){
 				}else{
 					if(encryptArray.length < 2){
 						composeMsg.textContent = 'In Read-once mode, you must select recipients other than yourself.';
-						throw('only myself for Read-once')
+						return
 					}
 				}
 			}
@@ -438,7 +458,7 @@ function decryptList(){
 		}else{
 			readMsg.textContent = 'This message is not encrypted, but perhaps the images or attachments are. Download them and click the big button to decrypt them'
 		}
-		throw('illegal Lock at the start')
+		return
 	}
 
 	if(!locDir[theirEmail]){											//make entry if needed
@@ -453,7 +473,7 @@ function decryptList(){
 	
 	if(theirLock && !text){
 		readMsg.textContent = "This message contains only the sender's Lock. Nothing to decrypt";
-		throw("empty message")
+		return
 	}
 	
 	var	type = text.charAt(0);
@@ -461,7 +481,7 @@ function decryptList(){
 	if(!type.match(/[gSO]/)){
 		readBox.textContent = '';
 		readMsg.textContent = 'This message is not encrypted, but perhaps the attachments are. Click More to decrypt them';
-		throw("unrecognized type")
+		return
 	}
 	
 	var cipherInput = nacl.util.decodeBase64(text),
@@ -495,7 +515,7 @@ function decryptList(){
 
 	if (type == 'O' && theirEmail == myEmail){
 		readMsg.textContent = 'You cannot decrypt Read-once messages to yourself';
-		throw('Read-once message to myself')
+		return
 	}
 	if(type == 'S'){														//signed mode
 		var sharedKey = makeShared(convertPubStr(theirLock),myKey),
@@ -551,7 +571,7 @@ function decryptList(){
 				}
 			}
 			if(typeof(msgKeycipher) == 'undefined'){						//the password may have changed, so try again with old password
-				if(!document.getElementById('oldPwd')){showOldKeyDialog(); throw('stopped for Old Password');}
+				if(!document.getElementById('oldPwd')){showOldKeyDialog(); return;}
 				if(oldPwdStr){
 					var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
 						oldKey = ed2curve.convertSecretKey(oldKeySgn),
@@ -560,7 +580,7 @@ function decryptList(){
 						
 				}else{													//prompt for old password
 					$('#oldKeyScr').dialog("open");
-					throw('stopped for old key input')
+					return
 				}
 				
 				if(type == 'S'){
@@ -617,7 +637,7 @@ function decryptList(){
 
 			}else if(typeByte[0] == 172){													//reset. lastKey is the permanent, or symmetric key
 				var agree = confirm('If you go ahead, the current Read-once conversation with the sender will be reset. This may be OK if this is a new message, but if it is an old one the conversation will go out of sync');
-				if(!agree) throw('reset decrypt canceled');
+				if(!agree) return;
 				var	sharedKey = makeShared(newLock,myKey);
 				locDir[theirEmail][1] = locDir[theirEmail][2] = null;					//if reset type, delete ephemeral data first
 
@@ -684,11 +704,11 @@ function decoyEncrypt(length,seckey){
 	if(decoyMode.checked){
 		if(typeof(decoyPwdIn) == "undefined"){
 			showDecoyInDialog();
-			throw ("stopped for decoy input")			
+			return false		
 		}
 		if (!decoyPwdIn.value.trim() || !decoyText.value.trim()){ 					//stop to display the decoy entry form if there is no hidden message or key
 			showDecoyInDialog();
-			throw ("stopped for decoy input")
+			return false
 		}
 		var keyStr = decoyPwdIn.value,
 			text = encodeURI(decoyText.value.replace(/%20/g, ' '));
@@ -721,12 +741,12 @@ function decoyEncrypt(length,seckey){
 function decoyDecrypt(cipher,dummylock){
 	if(typeof(decoyPwdOut) == "undefined"){
 		showDecoyOutDialog();
-		throw ("stopped for decoy input")			
+		return false			
 	}
 	var decoyOut = document.getElementById('decoyPwdOut');
 	if (!decoyOut.value.trim()){					//stop to display the decoy key entry form if there is no key entered
 		showDecoyOutDialog();
-		throw ("stopped for decoy input")
+		return false
 	}
 	var keyStr = decoyOut.value;
 	decoyOut.value = ""	;
