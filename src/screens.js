@@ -1,49 +1,67 @@
-﻿//this is for showing and hiding text in key box and other password input boxes
+﻿var hashiliOn = false;			//default to not showing hashili
+
+//this is for showing and hiding text in key box and other password input boxes
 function showSec(){
 	var pwdBox = document.getElementById('myPwd');
 	if(pwdBox.type=="password"){
-		pwdBox.type="text";
-		showKey.src = hideImg
+		if(hashiliOn){
+			pwdBox.type="text";
+			showKey.src = hideImg
+		}else{hashiliOn = true}
 	}else{
 		pwdBox.type="password";
-		showKey.src = eyeImg
+		showKey.src = eyeImg;
+		hashiliOn = false
 	}
+	keyStrength(pwdBox.value,'pwd')
 }
 
 //same, for old Key box
 function showOldSec(){
 	var oldPwdBox = document.getElementById('oldPwd');
 	if(oldPwdBox.type=="password"){
-		oldPwdBox.type="text";
-		showOldKey.src = hideImg
+		if(hashiliOn){
+			oldPwdBox.type="text";
+			showOldKey.src = hideImg
+		}else{hashiliOn = true}
 	}else{
 		oldPwdBox.type="password";
-		showOldKey.src = eyeImg
+		showOldKey.src = eyeImg;
+		hashiliOn = false
 	}
+	keyStrength(oldPwdBox.value,'oldPwd')
 }
 
 //same, for decoy In box
 function showDecoyPwdIn(){
 	var decoyBoxIn = document.getElementById('decoyPwdIn');
 	if(decoyBoxIn.type=="password"){
-		decoyBoxIn.type="text";
-		showDecoyInCheck.src = hideImg
+		if(hashiliOn){
+			decoyBoxIn.type="text";
+			showDecoyInCheck.src = hideImg
+		}else{hashiliOn = true}
 	}else{
 		decoyBoxIn.type="password";
-		showDecoyInCheck.src = eyeImg
+		showDecoyInCheck.src = eyeImg;
+		hashiliOn = false
 	}
+	keyStrength(decoyBoxIn.value,'decoyIn')
 }
 
 //same, for decoy Out box
 function showDecoyPwdOut(){
 	var decoyBoxOut = document.getElementById('decoyPwdOut');
 	if(decoyBoxOut.type=="password"){
-		decoyBoxOut.type="text";
-		showDecoyOutCheck.src = hideImg
+		if(hashiliOn){
+			decoyBoxOut.type="text";
+			showDecoyOutCheck.src = hideImg
+		}else{hashiliOn = true}
 	}else{
 		decoyBoxOut.type="password";
-		showDecoyOutCheck.src = eyeImg
+		showDecoyOutCheck.src = eyeImg;
+		hashiliOn = false
 	}
+	keyStrength(decoyBoxOut.value,'decoyOut')
 }
 
 //to switch between basic and advanced interface in the Compose dialog
@@ -309,8 +327,9 @@ function pwdKeyup(evt){
 //enter old password from keyboard
 function oldPwdKeyup(evt){
 	evt = evt || window.event
-	if (evt.keyCode == 13){acceptOldKey()}
-	else if(oldPwd.value.trim() == ''){return}
+	if (evt.keyCode == 13){acceptOldKey()} else{
+		return keyStrength(oldPwd.value,'pwdOld')
+	}
 }
 
 //enter decoy Key from keyboard
@@ -318,7 +337,7 @@ function decoyPwdInKeyup(evt){
 	evt = evt || window.event;
 	var key = evt.keyCode || evt.which || evt.keyChar;
 	if (key == 13){acceptDecoyIn()} else {
-		return keyStrength(decoyPwdIn.value,'decoy')
+		return keyStrength(decoyPwdIn.value,'decoyIn')
 	}
 }
 
@@ -326,7 +345,9 @@ function decoyPwdInKeyup(evt){
 function decoyPwdOutKeyup(evt){
 	evt = evt || window.event;
 	var key = evt.keyCode || evt.which || evt.keyChar;
-	if (key == 13) doDecoyDecrypt()
+	if (key == 13){doDecoyDecrypt()} else {
+		return keyStrength(decoyPwdOut.value,'decoyOut')
+	}
 }
 
 //enter image Key from keyboard

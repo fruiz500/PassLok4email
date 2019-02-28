@@ -24,8 +24,12 @@ function keyStrength(pwd,location) {
 	var msg = 'Password strength: ' + msg + '<br>Up to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process<br>' + hashili(pwd);
 	if(location == 'pwd'){
 		keyMsg.innerHTML = msg
-	}else if(location == 'decoy'){
+	}else if(location == 'oldPwd'){
+		oldKeyMsg.innerHTML = msg
+	}else if(location == 'decoyIn'){
 		decoyInMsg.innerHTML = msg
+	}else if(location == 'decoyOut'){
+		decoyOutMsg.innerHTML = msg
 	}else if(location == 'image'){
 		stegoImageMsg.innerHTML = msg
 	}
@@ -100,11 +104,11 @@ function reduceVariants(string){
 var vowel = 'aeiou',
 	consonant = 'bcdfghjklmnprstvwxyz';
 function hashili(string){
-	var code = nacl.hash(nacl.util.decodeUTF8(string.trim())).slice(-4),			//take last 8 bytes of the SHA512		
-		code10 = ((((code[0]*256)+code[1])*256+code[2])*256+code[3]) % 100000000,		//convert to decimal
+	var code = nacl.hash(nacl.util.decodeUTF8(string.trim())).slice(-2),			//take last 4 bytes of the SHA512		
+		code10 = ((code[0]*256)+code[1]) % 10000,					//convert to decimal
 		output = '';
 
-	for(var i = 0; i < 4; i++){
+	for(var i = 0; i < 2; i++){
 		var remainder = code10 % 100;								//there are 5 vowels and 20 consonants; encode every 2 digits into a pair
 		output += consonant[Math.floor(remainder / 5)] + vowel[remainder % 5];
 		code10 = (code10 - remainder) / 100

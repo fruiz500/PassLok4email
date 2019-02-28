@@ -10,7 +10,7 @@
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
 }
-.ms-Icon--replyAll, ._rp_81, ._mcp_93, ._mcp_55, ._mcp_02, ._mcp_I2{	<!--this is for Outlook-->
+.ms-CommandBar-primaryCommand{	<!--this is for Outlook-->
       -webkit-animation-duration: 0.001s;
       -webkit-animation-name: composeInserted;
 }
