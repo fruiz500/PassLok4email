@@ -414,7 +414,7 @@ function keyDecrypt(cipherStr,isArray){
 function stripHeaders(string){
 	string = string.replace(/[\s\n]/g,'').replace(/&nbsp;/g,'');							//remove spaces, newlines
 	if(string.match('==')) string = string.split('==')[1];									//keep only PassLok item, if bracketed
-	string = string.replace(/<(.*?)>/gi,"").replace(/[^a-zA-Z0-9+\/]/g,''); 		//takes out html tags and anything that is not base64
+	string = string.replace(/<(.*?)>/gi,"").replace(/[^a-zA-Z0-9\+\/]/g,''); 		//takes out html tags and anything that is not base64
 	return string
 }
 
@@ -431,11 +431,17 @@ var padding;			//global variable involved in decoding secret message, needed for
 //decrypts a message encrypted for multiple recipients. Encryption can be Signed, Read-once, or an Invitation. This is detected automatically. It can also be an encrypted database
 function decryptList(){
 	readBox.textContent = '';
-	var text = stripHeaders(text2decrypt);											//get the data from a global variable holding it
+	var text = stripHeaders(text2decrypt);										//get the data from a global variable holding it
 	theirEmail = senderBox.textContent.trim();
 
-	if(isBase36(text.slice(0,50)) && (text.slice(50,56) == '//////')){					//find Lock located at the start
+	if(isBase36(text.slice(0,50)) && (text.slice(50,56) == '//////')){			//find Lock located at the start
 		theirLock = changeBase(text.slice(0,50),base36,base64,true)
+	
+	}else if(text.length == 50 && isBase36(text)){								//just an ezLock
+		theirLock = changeBase(text,base36,base64,true)
+		
+	}else if(text.length == 43){													//just a regular Lock
+		theirLock = text
 		
 	}else if(text.charAt(0) == 'k'){													//it's an encrypted database, so decrypt it and merge it
 		var agree = confirm('This is an encrypted local database. It will be loaded if you click OK, possibly replacing current data. This cannot be undone.');
