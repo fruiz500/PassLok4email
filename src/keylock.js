@@ -310,37 +310,55 @@ var base36 = '0123456789abcdefghijkLmnopqrstuvwxyz';										//capital L so it 
 var base64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 //changes the base of a number. inAlpha and outAlpha are strings containing the base code for the original and target bases, as in '0123456789' for decimal
 //adapted from http://snippetrepo.com/snippets/bignum-base-conversion, by kybernetikos
-function changeBase(number, inAlpha, outAlpha, isLock) {
-	var targetBase = outAlpha.length,
-		originalBase = inAlpha.length;
-    var result = "";
+function changeBase(numberIn, inAlpha, outAlpha, isLock) {
+	var isWordsIn = inAlpha instanceof RegExp || inAlpha.match(' '),				//detect whether it's words into string, or the opposite
+		isWordsOut = outAlpha instanceof RegExp || outAlpha.match(' ');			//could be RegExp or space-delimited
+		
+	//split alphabets into array
+	var alphaIn = isWordsIn ? (inAlpha instanceof RegExp ? inAlpha.toString().slice(1,-2).split('|') : inAlpha.trim().split(' ')) : inAlpha.split(''),
+		alphaOut = isWordsOut ? (outAlpha instanceof RegExp ? outAlpha.toString().slice(1,-2).split('|') : outAlpha.trim().split(' ')) : outAlpha.split('');
+	
+	var targetBase = alphaOut.length,
+		originalBase = alphaIn.length;
+    var result = [],
+		number = isWordsIn ? numberIn.trim().replace(/ +/g,' ').split(' ') : numberIn.split('');
+		
+	if(isWordsIn){										//convert words into dictionary variants
+		for(var i = 0; i < number.length; i++){
+			number[i] = reduceVariants(number[i])
+		}
+	}
+	
     while (number.length > 0) {
-        var remainingToConvert = "", resultDigit = 0;
+        var remainingToConvert = [], resultDigit = 0;
         for (var position = 0; position < number.length; ++position) {
-            var idx = inAlpha.indexOf(number[position]);
+            var idx = alphaIn.indexOf(number[position]);
             if (idx < 0) {
-                throw new Error('Symbol ' + number[position] + ' from the'
-                    + ' original number ' + number + ' was not found in the'
-                    + ' alphabet ' + inAlpha);
+				readMsg.textContent = "Word '" + replaceVariants(number[position]) + "' in word Lock not found in dictionary. Please check"
+				return false
             }
             var currentValue = idx + resultDigit * originalBase;
             var remainDigit = Math.floor(currentValue / targetBase);
             resultDigit = currentValue % targetBase;
             if (remainingToConvert.length || remainDigit) {
-                remainingToConvert += inAlpha[remainDigit];
+                remainingToConvert.push(alphaIn[remainDigit])
             }
         }
         number = remainingToConvert;
-        result = outAlpha[resultDigit] + result;
+        result.push(alphaOut[resultDigit])
     }
-
-	//add leading zeroes in Locks
-	if(isLock){
-		if(targetBase == 64){
-			while(result.length < 43) result = 'A'+ result;
-		} else if (targetBase == 36){
-			while(result.length < 50) result = '0'+ result;
+	
+	if(isLock){													//add leading zeroes in Locks
+		var lockLength = isWordsOut ? 20 : ((targetBase == 36) ? 50 : 43);
+		while(result.length < lockLength) result.push(alphaOut[0])
+	}
+	result.reverse();
+	
+	if(isWordsOut){											//convert to regular words
+		for(var i = 0; i < result.length; i++){
+			result[i] = replaceVariants(result[i])
 		}
 	}
-    return result;
+
+    return isWordsOut ? result.join(' ') : result.join('')
 }
