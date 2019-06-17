@@ -1,7 +1,7 @@
 //This function calls the Letters encoder
 function textStego(text){
 	if(text.match('==')) text = text.split('==')[1];
-	text = text.replace(/<(.*?)>/gi,"");
+	text = text.replace(/<(.*?)>/gi,"").replace(/<br>/g,'').replace(/[\r\n]/g,'');
 	var	result = toLetters(text);
 	coverBox.value = '';
 	return result
@@ -10,14 +10,15 @@ function textStego(text){
 //This function calls the Invisible encoder
 function invisibleStego(text){
 	if(text.match('==')) text = text.split('==')[1];
-	text = text.replace(/<(.*?)>/gi,"");
+	text = text.replace(/<(.*?)>/gi,"").replace(/<br>/g,'').replace(/[\r\n]/g,'');
 	return toInvisible(text)
 }
 
 //just to enter the cover text
 function enterCover(){
-	if(typeof(coverBox) == 'undefined') {showCoverDialog(); return};
-	if(coverBox.value.trim() == '') {showCoverDialog(); return};	
+	if(typeof(coverBox) == 'undefined') {showCoverDialog(); return false};
+	if(coverBox.value.trim() == '') {showCoverDialog(); return false};	
+	return true
 }
 
 //retrieves base64 string from binary array. No error checking
@@ -211,7 +212,7 @@ function invisibleEncoder(bin){
 
 function invisibleDecoder(text){
 	var binStr = text.replace(/\u00ad/g,'0').replace(/\u200c/g,'1');
-	binStr = binStr.match(/[a-zA-Z,:\.][01]+[a-zA-Z]/)[0].slice(1,-1);						//remove text around the binary part
+	binStr = binStr.match(/[a-zA-Z,:\.][01]+[a-zA-Z\r\n]/)[0].slice(1,-1);						//remove text around the binary part
 	var length = binStr.length,
 		bin = new Array(length);
 	for(var i = 0; i < length; i++){
@@ -237,7 +238,7 @@ function updateCapacity(){
   if(decodeImgBtn.style.display == 'none'){						//do this calculation only when encoding, not when decoding
 	var	textsize = composeBox.textContent.length;
 
-	stegoImageMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
+	blinkMsg(stegoImageMsg);
 	setTimeout(function(){																				//give it 2 seconds to complete
 		if(stegoImageMsg.textContent == 'PROCESSING') stegoImageMsg.textContent = 'There was an error calculating the capacity, but the image is still usable'
 	},2000)
@@ -309,8 +310,8 @@ function encodePNG(){
 		stegoImageMsg.textContent = 'Please load an image before clicking this button';
 		return
 	}
-	
-	stegoImageMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
+
+	blinkMsg(stegoImageMsg);
 
 	var resultURI = encodePNGprocess(text);					//this is the main process, in next functions
 
@@ -401,7 +402,7 @@ function encodePNGprocess(text){
 
 //extract text from image
 function decodeImage(){	
-	stegoImageMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
+	blinkMsg(stegoImageMsg);
 	
   setTimeout(function(){
 	if(previewImg.src.slice(11,15) == 'png;'){							//two cases: png and jpeg
@@ -463,7 +464,7 @@ function decodePNG(){
 	decryptList();
 	openChat();
 	if(result2){
-		readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decryptSanitizer(LZString.decompressFromBase64(fromBin(result2[0]))) + '</span>'
+		readMsg.textContent = 'Hidden message: ' + decryptSanitizer(LZString.decompressFromBase64(fromBin(result2[0])))
 	}
 }
 
@@ -513,7 +514,7 @@ var decodeJPG = function(){
 		decryptList();
 		openChat();
 		if(result2){
-			readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decryptSanitizer(LZString.decompressFromBase64(fromBin(result2[0]))) + '</span>'
+			readMsg.textContent = 'Hidden message: ' + decryptSanitizer(LZString.decompressFromBase64(fromBin(result2[0])))
 		}
 	})
 }
@@ -532,7 +533,7 @@ var encodeJPG = function(){
 		stegoImageMsg.textContent = 'Please load an image before clicking this button';
 		return
 	}
-	stegoImageMsg.innerHTML = '<span class="blink" style="color:cyan">PROCESSING</span>';				//Get blinking message started
+	blinkMsg(stegoImageMsg);
 	
   setTimeout(function(){																			//the rest after a 30 ms delay
 	if(previewImg.src.slice(11,15).match(/gif;|png;/)) transparent2white();		//first remove transparency

@@ -4,7 +4,7 @@
         @licstart  The following is the entire license notice for the
         code in this extension.
 
-        Copyright (C) 2018  Francisco Ruiz
+        Copyright (C) 2019  Francisco Ruiz
 
         The JavaScript and html code in this page is free software: you can
         redistribute it and/or modify it under the terms of the GNU
@@ -162,7 +162,7 @@ var PLicon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+
 	
 //read screen
 var readHTML = '<div class="passlok-read" id="readScr">'+
-	'<div id="readMsg" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
+	'<div id="readMsg" class="message" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
 	'<div id="readButtons" style="display: block;" align="center">'+
 		'<button class="cssbutton" id="readHelpBtn" value="Help" style="" title="open Help in a new tab">Help</button>'+
 		'<span id="moreReadButtons" style="display:none">&nbsp;&nbsp;'+
@@ -181,7 +181,7 @@ var readHTML = '<div class="passlok-read" id="readScr">'+
 	
 //compose screen
 var composeHTML = '<div class="passlok-compose" id="composeScr">'+
-	'<div id="composeMsg" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
+	'<div id="composeMsg" class="message" align="center" style="height:50px;"><p><span style="color:green;">Welcome to PassLok</span></p></div><br>'+
 	'<div id="composeButtons" style="display: block;" align="center">'+
 		'<button class="cssbutton" id="encryptBtn" value="" style="background-color:#3896F9;color:white;" title="encrypt contents using the mode selected below">Encrypt to email</button>&nbsp;&nbsp;'+
 		'<span id="moreComposeButtons" style="display:none">'+
@@ -228,12 +228,11 @@ var keyHTML = '<div class="passlok-key" id="keyScr">'+
 		'<div align="center">'+
 			'<button class="cssbutton" id="suggestKeyBtn" value="Suggest" title="suggest a Password made of five common words">Suggest</button><br></div><br>'+
 		'</div>'+
-	'<div id="keyMsg" align="center" style="height:50px;"></div>'+
+	'<div id="keyMsg" class="message" align="center" style="height:50px;"></div>'+
 	'<input type="password" class="cssbox" autocomplete="off" id="myPwd" style="" name="text" placeholder="Enter your Password here" align="center">'+
 	'<img id="showKey" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
 	'<br><br><br><br>'+
 	'<div align="center">'+
-//		'<input type="checkbox" id="showKey" title="reveal box contents">&nbsp;Show&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptKeyBtn" value="OK" style="" title="accept Password">OK</button>'+
 	'</div><br>'+
 	'<span id="fiveMin"><p>You will need to re-enter your Password if you do not use it for 5 minutes or reload your email app</p></span>'+
@@ -241,12 +240,11 @@ var keyHTML = '<div class="passlok-key" id="keyScr">'+
 
 //old key dialog
 var oldKeyHTML = '<div class="passlok-oldkey" id="oldKeyScr">'+
-	'<div id="oldKeyMsg" align="center" style="height:50px;">Looks like you may have changed your Password recently. If you want to continue this conversation, please write the previous Password in the box below and click <strong>OK</strong><br><br>This may also have popped because you tried to decrypt a Read-once message for the 2nd time</div><br>'+
+	'<div id="oldKeyMsg" class="message" align="center" style="height:50px;">Looks like you may have changed your Password recently. If you want to continue this conversation, please write the previous Password in the box below and click <strong>OK</strong><br><br>This may also have popped because you tried to decrypt a Read-once message for the 2nd time</div><br>'+
 	'<input type="password" class="cssbox" id="oldPwd" style="" name="oldPwd" placeholder="Enter the previous Password here." align="center">'+
 	'<img id="showOldKey" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
 	'<br><br>'+
 	'<div align="center">'+
-//		'<input type="checkbox" id="showOldKey" title="reveal box contents">&nbsp;Show&nbsp;'+
 		'<button class="cssbutton" id="cancelOldKeyBtn" value="Cancel" style="" title="cancel old Password">Cancel</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptOldKeyBtn" value="OK" style="" title="accept old Password">OK</button>'+
 	'</div>'+
@@ -254,7 +252,7 @@ var oldKeyHTML = '<div class="passlok-oldkey" id="oldKeyScr">'+
 
 //change name dialog
 var nameHTML = '<div class="passlok-name" id="nameScr">'+
-	'<div id="nameMsg" align="center" style="height:50px;">The sender has encrypted this with a new Password. Please click <strong>OK</strong> to accept it from now on</div><br><br>'+
+	'<div id="nameMsg" class="message" align="center" style="height:50px;">The sender has encrypted this with a new Password. Please click <strong>OK</strong> to accept it from now on</div><br><br>'+
 	'<div align="center">'+
 		'<button class="cssbutton" id="cancelNameBtn" value="Cancel" style="" title="cancel change">Cancel</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptNameBtn" value="OK" style="" title="accept change">OK</button>'+
@@ -263,7 +261,7 @@ var nameHTML = '<div class="passlok-name" id="nameScr">'+
 
 //make chat dialog
 var chatHTML = '<div class="passlok-chat "id="chatScr">'+
-	'<span id="chatMsg">Choose the type of chat, then optionally write in the box a message including the date and time</span><br><br>'+
+	'<span id="chatMsg" class="message">Choose the type of chat, then optionally write in the box a message including the date and time</span><br><br>'+
 	'<div align="center">'+
 		'<input type="radio" name="chatmodes" id="dataChat"  title="chat with text messages and file exchange" checked/>&nbsp; Text and files&nbsp;&nbsp;'+
 		'<input type="radio" name="chatmodes" id="audioChat" title="like Text chat, plus audio"/>&nbsp; Audio&nbsp;&nbsp;'+
@@ -278,7 +276,7 @@ var chatHTML = '<div class="passlok-chat "id="chatScr">'+
 
 //accept chat dialog
 var acceptChatHTML = '<div class="passlok-acceptchat" id="acceptChatScr">'+
-	'<div id="chatMsg2" align="center" style="height:50px;"></div><br><br>'+
+	'<div id="chatMsg2" class="message" align="center" style="height:50px;"></div><br><br>'+
 	'<div align="center">'+
 		'<button class="cssbutton" id="cancelChat2Btn" value="Cancel" style="" title="cancel chat">Cancel</button>&nbsp;&nbsp;'+
 		'<button class="cssbutton" id="acceptChatBtn" value="OK" style="" title="start chat">OK</button>'+
@@ -287,7 +285,7 @@ var acceptChatHTML = '<div class="passlok-acceptchat" id="acceptChatScr">'+
 
 //Cover text entry dialog
 var coverHTML = '<div class="passlok-cover" id="coverScr">'+
-	'<div align="center"> <span id="coverMsg">Please enter the cover text for hiding and click <strong>OK</strong></span><br><br>'+
+	'<div align="center"> <span id="coverMsg" class="message">Please enter the cover text for hiding and click <strong>OK</strong></span><br><br>'+
     	'<textarea class="cssbox" rows="5" autocomplete="off" id="coverBox" style="width:95%;max-height:600px" placeholder="Enter the cover text here." align="center"></textarea><br>'+
     	'<button class="cssbutton" id="cancelCoverBtn" value="cancel" style="" title="close cover text dialog">Cancel</button>&nbsp;'+
 		'<button class="cssbutton" id="acceptCoverBtn" value="OK" style="" title="accept cover text">OK</button>'+
@@ -296,24 +294,22 @@ var coverHTML = '<div class="passlok-cover" id="coverScr">'+
 
 //Decoy message entry
 var decoyInHTML = '<div class="passlok-decoyin" id="decoyIn" align="center">'+
-	'<p id="decoyMsg">Enter the Hidden Message</p>'+
+	'<p id="decoyMsg" class="message">Enter the Hidden Message</p>'+
 	'<textarea id="decoyText" class="cssbox" style="width:95%;" name="text" rows="3"></textarea>'+
-	'<p id="decoyInMsg">Enter the shared Key or Lock for the Hidden message</p>'+
+	'<p id="decoyInMsg" class="message">Enter the shared Key or Lock for the Hidden message</p>'+
 	'<input type="password" class="cssbox" id="decoyPwdIn" style="width:95%;" name="key"/>'+
 	'<img id="showDecoyInCheck" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
 	'<br><br>'+
-//	'<input type="checkbox" id="showDecoyInCheck" title="reveal Key">&nbsp; Show&nbsp;&nbsp;'+
 	'<button class="cssbutton" id="cancelDecoyInBtn" value="Cancel" title="do not encrypt">Cancel</button>&nbsp;'+
 	'<button class="cssbutton" id="acceptDecoyInBtn" value="OK" title="go on with encryption">OK</button>'+
 '</div>';
 
 //Decoy message retrieval
 var decoyOutHTML = '<div class="passlok-decoyout" id="decoyOut" align="center">'+
-	'<p id="decoyOutMsg">Enter the Key for the Hidden message</p>'+
+	'<p id="decoyOutMsg" class="message">Enter the Key for the Hidden message</p>'+
 	'<input type="password" class="cssbox" id="decoyPwdOut" style="width:95%;" name="key"/>'+
 	'<img id="showDecoyOutCheck" class="field-icon" src=' + eyeImg + ' title="click this to see/hide the Password">'+
 	'<br><br>'+
-//	'<input type="checkbox" id="showDecoyOutCheck" title="reveal Key">&nbsp; Show&nbsp;'+
 	'<button class="cssbutton" id="cancelDecoyOutBtn" value="Cancel" title="stop decryption">Cancel</button>&nbsp;'+
 	'<button class="cssbutton" id="acceptDecoyOutBtn" value="OK" title="go on with decryption">OK</button>'+
 	'<p>The Hidden message will appear at the top of the decrypt window</p>'+
@@ -326,7 +322,7 @@ var imageHTML = '<div class="passlok-image" id="stegoImage" align="center">'+
 	'<button class="cssbutton" id="encodePNGBtn" value="PNG Hide" title="encrypt into PNG image">Encrypt to PNG</button>&nbsp;'+
 	'<button class="cssbutton" id="encodeJPGBtn" value="JPG Hide" title="encrypt into JPG image">Encrypt to JPG</button>'+
 	'<button class="cssbutton" id="decodeImgBtn" value="Decrypt" title="extract hidden content and decrypt">Decrypt</button><br><br>'+
-	'<div id="stegoImageMsg" style="height:30px;"></div><br>'+
+	'<div id="stegoImageMsg" class="message" style="height:30px;"></div><br>'+
 	'<img id="previewImg" src="" width="100%"/>'+
 '</div>';
 
@@ -531,7 +527,9 @@ function showKeyDialog(isInit){
 			modal.dialog({width : 600, autoOpen: false})
 		}else{
 			modal.dialog({modal: true, width: 600, autoOpen: true});
-			if(!myEmail) document.getElementById('keyMsg').innerHTML = '<span style="color:red;">PassLok has not loaded properly. Please reload your email page</span>'
+			if(!myEmail){
+				document.getElementById('keyMsg').textContent = 'PassLok has not loaded properly. Please reload your email page'
+			}
 		}
 				
 	//global variables for DOM elements, required by Firefox
@@ -865,7 +863,8 @@ function composeIntercept(ev) {
 					var recipients = $(this).parents().eq(5).find('.g2');
 					soleRecipient = (recipients.length < 2);												//this is used when decrypting images	
 					var bodyElement = $(this).parents().eq(5).find('.a3s').eq(0);
-					var bodyText = bodyElement.html().split('ajU"')[0];					//leave out quoted text
+					var bodyText = bodyElement.html();
+					if(bodyText.match('ajU"')) bodyText = bodyText.split('ajU"')[0] + '>';			//leave out quoted text, completing final tag so it can be filtered out
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 					showReadDialog(email,bodyText);
 					if(!myKey) showKeyDialog()
@@ -1025,7 +1024,7 @@ $(document).ready(function() {
 	showOldKeyDialog(true);
 	showComposeDialog('','','',true);
 	showImageDialog(true);
-//	showDecoyOutDialog(true);
+	showDecoyOutDialog(true);
 	getMyEmail();
 	retrieveAllSync();												//get data from sync or local storage
 	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10

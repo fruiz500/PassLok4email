@@ -1,67 +1,62 @@
-﻿var hashiliOn = false;			//default to not showing hashili
+﻿//start blinking message, for Msg elements
+function blinkMsg(element){
+	element.textContent = '';
+	var blinker = document.createElement('span');
+	blinker.className = "blink";
+	blinker.textContent = 'PROCESSING';
+	element.appendChild(blinker)
+}
 
 //this is for showing and hiding text in key box and other password input boxes
 function showSec(){
-	var pwdBox = document.getElementById('myPwd');
-	if(pwdBox.type=="password"){
-		if(hashiliOn){
-			pwdBox.type="text";
-			showKey.src = hideImg
-		}else{hashiliOn = true}
+	var pwdIn = document.getElementById('myPwd');
+	if(pwdIn.type=="password"){
+		pwdIn.type="text";
+		showKey.src = hideImg
 	}else{
-		pwdBox.type="password";
-		showKey.src = eyeImg;
-		hashiliOn = false
+		pwdIn.type="password";
+		showKey.src = eyeImg
 	}
-	keyStrength(pwdBox.value,'pwd')
+	keyStrength(pwdIn.value.trim(),'pwd')
 }
 
 //same, for old Key box
 function showOldSec(){
-	var oldPwdBox = document.getElementById('oldPwd');
-	if(oldPwdBox.type=="password"){
-		if(hashiliOn){
-			oldPwdBox.type="text";
-			showOldKey.src = hideImg
-		}else{hashiliOn = true}
+	var oldPwdIn = document.getElementById('oldPwdBox');
+	if(oldPwdIn.type=="password"){
+		oldPwdIn.type="text";
+		showOldKey.src = hideImg
 	}else{
-		oldPwdBox.type="password";
-		showOldKey.src = eyeImg;
-		hashiliOn = false
+		oldPwdIn.type="password";
+		showOldKey.src = eyeImg
 	}
-	keyStrength(oldPwdBox.value,'oldPwd')
+	keyStrength(oldPwdIn.value.trim(),'oldPwd')
 }
 
 //same, for decoy In box
 function showDecoyPwdIn(){
 	var decoyBoxIn = document.getElementById('decoyPwdIn');
 	if(decoyBoxIn.type=="password"){
-		if(hashiliOn){
-			decoyBoxIn.type="text";
-			showDecoyInCheck.src = hideImg
-		}else{hashiliOn = true}
+		decoyBoxIn.type="text";
+		showDecoyInCheck.src = hideImg
 	}else{
 		decoyBoxIn.type="password";
-		showDecoyInCheck.src = eyeImg;
-		hashiliOn = false
+		showDecoyInCheck.src = eyeImg
 	}
-	keyStrength(decoyBoxIn.value,'decoyIn')
+	keyStrength(decoyBoxIn.value.trim(),'decoyIn')
 }
 
 //same, for decoy Out box
 function showDecoyPwdOut(){
 	var decoyBoxOut = document.getElementById('decoyPwdOut');
 	if(decoyBoxOut.type=="password"){
-		if(hashiliOn){
-			decoyBoxOut.type="text";
-			showDecoyOutCheck.src = hideImg
-		}else{hashiliOn = true}
+		decoyBoxOut.type="text";
+		showDecoyOutCheck.src = hideImg
 	}else{
 		decoyBoxOut.type="password";
-		showDecoyOutCheck.src = eyeImg;
-		hashiliOn = false
+		showDecoyOutCheck.src = eyeImg
 	}
-	keyStrength(decoyBoxOut.value,'decoyOut')
+	keyStrength(decoyBoxOut.value.trim(),'decoyOut')
 }
 
 //to switch between basic and advanced interface in the Compose dialog
@@ -69,7 +64,8 @@ function switchButtons(){
 	if(encodeURI(interfaceBtn.textContent) == "%E2%96%BA"){		//right arrow character
 		moreComposeButtons.style.display = '';
 		checkBoxes.style.display = '';
-		interfaceBtn.innerHTML = '&#9668;';
+//		interfaceBtn.innerHTML = '&#9668;';
+		interfaceBtn.textContent = '\u25C4';
 		toolBar1.style.display = 'block';
 		composeBox.style.borderTopLeftRadius = '0';
 		composeBox.style.borderTopRightRadius = '0';
@@ -77,7 +73,8 @@ function switchButtons(){
 	}else{
 		moreComposeButtons.style.display = 'none';
 		checkBoxes.style.display = 'none';
-		interfaceBtn.innerHTML = '&#9658;';
+//		interfaceBtn.innerHTML = '&#9658;';
+		interfaceBtn.textContent = '\u25BA';
 		toolBar1.style.display = 'none';
 		composeBox.style.borderTopLeftRadius = '15px';
 		composeBox.style.borderTopRightRadius = '15px';
@@ -89,11 +86,13 @@ function switchButtons(){
 function switchReadButtons(){
 	if(encodeURI(readInterfaceBtn.textContent) == "%E2%96%BA"){
 		moreReadButtons.style.display = '';
-		readInterfaceBtn.innerHTML = '&#9668;';
+//		readInterfaceBtn.innerHTML = '&#9668;';
+		readInterfaceBtn.textContent = '\u25C4';
 		readMsg.textContent = "Click the big button to decrypt a file or an image, the small one to reveal a hidden message"
 	}else{
 		moreReadButtons.style.display = 'none';
-		readInterfaceBtn.innerHTML = '&#9658;';
+//		readInterfaceBtn.innerHTML = '&#9658;';
+		readInterfaceBtn.textContent = '\u25BA';
 		readMsg.textContent = "Click the arrow to decrypt attachments or reveal a hidden message"
 	}
 }
@@ -167,7 +166,14 @@ function acceptKey(){
 		keyMsg.textContent = 'This Password is too short';
 		return
 	}
-	keyMsg.innerHTML = '<span class="blink" style="color:orange">LOADING...</span> for best speed, use at least a Medium Password';
+	keyMsg.textContent = '';
+	var blinker = document.createElement('span'),
+		msgText = document.createElement('span');
+	blinker.className = "blink";
+	blinker.textContent = "LOADING...";
+	msgText.textContent = " for best speed, use at least a Medium Password";
+	keyMsg.appendChild(blinker);
+	keyMsg.appendChild(msgText);
 
 	setTimeout(function(){									//execute after a delay so the LOADING message can load
 		if(!newPwdAccepted){
@@ -328,7 +334,7 @@ function pwdKeyup(evt){
 function oldPwdKeyup(evt){
 	evt = evt || window.event
 	if (evt.keyCode == 13){acceptOldKey()} else{
-		return keyStrength(oldPwd.value,'pwdOld')
+		return keyStrength(document.getElementById('oldPwd').value,'pwdOld')
 	}
 }
 
@@ -337,7 +343,7 @@ function decoyPwdInKeyup(evt){
 	evt = evt || window.event;
 	var key = evt.keyCode || evt.which || evt.keyChar;
 	if (key == 13){acceptDecoyIn()} else {
-		return keyStrength(decoyPwdIn.value,'decoyIn')
+		return keyStrength(document.getElementById('decoyPwdIn').value,'decoyIn')
 	}
 }
 
@@ -346,7 +352,7 @@ function decoyPwdOutKeyup(evt){
 	evt = evt || window.event;
 	var key = evt.keyCode || evt.which || evt.keyChar;
 	if (key == 13){doDecoyDecrypt()} else {
-		return keyStrength(decoyPwdOut.value,'decoyOut')
+		return keyStrength(document.getElementById('decoyPwdOut').value,'decoyOut')
 	}
 }
 
@@ -354,14 +360,10 @@ function decoyPwdOutKeyup(evt){
 function imagePwdKeyup(evt){
 	evt = evt || window.event;
 	var key = evt.keyCode || evt.which || evt.keyChar;
-	if(decodeImgBtn.style.display == ''){
-		if (key == 13){
-			decodeImage()
-		}else{
-			return keyStrength(imagePwd.value,'image')
-		}
+	if(decodeImgBtn.style.display == '' && key == 13){
+		decodeImage()
 	}else{
-		return keyStrength(imagePwd.value,'image')
+		return keyStrength(document.getElementById('imagePwd').value,'image')
 	}
 }
 

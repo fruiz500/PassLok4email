@@ -6,9 +6,13 @@ function encrypt(){
 		var reply = confirm("This item is too long to be encrypted directly into the email and likely will be clipped by the server, rendering it undecryptable. We suggest to cancel and instead encrypt to file or to image, then attach the resulting file to your email");
 		if(!reply) return
 	}
-	if(stegoMode.checked) enterCover();
+	if(stegoMode.checked){
+		var reply = enterCover();
+		if(!reply) return
+	}
 	if(chatMode.checked){
-		displayChat()
+		displayChat();
+		return
 	}else if(composeBox.innerHTML){
 		resetTimer();
 		if(!myKey){
@@ -28,7 +32,8 @@ function encrypt(){
 function encrypt2file(){
 	callKey = 'encrypt2file';
 	if(chatMode.checked){
-		displayChat()
+		displayChat();
+		return
 	}else if(composeBox.textContent){
 		resetTimer();
 		if(!myKey){
@@ -49,7 +54,8 @@ function encrypt2file(){
 function encrypt2image(){
 	callKey = 'encrypt2image';
 	if(chatMode.checked){
-		displayChat()
+		displayChat();
+		return
 	}else{
 		resetTimer();
 		if(!myKey){
@@ -94,7 +100,11 @@ var inviteRequested = false;
 function inviteEncrypt(){
 	if(!inviteRequested){				//sets flag so action happens on next click
 		inviteRequested = true;
-		composeMsg.innerHTML = "If you click <strong>Invite</strong> again, the contents of the box will be encrypted and added to a special invitation message. This message can be decrypted by anyone and is <span class='blink'>NOT SECURE</span>";
+		composeMsg.textContent = "If you click *Invite* again, the contents of the box will be encrypted and added to a special invitation message. This message can be decrypted by anyone and is ";
+		var blinker = document.createElement('span');
+		blinker.className = "blink";
+		blinker.textContent = "NOT SECURE";
+		composeMsg.appendChild(blinker);
 		inviteBtn.style.background = '#FB5216';
 		setTimeout(function() {
 			inviteRequested = false;
@@ -116,9 +126,20 @@ function inviteEncrypt(){
 		setTimeout(function(){composeMsg.textContent = "This invitation can be decrypted by anyone"},20);
 
 		var output = myezLock + '//////' + nacl.util.encodeBase64(concatUint8Arrays([128],concatUint8Arrays(nonce,symEncrypt(text,nonce24,myLockbin,true)))).replace(/=+$/,'')
-		output = output.match(/.{1,80}/g).join("\n");
-		var outNode = document.createElement('div');
-		outNode.innerHTML = "<br>The gibberish below contains a message from me that has been encrypted with <b>PassLok for Email</b>. To decrypt it, do this:<ol><li>Install the PassLok for Email extension by following one of these links: <ul><li>Chrome:&nbsp; https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh</li><li>Firefox:&nbsp; https://addons.mozilla.org/en-US/firefox/addon/passlok-for-email/</li></ul></li><li>Reload your email and get back to this message.</li><li>Click the <b>PassLok</b> logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.</li></ol>If you don't use Chrome or Firefox, or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com/app<br><pre>----------begin invitation message encrypted with PassLok--------==<br><br>" + output + "<br><br>==---------end invitation message encrypted with PassLok-----------</pre>";
+		output = output.match(/.{1,80}/g).join("\r\n");
+		var outNode = document.createElement('div');	
+		outNode.style.whiteSpace = "pre-line";	
+		outNode.textContent = "The gibberish link below contains a message from me that has been encrypted with PassLok for Email, To decrypt it, do this:\r\n1. Install the PassLok for Email extension by following one of these links:\r\nChrome:&nbsp; https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh\r\nFirefox:&nbsp; https://addons.mozilla.org/en-US/firefox/addon/passlok-for-email/\r\n\r\n2. Reload your email and get back to this message.\r\n\r\n3. Click the PassLok logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.\r\n\r\n4. If you don't use Chrome or Firefox, or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com/app\r\n";
+		var initialTag = document.createElement('pre'),
+			invBody = document.createElement('pre'),
+			finalTag = document.createElement('pre');
+		initialTag.textContent = "----------begin invitation message encrypted with PassLok--------==";
+		invBody.textContent = output;
+		finalTag.textContent = "==---------end invitation message encrypted with PassLok-----------";
+		outNode.appendChild(initialTag);
+		outNode.appendChild(invBody);
+		outNode.appendChild(finalTag);
+			
 		if(typeof(isNewYahoo) == "undefined") outNode.contentEditable = 'true';
 		var bodyElement = document.getElementById(bodyID);
 		bodyElement.insertBefore(outNode,bodyElement.childNodes[0]);
@@ -278,7 +299,8 @@ function encryptList(listArray,isFileOut,isImageOut){
 
 	//finish off by adding the encrypted message and tags
 	outString += nacl.util.encodeBase64(concatUint8Arrays(outArray,cipher)).replace(/=+$/,'');
-	var outNode = document.createElement('div');								//output node not sanitized because it is made by encryption
+	var outNode = document.createElement('div');	
+	outNode.style.whiteSpace = "pre-line";						//so that carriage returns are respected
 	
 if(!isImageOut){																//normal output, not to image
 	if(stegoMode.checked){
@@ -288,36 +310,49 @@ if(!isImageOut){																//normal output, not to image
 	}
 
 	if(isFileOut && !invisibleMode.checked){									//output to File
+		var fileLink = document.createElement('a');
 		if(stegoMode.checked){
-			outNode.innerHTML = '<a download="ChangeMe.txt" href="data:,' + outString + '"><b>PassLok Hidden message; right-click and select Save Link As... Make sure to change the name</b></a>'
+			fileLink.download = "ChangeMe.txt";
+			fileLink.href = "data:," + outString;
+			fileLink.textContent = "PassLok Hidden message; right-click and select Save Link As... Make sure to change the name"			
 		}else if(onceMode.checked){
 			if(textMode.checked){
-				outNode.innerHTML = '<a download="PLmso.txt" href="data:,' + outString + '"><b>PassLok Read-once message as a text file; right-click and choose Save Link As...</b></a>'
+				fileLink.download = "PL24mso.txt";
+				fileLink.href = "data:," + outString;
+				fileLink.textContent = "PassLok 2.4 Read-once message (text file); right-click and choose Save Link As..."
 			}else{
-				outNode.innerHTML = '<a download="PLmso.plk" href="data:binary/octet-stream;base64,' + outString + '"><b>PassLok Read-once message as a binary file; right-click and choose Save Link As...</b></a>'
+				fileLink.download = "PL24mso.plk";
+				fileLink.href = "data:binary/octet-stream;base64," + outString;
+				fileLink.textContent = "PassLok 2.4 Read-once message (binary file); right-click and choose Save Link As..."
 			}
 		}else{
 			if(textMode.checked){
-				outNode.innerHTML = '<a download="PLmss.txt" href="data:,' + outString + '"><b>PassLok Signed message as a text file; right-click and choose Save Link As...</b></a>'
+				fileLink.download = "PL24mss.txt";
+				fileLink.href = "data:," + outString;
+				fileLink.textContent = "PassLok 2.4 Signed message (text file); right-click and choose Save Link As..."
 			}else{
-				outNode.innerHTML = '<a download="PLmss.plk" href="data:binary/octet-stream;base64,' + outString + '"><b>PassLok Signed message as a binary file; right-click and choose Save Link As...</b></a>'
+				fileLink.download = "PL24mss.plk";
+				fileLink.href = "data:binary/octet-stream;base64," + outString;
+				fileLink.textContent = "PassLok 2.4 Signed message (binary file); right-click and choose Save Link As..."
 			}
 		}
 	}else{																		//output to email page
 		if(stegoMode.checked){
 			outNode.textContent = outString
 		}else if(invisibleMode.checked){
-			outNode.innerHTML = 'Invisible message at the end of the introduction below this line. Edit as needed and remove this notice:<br><br>Dear friend,' + outString + '<br><br>Body of the message.'
+			outNode.textContent = 'Invisible message at the end of the introduction below this line. Edit as needed and remove this notice:\r\n\r\nDear friend,' + outString + '\r\n\r\nBody of the message.'
 		}else{
-			if(onceMode.checked){
-				outNode.innerHTML = '<pre>----------begin Read-once message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,80}/g).join("<br>") + '<br><br>==---------end Read-once message encrypted with PassLok-----------</pre>'
+			var fileLink = document.createElement('pre');
+			if(onceMode.checked){			
+				fileLink.textContent = '----------begin Read-once message encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end Read-once message encrypted with PassLok-----------'
 			} else if(isChatInvite){
-				outNode.innerHTML = '<pre>----------begin Chat invitation encrypted with PassLok--------==<br><br>' + outString.match(/.{1,80}/g).join("<br>") + '<br><br>==---------end Chat invitation encrypted with PassLok-----------</pre>'
+				fileLink.textContent = '----------begin Chat invitation encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end Chat invitation encrypted with PassLok-----------'
 			} else {
-				outNode.innerHTML = '<pre>----------begin Signed message encrypted with PassLok--------==<br><br>' + outString.match(/.{1,80}/g).join("<br>") + '<br><br>==---------end Signed message encrypted with PassLok-----------</pre>'
+				fileLink.textContent = '----------begin Signed message encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end Signed message encrypted with PassLok-----------'
 			}
 		}
 	}
+	if(fileLink) outNode.appendChild(fileLink)
 }else{																			//no extra text if output is to image
 	outNode.textContent = outString
 }
@@ -345,7 +380,7 @@ if(!isImageOut){																//normal output, not to image
 		}
 	}else{
 		var bodyElement = document.getElementById(bodyID);
-		bodyElement.insertBefore(outNode,bodyElement.childNodes[0])
+		bodyElement.insertBefore(outNode,bodyElement.firstChild)
 	}
 	if(inviteArray.length != 0){		 
 		composeMsg.textContent = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:\n' + inviteArray.join(', ') + '\nYou should send them an invitation first. You may close this dialog now'
@@ -681,13 +716,10 @@ function decryptList(){
 	var plainstr = symDecrypt(cipher,nonce24,msgKey,true);
 	plainstr = decryptSanitizer(plainstr);										//sanitize what is about to be put in the DOM, based on a whitelist
 
-	readBox.textContent = '';	
-	if(type != 'g'){
-		readBox.innerHTML = plainstr;
-	}else{																	//add further instructions if it was an invitation
-		plainstr = "Congratulations! You have decrypted your first message from me with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address if it's not there already so PassLok can recognize the recipient, but <em>do not write your message yet</em>. Then click the <b>PassLok</b> logo (orange key in the bottom toolbar).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt to email</b> button.</li><li>The encrypted message will appear in the compose window. Add the subject and whatever plain text you want, and click <b>Send</b>.</li></ol>";
-		readBox.innerHTML = plainstr
+	if(type == 'g'){																	//add further instructions if it was an invitation
+		plainstr = "Congratulations! You have decrypted your first message from me with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address if it's not there already so PassLok can recognize the recipient, but <em>do not write your message yet</em>. Then click the <b>PassLok</b> logo (orange key in the bottom toolbar).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt to email</b> button.</li><li>The encrypted message will appear in the compose window. Add the subject and whatever plain text you want, and click <b>Send</b>.</li></ol>";		
 	}
+	readBox.innerHTML = plainstr
 
 	syncLocDir();															//everything OK, so store
 
@@ -781,15 +813,17 @@ function decoyDecrypt(cipher,dummylock){
 	$('#decoyOut').dialog("close");
 	showDecoyOutCheck.checked = false;
 	if(!plain) failedDecrypt('decoy');									//give up
-	readMsg.innerHTML = 'Hidden message: <span style="color:blue">' + decryptSanitizer(decodeURI(nacl.util.encodeUTF8(plain))) + '</span>'
+	readMsg.textContent = 'Hidden message: ' + decryptSanitizer(decodeURI(nacl.util.encodeUTF8(plain)));
+	return true
 }
 
 //does decoy decryption after a button is clicked
 function doDecoyDecrypt(){
+	var msg = 'You must have just decrypted something in order to use this feature';
 	if(padding){
-		decoyDecrypt(padding,convertPubStr(theirLock));
+		if(!decoyDecrypt(padding,convertPubStr(theirLock))){readMsg.textContent = msg; return};
 		padding = ''
 	}else{
-		readMsg.textContent = 'You must have just decrypted something in order to use this feature'
+		readMsg.textContent = msg
 	}
 }

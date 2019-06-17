@@ -147,6 +147,10 @@ img.intLink {
 	color: #000000;
 	border:1px solid #dedede;
 	overflow: auto;
+	white-space: pre-line;
+}
+.message {
+	white-space: pre-line;
 }
 .field-icon {
   margin-left: -30px;

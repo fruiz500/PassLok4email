@@ -3,35 +3,43 @@ function keyStrength(pwd,location) {
 	var entropy = entropycalc(pwd);
 
 	if(entropy == 0){
-		var msg = 'This is a known <span style="color:magenta">bad Password!</span>';
+		var msg = 'This is a known bad Password!';
+		var colorName = 'magenta'
 	}else if(entropy < 20){
-		var msg = '<span style="color:magenta">Terrible!</span>';
+		var msg = 'Terrible!';
+		var colorName = 'magenta'
 	}else if(entropy < 40){
-		var msg = '<span style="color:red">Weak!</span>';
+		var msg = 'Weak!';
+		var colorName = 'red'
 	}else if(entropy < 60){
-		var msg = '<span style="color:orange">Medium</span>';
+		var msg = 'Medium';
+		var colorName = 'darkorange'
 	}else if(entropy < 90){
-		var msg = '<span style="color:lime">Good!</span>';
+		var msg = 'Good!';
+		var colorName = 'green'
 	}else if(entropy < 120){
-		var msg = '<span style="color:blue">Great!</span>';
+		var msg = 'Great!';
+		var colorName = 'blue'
 	}else{
-		var msg = '<span style="color:cyan">Overkill  !!</span>';
+		var msg = 'Overkill  !!';
+		var colorName = 'cyan'
 	}
 
 	var iter = Math.max(1,Math.min(20,Math.ceil(24 - entropy/5)));			//set the scrypt iteration exponent based on entropy: 1 for entropy >= 120, 20(max) for entropy <= 20
 
 	var seconds = time10/10000*Math.pow(2,iter-8);			//to tell the user how long it will take, in seconds
-	var msg = 'Password strength: ' + msg + '<br>Up to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process<br>' + hashili(pwd);
-	if(location == 'pwd'){
-		keyMsg.innerHTML = msg
-	}else if(location == 'oldPwd'){
-		oldKeyMsg.innerHTML = msg
-	}else if(location == 'decoyIn'){
-		decoyInMsg.innerHTML = msg
-	}else if(location == 'decoyOut'){
-		decoyOutMsg.innerHTML = msg
-	}else if(location == 'image'){
-		stegoImageMsg.innerHTML = msg
+	var msg = 'Password strength: ' + msg + '\r\nUp to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process';
+	var msgName = '';
+	if(location == 'pwd'){msgName = 'keyMsg'
+	}else if(location == 'oldPwd'){msgName = 'oldKeyMsg'
+	}else if(location == 'decoyIn'){msgName = 'decoyInMsg'
+	}else if(location == 'decoyOut'){msgName = 'decoyOutMsg'
+	}else if(location == 'image'){msgName = 'stegoImageMsg'
+	}
+	if(msgName){
+		document.getElementById(msgName).textContent = msg;
+		hashili(msgName,pwd);
+		document.getElementById(msgName).style.color = colorName
 	}
 	return iter
 };
@@ -102,18 +110,28 @@ function reduceVariants(string){
 
 //makes 'pronounceable' hash of a string, so user can be sure the password was entered correctly
 var vowel = 'aeiou',
-	consonant = 'bcdfghjklmnprstvwxyz';
-function hashili(string){
-	var code = nacl.hash(nacl.util.decodeUTF8(string.trim())).slice(-2),			//take last 4 bytes of the SHA512		
-		code10 = ((code[0]*256)+code[1]) % 10000,					//convert to decimal
-		output = '';
+	consonant = 'bcdfghjklmnprstvwxyz',
+	hashiliTimer;
+function hashili(msgID,string){
+	var element = document.getElementById(msgID);
+	clearTimeout(hashiliTimer);
+	hashiliTimer = setTimeout(function(){
+		if(!string.trim()){
+			element.innerText += ''
+		}else{
+			var code = nacl.hash(nacl.util.decodeUTF8(string.trim())).slice(-2),			//take last 4 bytes of the SHA512		
+				code10 = ((code[0]*256)+code[1]) % 10000,		//convert to decimal
+				output = '';
 
-	for(var i = 0; i < 2; i++){
-		var remainder = code10 % 100;								//there are 5 vowels and 20 consonants; encode every 2 digits into a pair
-		output += consonant[Math.floor(remainder / 5)] + vowel[remainder % 5];
-		code10 = (code10 - remainder) / 100
-	}
-	return output
+			for(var i = 0; i < 2; i++){
+				var remainder = code10 % 100;								//there are 5 vowels and 20 consonants; encode every 2 digits into a pair
+				output += consonant[Math.floor(remainder / 5)] + vowel[remainder % 5];
+				code10 = (code10 - remainder) / 100
+			}
+//	return output
+			element.innerText += '\n' + output
+		}
+	}, 1000);						//one second delay to display hashili
 }
 
 //a bunch of global variables. The rest of the global variables are flags that are defined right before they are to be used.

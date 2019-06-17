@@ -202,8 +202,16 @@ function moveDB(){
 		if(!locDir && ChromeSyncOn) chrome.storage.sync.remove('ChromeSyncList');		//remove index if empty
 
 		//now encrypt it with the user Password
-		composeBox.innerHTML = 'The link below is an encrypted backup containing data needed to continue conversations in course. Right-click on it and save it locally. To restore it, load it as you would an encrypted attachment.<br><br><a download="PLbak.txt" href="data:,==' + keyEncrypt(JSON.stringify(locDir)) + '=="><b>PassLok encrypted database; right-click and Save link as...</b></a><br><br>If now you click the button again while it is red, the data will be erased from the app.';
-		composeMsg.textContent = 'Backup in the box.\nIf you click the button again while red, it will be wiped from this machine and others in sync. This cannot be undone.';
+		composeBox.textContent = 'The link below is an encrypted backup containing data needed to continue conversations in course. Right-click on it and save it locally. To restore it, load it as you would an encrypted attachment.\r\n\r\n';
+		var fileLink = document.createElement('a');
+		fileLink.download = "PLbak.txt";
+		fileLink.href = 'data:,==' + keyEncrypt(JSON.stringify(locDir)) + '==';
+		fileLink.textContent = "PassLok encrypted database; right-click and Save link as...";
+		var epilogue = document.createTextNode("\r\n\r\nPassLok encrypted database; right-click and Save link as...</b></a><br><br>If now you click the button again while it is red, the data will be erased from the app.");
+		composeBox.appendChild(fileLink);
+		composeBox.appendChild(epilogue);
+		
+		composeMsg.textContent = 'Backup in the box.\r\nIf you click the button again while red, it will be wiped from this machine and others in sync. This cannot be undone.';
 		moveBtn.style.background = '#FB5216';
 		moveBtn.style.color = 'white';
 		moveBtn.textContent = 'Wipe';
