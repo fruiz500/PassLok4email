@@ -1,0 +1,230 @@
+input:focus {
+    outline: none;
+    border:1px solid #00CA68;
+    box-shadow: 0 0 10px #77b5a4;
+}
+a:hover {
+  color: red;
+  position: relative;
+}
+select {
+	-webkit-appearance: button;
+	-webkit-user-select: none;
+	margin: 0;
+	border: 1px solid #dedede;
+	color: #666666;
+}
+img.intLink {
+	border: 0;
+}
+.intLink:hover {
+	text-decoration: none;
+	cursor: pointer;
+	background: #d4d4d4;
+}
+.screen {
+	display: none;
+}
+.cssbutton {
+	-webkit-border-radius: 10px;
+  	border-radius: 10px;
+  	font-family: Arial;
+	font-size: small;
+  	padding: 8px;
+  	text-decoration: none;
+	border:0px;
+	margin-right: -2px;
+	color: #666666;
+  	background: #e6e6e6;
+}
+.cssbutton:hover {
+	text-decoration: none;
+	cursor: pointer;
+	background: #d4d4d4;
+}
+.cssbutton:focus {
+    outline: none;
+    box-shadow: 0 0 10px #75b3a2;
+}
+.cssbox {
+	-webkit-border-radius: 15px;
+  	border-radius: 15px;
+  	padding: 15px;
+  	text-decoration: none;
+	width: 99.4%;
+	-webkit-appearance: none;
+	box-sizing: border-box;
+   	 -webkit-box-sizing:border-box;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	color: #000000;
+	border:1px solid #dedede;
+	overflow: auto;
+	white-space: pre-line;
+}
+.cssbox:focus {
+    outline: none;
+    border:1px solid #00CA68;
+    box-shadow: 0 0 10px #719ECE;
+}
+.message {
+	white-space: pre-line;
+	height: 40px;
+}
+.field-icon {
+  margin-left: -30px;
+  height: 18px;
+  z-index: 2;
+}
+.blink {
+	-webkit-animation: blink .75s linear infinite;
+	-moz-animation: blink .75s linear infinite;
+	-ms-animation: blink .75s linear infinite;
+	-o-animation: blink .75s linear infinite;
+	animation: blink .75s linear infinite;
+	color: blue;
+}
+ @-webkit-keyframes blink {
+ 0% {
+opacity: 1;
+}
+ 50% {
+opacity: 1;
+}
+ 50.01% {
+opacity: 0;
+}
+ 100% {
+opacity: 0;
+}
+}
+ @-moz-keyframes blink {
+ 0% {
+opacity: 1;
+}
+ 50% {
+opacity: 1;
+}
+ 50.01% {
+opacity: 0;
+}
+ 100% {
+opacity: 0;
+}
+}
+ @-ms-keyframes blink {
+ 0% {
+opacity: 1;
+}
+ 50% {
+opacity: 1;
+}
+ 50.01% {
+opacity: 0;
+}
+ 100% {
+opacity: 0;
+}
+}
+ @-o-keyframes blink {
+ 0% {
+opacity: 1;
+}
+ 50% {
+opacity: 1;
+}
+ 50.01% {
+opacity: 0;
+}
+ 100% {
+opacity: 0;
+}
+}
+ @keyframes blink {
+ 0% {
+opacity: 1;
+}
+ 50% {
+opacity: 1;
+}
+ 50.01% {
+opacity: 0;
+}
+ 100% {
+opacity: 0;
+}
+}
+
+#composeBox {
+	height: 150px;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+#toolBar1 {
+	padding-top: 1px;
+	padding-left: 2px;
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;
+	background: #e6e6e6;
+	width: 99.1%;
+}
+#toolBar1 select {
+	font-size: 10px;
+	width: 80px;
+	padding: 2px;
+	border-radius: 8px;
+}
+#keyScr {
+	display: block;
+}
+#loadEncrFile {
+	display: none;
+}
+#firstTimeKey {
+	display: none;
+}
+#resetSpan {
+	display: none;
+}
+#resetSpan2 {
+	display: none;
+}
+#imgFile {
+	display: none;
+}
+#mainFile {
+	display: none;
+}
+#encryptImageFile {
+	display: none;
+}
+#moveBtn {
+	display: none;
+}
+#checkBoxes {
+	font-size: 8pt;
+}
+#encryptBtn {
+	background: #d9edff;
+}
+#encryptBtn:hover {
+	background: #cae5fd;
+}
+#encryptFileBtn {
+	background: #d9edff;
+}
+#encryptFileBtn:hover {
+	background: #cae5fd;
+}
+#encryptImageBtn {
+	background: #d9edff;
+}
+#encryptImageBtn:hover {
+	background: #cae5fd;
+}
+#inviteBtn {
+	background: #d9edff;
+}
+#inviteBtn:hover {
+	background: #cae5fd;
+}

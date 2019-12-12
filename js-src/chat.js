@@ -10,15 +10,17 @@ function charsLeftChat(){
 }
 
 var isChatInvite = false;
+
 //start making a Chat invitation
 function displayChat(){
-	showChatDialog();
+	openScreen('chatScr');
 	isChatInvite = true
 }
 
 //continues making a chat invite after the user has chosen the chat type
 function makeChat(){
-	$('#chatScr').dialog("close");
+	if(!refreshKey()) return;							//check that key is active and stop if not
+	openScreen('composeScr');
 
 	if(dataChat.checked){
 		var type = 'A'
@@ -73,22 +75,19 @@ function openChat(){
 	if (typetoken.length == 107 && !typetoken.slice(-43).match(' ')){			//chat invite detected, so open chat
 		var date = typetoken.slice(0,43).trim();									//the first 43 characters are for the date and time etc.
 		if(date != 'noDate'){
-			var msgStart = "This chat invitation says:\n\n " + date + " \n\n"
+			var msgStart = "This chat invitation says:\r\n " + date + " \r\n"
 		}else{
 			var msgStart = ""
 		}
-		showAcceptChatDialog(msgStart + "If you go ahead, the chat session will open now.")
+		chatMsg2.textContent = msgStart + "\r\nIf you go ahead, the chat session will open now.";
+		openScreen('acceptChatScr')
 	}
 }
 
 //continues to open chat if the user agrees
 function acceptChat(){
-	chrome.runtime.sendMessage({newtab: "chatTab", typetoken: readBox.innerHTML.trim()}, function (response) {
-		console.log(response.farewell);
-	});
-
-	$('#acceptChatScr').dialog("close");
-
+	chrome.runtime.sendMessage({newtab: "chatTab", typetoken: readBox.innerHTML.trim()});
+	openScreen('readScr');
 	readBox.textContent = '';
 	readMsg.textContent = 'Chat session open in a separate tab. You may close this now.'
 }

@@ -1,0 +1,36 @@
+html {
+	-webkit-text-size-adjust: 100%;
+}
+body {
+	font-family: Sans-Serif;
+	margin-left: 10%;
+	margin-right: 10%;
+	overflow: auto;
+	background-color: #FFFFFF;
+	color: #000000;
+}
+#helpTitle {
+	color: green;
+	font-size:x-large;	
+}
+#helpmsg {
+	font-size: small;
+}
+#canary {
+	float: left;
+}
+.helpitem {
+	font-size: medium;
+	cursor: pointer;
+	padding: 14px;
+	margin: 0;
+}
+.helpitem:hover {
+	background-color: #eeeeee;
+}
+.helptext {
+	font-size: medium;
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.3s ease-out;
+}

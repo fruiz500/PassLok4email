@@ -1,0 +1,17 @@
+@-webkit-keyframes composeInserted {  
+    from { clip: rect(1px, auto, auto, auto); }
+      to { clip: rect(0px, auto, auto, auto); }
+}
+.bAK, td[class="gH acX bAm"]{			<!--this is for Gmail-->
+      -webkit-animation-duration: 0.001s;
+      -webkit-animation-name: composeInserted;
+}	
+.bottomToolbar, .thread-info, .msg-date, [data-test-id="compose-toolbar-styler"]{  <!--this is for Yahoo-->
+      -webkit-animation-duration: 0.001s;
+      -webkit-animation-name: composeInserted;
+
+}
+[aria-label='Discard'], [aria-label='Reply all']{	<!--this is for Outlook-->
+      -webkit-animation-duration: 0.001s;
+      -webkit-animation-name: composeInserted;
+}

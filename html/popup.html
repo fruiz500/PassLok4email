@@ -1,0 +1,355 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PassLok for Email</title>
+
+<link href="../css/popup.css" rel="stylesheet">
+
+<!--License notice-->
+<script src="../js-src/license.js"></script>
+
+<!--Tweet NaCl crypto library by Dmitry Chestnykh. https://github.com/dchest/tweetnacl-js-->
+<script src="../js-lib/nacl.js"></script>
+
+<!--ed2curve-js conversion of curve coordinates by Dmitry Chestnykh. https://github.com/dchest/ed2curve-js-->
+<script src="../js-lib/ed2curve.js"></script>
+
+<!--scrypt-async-js KDF by Dmitry Chestnykh. https://github.com/dchest/scrypt-async-js-->
+<script src="../js-lib/scrypt-async.js"></script>
+
+<!--lz-string compression algorithm. https://github.com/pieroxy/lz-string-->
+<script src="../js-lib/lz-string.js"></script>
+
+<!--dompurify, used to sanitize decrypted material before putting in DOM. https://github.com/cure53/DOMPurify-->
+<script src="../js-lib/purify.js"></script>
+
+<!--jpeg image steganography by Owen Campbell-Moore and others. https://github.com/owencm/js-steg. First jsstegencoder-1.0.js-->
+<script src="../js-lib/jsstegencoder.js"></script>
+
+<!--jsstegdecoder-1.0.js. One edit to display warning on error-->
+<script src="../js-lib/jsstegdecoder.js"></script>
+
+<!--jssteg-1.0.js-->
+<script src="../js-lib/jssteg.js"></script>
+
+<!--isaac seedable PRNG by Yves-Marie Rinquin. https://github.com/rubycon/isaac.js/blob/master/isaac.js-->
+<script src="../js-lib/isaac.js"></script>
+
+<!--this only loads two word arrays: wordlist and blacklist-->
+<script src="../js-src/dictionary_en.js"></script>
+
+<!--Key and Lock functions-->
+<script src="../js-src/keylock.js"></script>
+
+<!--cryptographic functions, main part-->
+<script src="../js-src/crypto.js"></script>
+
+<!--cryptographic functions, symmetric methods-->
+<script src="../js-src/crypto-sym.js"></script>
+
+<!--extra functions for chat.-->
+<script src="../js-src/chat.js"></script>
+
+<!--text steganograghy-->
+<script src="../js-src/textstego.js"></script>
+
+<!--image steganograghy-->
+<script src="../js-src/imagestego.js"></script>
+
+<!--local Directory functions-->
+<script src="../js-src/localdir.js"></script>
+
+<!--functions for switching screens, etc.-->
+<script src="../js-src/screens.js"></script>
+</head>
+
+</head>
+
+<body>
+	
+<!--read screen-->
+<div class="screen" id="readScr">
+	<div id="readMsg" class="message" align="center"><p><span>Welcome to PassLok</span></p></div><br>
+	<div id="readButtons" align="center">
+		<button class="cssbutton" id="readHelpBtn" value="Help" title="open Help in a new tab">Help</button>
+		<span id="moreReadButtons">&nbsp;&nbsp;
+			<label for="loadEncrFile" id="decryptFileBtn" title="open dialog to load an encrypted file or image"><span class="cssbutton">Decrypt file / image</span></label>&nbsp;&nbsp;
+			<input type="file" id="loadEncrFile"/>
+			<button class="cssbutton" id="decoyBtn" value="Decoy" title="decrypt hidden message, if any">Hidden</button>
+		</span>&nbsp;&nbsp;
+		<button class="cssbutton" id="readInterfaceBtn" value="switch" title="get more options">&#9658;</button>
+	</div><br>
+	From:<br><div id="senderBox" contenteditable="false"></div>
+	<span id="resetSpan">&nbsp;&nbsp;
+		<button class="cssbutton" id="resetBtn" value="Reset" title="reset the current Read-once conversation with this sender">Reset</button>
+	</span><br><br>
+	Message:<br><div id="readBox" class="cssbox"></div>
+</div>
+	
+<!--compose screen-->
+<div class="screen" id="composeScr">
+	<div id="composeMsg" class="message" align="center"><p><span>Welcome to PassLok</span></p></div><br>
+	<div id="composeButtons" align="center">
+		<button class="cssbutton" id="encryptBtn" value="" title="encrypt contents using the mode selected below">Encrypt to email</button>&nbsp;&nbsp;
+		<span id="moreComposeButtons">
+			<button class="cssbutton" id="encryptFileBtn" value="" title="encrypt contents to file using the mode selected below">Encrypt to file</button>&nbsp;&nbsp;
+			<label for="encryptImageFile" title="encrypt content to image using the mode selected below"><span class="cssbutton" id="encryptImageBtn">Encrypt to image</span></label>
+			<input type="file" id="encryptImageFile"/>
+		</span>
+		<button class="cssbutton" id="inviteBtn" value="Invite" title="invite recipients to PassLok">Invite</button>&nbsp;&nbsp;
+		<button class="cssbutton" id="compHelpBtn" value="Help" title="open Help in a new tab">Help</button>&nbsp;&nbsp;
+		<button class="cssbutton" id="moveBtn" value="Backup" title="make an encrypted file containing local data, then offers to delete it">Backup</button>
+		<button class="cssbutton" id="interfaceBtn" value="Basic" title="toggle between basic and advanced interface">&#9658;</button>
+	</div>
+	To:<br><div id="composeRecipientsBox" contenteditable="false"><span><em>Nobody!</em> Please close this dialog and enter the recipients, then try again</span></div>
+	<span id="resetSpan2">&nbsp;&nbsp;
+		<button class="cssbutton" id="resetBtn2" value="Reset" title="reset the current Read-once conversation with this sender">Reset</button>
+	</span><br><br>
+	Message:<br>
+    
+<!--toolbar for rich text editing-->
+<div id="toolBar1">
+    <select id="formatBlock" title="headings, etc.">
+      <option selected>- formatting -</option>
+      <option value="h1">Title 1 &lt;h1&gt;</option>
+      <option value="h2">Title 2 &lt;h2&gt;</option>
+      <option value="h3">Title 3 &lt;h3&gt;</option>
+      <option value="h4">Title 4 &lt;h4&gt;</option>
+      <option value="h5">Title 5 &lt;h5&gt;</option>
+      <option value="h6">Subtitle &lt;h6&gt;</option>
+      <option value="p">Paragraph &lt;p&gt;</option>
+      <option value="pre">Preformatted &lt;pre&gt;</option>
+    </select>
+    <select id="fontName" title="font type">
+      <option class="heading" selected>- font -</option>
+      <option>Arial</option>
+      <option>Arial Black</option>
+      <option>Courier New</option>
+      <option>Times New Roman</option>
+      <option>Verdana</option>
+      <option>Comic Sans MS</option>
+      <option>Impact</option>
+      <option>Trebuchet MS</option>
+      <option>Symbol</option>
+    </select>
+    <select id="fontSize" title="font size">
+      <option class="heading" selected>- size -</option>
+      <option value="1">Very small</option>
+      <option value="2">A bit small</option>
+      <option value="3">Normal</option>
+      <option value="4">Medium-large</option>
+      <option value="5">Big</option>
+      <option value="6">Very big</option>
+      <option value="7">Maximum</option>
+    </select>
+    <select id="foreColor" title="text color">
+      <option class="heading" selected>- color -</option>
+      <option value="brown">Brown</option>
+      <option value="red">Red</option>
+      <option value="orange">Orange</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="purple">Violet</option>
+      <option value="violet">Pink</option>
+      <option value="yellow">Yellow</option>
+      <option value="cyan">Cyan</option>
+      <option value="white">White</option>
+      <option value="gray">Gray</option>
+      <option value="black">Black</option>
+    </select>
+    <select id="backColor" title="color behind the text">
+      <option class="heading" selected>- back color -</option>
+      <option value="brown">Brown</option>
+      <option value="red">Red</option>
+      <option value="orange">Orange</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+      <option value="purple">Violet</option>
+      <option value="violet">Pink</option>
+      <option value="yellow">Yellow</option>
+      <option value="cyan">Cyan</option>
+      <option value="white">White</option>
+      <option value="gray">Gray</option>
+      <option value="black">Black</option>
+    </select>
+    <!--rich text editing buttons; images are loaded as data-->
+    <div id="toolBar2">
+	   <img class="intLink" title="Bold" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAInhI+pa+H9mJy0LhdgtrxzDG5WGFVk6aXqyk6Y9kXvKKNuLbb6zgMFADs="/>
+	   <img class="intLink" title="Italic" src="data:image/gif;base64,R0lGODlhFgAWAKEDAAAAAF9vj5WIbf///yH5BAEAAAMALAAAAAAWABYAAAIjnI+py+0Po5x0gXvruEKHrF2BB1YiCWgbMFIYpsbyTNd2UwAAOw=="/>
+	   <img class="intLink" title="Underline" src="data:image/gif;base64,R0lGODlhFgAWAKECAAAAAF9vj////////yH5BAEAAAIALAAAAAAWABYAAAIrlI+py+0Po5zUgAsEzvEeL4Ea15EiJJ5PSqJmuwKBEKgxVuXWtun+DwxCCgA7"/>
+	   <img class="intLink" title="Strikethrough" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWBAMAAAA2mnEIAAAAGFBMVEUAAABGRkZxcXGrq6uOjo7CwsINDQ3p6emLJhauAAAAAXRSTlMAQObYZgAAAEVJREFUGNNjoCYoDjaBs1UZDGFMVmUGJhibXcidFa7GUVAVygpSUlJMS0uBqmFgFhSA6TVgYIOxmcUZ2BxgbEFnF2o6HQD3yAWvJ+vXvwAAAABJRU5ErkJggg=="/>
+	   <img class="intLink" title="Subscript" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWBAMAAAA2mnEIAAAAGFBMVEUAAACCgoJISEh0pePr7/WgssrS0tLH1vP156UFAAAAAXRSTlMAQObYZgAAAElJREFUGNNjoB5gDBQRFICy2YQCAhNgEomqAghFSg5wNosSkniQGktwAURYlFEp2d0AIiyYpKTGbICwJBihnd2kBM5mNjagzPEAztoHvc+7u1sAAAAASUVORK5CYII="/>
+	   <img class="intLink" title="Superscript" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWBAMAAAA2mnEIAAAAGFBMVEUAAACCgoJISEigssrr7/V0pePS0tLH1vPtoVcWAAAAAXRSTlMAQObYZgAAAEpJREFUGNNjoC5gCTaAs5ndAxASrBA2o6GIoICpA5jNJmhg6B5SApFPUhZgDQ2AalRyQBioJABnMxqpwYWFGZUMYMKCSUpqlDocAJ7SBzNIUMnCAAAAAElFTkSuQmCC"/>
+	   <img class="intLink" title="Left align" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAIghI+py+0Po5y02ouz3jL4D4JMGELkGYxo+qzl4nKyXAAAOw=="/>
+	   <img class="intLink" title="Center align" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAIfhI+py+0Po5y02ouz3jL4D4JOGI7kaZ5Bqn4sycVbAQA7"/>
+	   <img class="intLink" title="Right align" src="data:image/gif;base64,R0lGODlhFgAWAID/AMDAwAAAACH5BAEAAAAALAAAAAAWABYAQAIghI+py+0Po5y02ouz3jL4D4JQGDLkGYxouqzl43JyVgAAOw=="/>
+	   <img class="intLink" title="Justify" src="data:image/gif;base64,R0lGODlhFgAWAIAAAMDAwAAAACH5BAEAAAAALAAAAAAWABYAAAIghI+py+0Po2yh2nvnxNxq2XVfFHIjVGLnk2brC8fyXAAAOw=="/>
+	   <img class="intLink" title="Numbered list" src="data:image/gif;base64,R0lGODlhFgAWAMIGAAAAADljwliE35GjuaezxtHa7P///////yH5BAEAAAcALAAAAAAWABYAAAM2eLrc/jDKSespwjoRFvggCBUBoTFBeq6QIAysQnRHaEOzyaZ07Lu9lUBnC0UGQU1K52s6n5oEADs="/>
+	   <img class="intLink" title="Dotted list" src="data:image/gif;base64,R0lGODlhFgAWAMIGAAAAAB1ChF9vj1iE33mOrqezxv///////yH5BAEAAAcALAAAAAAWABYAAAMyeLrc/jDKSesppNhGRlBAKIZRERBbqm6YtnbfMY7lud64UwiuKnigGQliQuWOyKQykgAAOw=="/>
+	   <img class="intLink" title="Quote" src="data:image/gif;base64,R0lGODlhFgAWAIQXAC1NqjFRjkBgmT9nqUJnsk9xrFJ7u2R9qmKBt1iGzHmOrm6Sz4OXw3Odz4Cl2ZSnw6KxyqO306K63bG70bTB0rDI3bvI4P///////////////////////////////////yH5BAEKAB8ALAAAAAAWABYAAAVP4CeOZGmeaKqubEs2CekkErvEI1zZuOgYFlakECEZFi0GgTGKEBATFmJAVXweVOoKEQgABB9IQDCmrLpjETrQQlhHjINrTq/b7/i8fp8PAQA7"/>
+	   <img class="intLink" title="Delete indentation" src="data:image/gif;base64,R0lGODlhFgAWAMIHAAAAADljwliE35GjuaezxtDV3NHa7P///yH5BAEAAAcALAAAAAAWABYAAAM2eLrc/jDKCQG9F2i7u8agQgyK1z2EIBil+TWqEMxhMczsYVJ3e4ahk+sFnAgtxSQDqWw6n5cEADs="/>
+	   <img class="intLink" title="Add indentation" src="data:image/gif;base64,R0lGODlhFgAWAOMIAAAAADljwl9vj1iE35GjuaezxtDV3NHa7P///////////////////////////////yH5BAEAAAgALAAAAAAWABYAAAQ7EMlJq704650B/x8gemMpgugwHJNZXodKsO5oqUOgo5KhBwWESyMQsCRDHu9VOyk5TM9zSpFSr9gsJwIAOw=="/>
+	   <img class="intLink" title="Horizontal rule" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWBAMAAAA2mnEIAAAAGFBMVEUAAADIyMimpqbp6enz8/P8/PzZ2dldXV27aT9/AAAAAXRSTlMAQObYZgAAAD5JREFUGNNjoBg4GSDYSgpYFCQKgkECiC0aGuLi7GwsAGILKYGBABYt5QUwVoiZuJhJAITN6mxs7Apk0wIAACMpB/oWEo0pAAAAAElFTkSuQmCC"/>
+	   <img class="intLink" title="Hyperlink" src="data:image/gif;base64,R0lGODlhFgAWAOMKAB1ChDRLY19vj3mOrpGjuaezxrCztb/I19Ha7Pv8/f///////////////////////yH5BAEKAA8ALAAAAAAWABYAAARY8MlJq7046827/2BYIQVhHg9pEgVGIklyDEUBy/RlE4FQF4dCj2AQXAiJQDCWQCAEBwIioEMQBgSAFhDAGghGi9XgHAhMNoSZgJkJei33UESv2+/4vD4TAQA7"/>
+	   <img class="intLink" title="Remove hyperlink" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWBAMAAAA2mnEIAAAAGFBMVEUAAAD08fHXzcxjY2OMhoafn5+uLyrktrTVXxhsAAAAAXRSTlMAQObYZgAAAGxJREFUGNNjwAAFMAZjEkMCYyKUU6aQoAaTYU90TIcrFwBCCFANDWIKDVUAMZkcBUVZBQWDQGwWERcnJhcXETBbBUEyKzubsjobK4PYrEZCwsxCQqZgc4KNTVmMjQOQzIfbW5jOgOYehDspAwBt9Q/S3exo3wAAAABJRU5ErkJggg=="/>
+	   <img class="intLink" title="Remove formatting" src="data:image/gif;base64,R0lGODlhFgAWAIQbAD04KTRLYzFRjlldZl9vj1dusY14WYODhpWIbbSVFY6O7IOXw5qbms+wUbCztca0ccS4kdDQjdTLtMrL1O3YitHa7OPcsd/f4PfvrvDv8Pv5xv///////////////////yH5BAEKAB8ALAAAAAAWABYAAAV84CeOZGmeaKqubMteyzK547QoBcFWTm/jgsHq4rhMLoxFIehQQSAWR+Z4IAyaJ0kEgtFoLIzLwRE4oCQWrxoTOTAIhMCZ0tVgMBQKZHAYyFEWEV14eQ8IflhnEHmFDQkAiSkQCI2PDC4QBg+OAJc0ewadNCOgo6anqKkoIQA7"/>
+	   <img class="intLink" title="Undo" src="data:image/gif;base64,R0lGODlhFgAWAOMKADljwliE33mOrpGjuYKl8aezxqPD+7/I19DV3NHa7P///////////////////////yH5BAEKAA8ALAAAAAAWABYAAARR8MlJq7046807TkaYeJJBnES4EeUJvIGapWYAC0CsocQ7SDlWJkAkCA6ToMYWIARGQF3mRQVIEjkkSVLIbSfEwhdRIH4fh/DZMICe3/C4nBQBADs="/>
+	   <img class="intLink" title="Redo" src="data:image/gif;base64,R0lGODlhFgAWAMIHAB1ChDljwl9vj1iE34Kl8aPD+7/I1////yH5BAEKAAcALAAAAAAWABYAAANKeLrc/jDKSesyphi7SiEgsVXZEATDICqBVJjpqWZt9NaEDNbQK1wCQsxlYnxMAImhyDoFAElJasRRvAZVRqqQXUy7Cgx4TC6bswkAOw=="/>
+	   <label for="imgFile">
+	   <img class="intLink" title="Insert image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAAbFBMVEUAAAAAAAAmJibm5uaJiYnZ2dnn5+e5ubmBgYHNzc3z8/Pr6+vW1ta2trZ/f3/y8vLQ0NDPz8/Dw8OgoKCOjo54eHgcHBwGBgb+/v7T09PIyMi+vr6srKyEhIRqampiYmJbW1tPT08qKioRERGLOctyAAAAAXRSTlMAQObYZgAAAHJJREFUGNOtzkkShCAQRNFKbLsVsZ3nWe9/R8EAYeHSv6u3qEh6qo0/TkUiKULNbCglfZGSjf0vCvWZLTmxwBBXVGG1NO2D+hoIQ6IHmrKrciJDfgxIBGbPId12E//pUjOiyHydCGtFyQG3kWTcc4ro1U7vPAUU4TAxJQAAAABJRU5ErkJggg==" /></label>
+	<input type="file" id="imgFile"/>
+	<label for="mainFile">
+	<img class="intLink" title="Load a file" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAATlBMVEUAAAAAAAD19fVcXFwbGxsTExP8/PzT09NxcXFaWlo4ODg1NTUEBAT5+fnw8PDr6+vU1NTIyMi+vr6Xl5dsbGxnZ2dXV1dISEghISEMDAw0f0rSAAAAAXRSTlMAQObYZgAAAFBJREFUGNO9yEkOgCAQBMBmUxDc9/9/VJ2EjgkHb9axcJuceqQRtMq4aAdWkDr6xtW5jJRFx2MBu23fdS7eG6Vz0U8VytrKmhMnVoDQlOfbBQLIAl4FF2fyAAAAAElFTkSuQmCC" /></label>
+	<input type="file" id="mainFile"/>
+	</div>
+  </div> 
+     
+     <div id="composeBox" class="cssbox" contenteditable="true"></div>
+	<div id="checkBoxes" align="center">
+		<br>
+		<input type="radio" name="lockmodes" id="signedMode" title="the message can be decrypted multiple times" checked/>&nbsp; Signed &nbsp;
+   		<input type="radio" name="lockmodes" id="onceMode" title="the message can be decrypted only once"/>&nbsp; Read-once&nbsp;
+		<input type="radio" name="lockmodes" id="chatMode" title="make an invitation to real-time chat"/>&nbsp; Chat&nbsp;
+        <input type="radio" name="lockmodes" id="symMode" title="use a shared Password"/>&nbsp; Shared Pwd.&nbsp;
+        <input type="radio" name="lockmodes" id="anonMode" title="don't authenticate the sender"/>&nbsp; Anon.
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+   		<input type="radio" name="outputmodes" id="visibleMode" title="output is gibberish text" checked/>&nbsp; Visible&nbsp;
+		<input type="radio" name="outputmodes" id="stegoMode" title="output appears to be a normal text that you supply through a dialog"/>&nbsp; Concealed&nbsp;
+		<input type="radio" name="outputmodes" id="invisibleMode" title="output is invisible text between two lines"/>&nbsp; Invisible
+        <br><br>
+		<input type="radio" name="fileModes" id="binaryMode" title="output file is binary" checked/>&nbsp; Binary file&nbsp;
+       <input type="radio" name="fileModes" id="textMode" title="output file is text"/>&nbsp; Text file
+       &nbsp;&nbsp;|&nbsp;&nbsp;
+		<input type="checkbox" id="decoyMode" title="additional hidden message"/>&nbsp; Hidden msg.
+	</div>
+</div>
+
+<!--key screen	-->
+<div class="screen" id="pwdScr">
+	<div id="firstTimeKey" align="left">
+		<h3>Welcome to PassLok for Email</h3>
+		<p>Before you do anything else, you must choose a secret Password, which you will memorize and <strong>will not tell anyone</strong>, and click <strong>OK</strong>.</p>
+		<p>Its measured strength will appear above it as you begin to type. If it is worse than Medium, <em>things will be very slow.</em></p>
+		<p>Make sure to use $ymbol$, numb3rs, caPiTals, unusual words and mespelingss.</p>
+		<p>The <strong>Suggest</strong> button will get you started with five words, which you can modify at will.</p>
+		<p>Your Password will not be stored or sent anywhere.</p>
+       <p>For extensive help on this app, click the Help button.</p>
+		<div align="center">
+			<button class="cssbutton" id="suggestPwdBtn" value="Suggest" title="suggest a Password made of five common words">Suggest</button>&nbsp;&nbsp;
+           <button class="cssbutton" id="keyHelpBtn" value="Help" title="open Help in a new tab">Help</button><br></div><br>
+		</div>
+	<div id="pwdMsg" class="message" align="center">Welcome to PassLok for Email<br>Please enter your Password</div>
+    <br>
+	<input type="password" class="cssbox" autocomplete="off" id="pwdBox" name="text" placeholder="Enter your Password here"  title="enter your Password here" align="center">
+	<img id="pwdIcon" class="field-icon" src='../img/eyeImg.png' title="click this to see/hide the Password">
+	<br><br><br><br>
+	<div align="center">
+		<button class="cssbutton" id="acceptPwdBtn" value="OK" title="accept Password">OK</button>
+	</div><br>
+	<span id="fiveMin"><p>You will need to re-enter your Password if you do not use it for 5 minutes or reload your email app</p></span>
+</div>
+
+<!--old key dialog-->
+<div class="screen" id="oldPwdScr">
+	<div id="oldPwdMsg" class="message" align="center">Looks like you may have changed your Password recently. If you want to continue this conversation, please write the previous Password in the box below and click <strong>OK</strong><br>This may also have popped because you tried to decrypt a Read-once message for the 2nd time</div><br>
+	<input type="password" class="cssbox" id="oldPwdBox" name="oldPwd" placeholder="Enter the previous Password here." align="center">
+	<img id="oldPwdIcon" class="field-icon" src='../img/eyeImg.png' title="click this to see/hide the Password">
+	<br><br>
+	<div align="center">
+		<button class="cssbutton" id="cancelOldPwdBtn" value="Cancel" title="cancel old Password">Cancel</button>&nbsp;&nbsp;
+		<button class="cssbutton" id="acceptOldPwdBtn" value="OK" title="accept old Password">OK</button>
+	</div>
+</div>
+
+<!--change name dialog-->
+<div class="screen" id="nameScr">
+	<div id="nameMsg" class="message" align="center">The sender has encrypted this with a new Password. Please click <strong>OK</strong> to accept it from now on</div><br><br>
+	<div align="center">
+		<button class="cssbutton" id="cancelNameBtn" value="Cancel" title="cancel change">Cancel</button>&nbsp;&nbsp;
+		<button class="cssbutton" id="acceptNameBtn" value="OK" title="accept change">OK</button>
+	</div>
+</div>
+
+<!--make chat dialog-->
+<div class="screen "id="chatScr">
+	<span id="chatMsg" class="message">Choose the type of chat, then optionally write in the box a message including the date and time</span><br><br>
+	<div align="center">
+		<input type="radio" name="chatmodes" id="dataChat"  title="chat with text messages and file exchange" checked/>&nbsp; Text and files&nbsp;&nbsp;
+		<input type="radio" name="chatmodes" id="audioChat" title="like Text chat, plus audio"/>&nbsp; Audio&nbsp;&nbsp;
+		<input type="radio" name="chatmodes" id="videoChat" title="like audio chat, plus video"/>&nbsp; Video <br><br>
+	</div>
+	<textarea id="chatDate" class="cssbox" name="chatDate" rows="1" title="additional information" placeholder="Write here the date and time for the chat"></textarea><br><br>
+	<div align="center">
+		<button class="cssbutton" id="cancelChatBtn" value="Cancel" title="cancel chat invitation">Cancel</button>&nbsp;&nbsp;
+		<button class="cssbutton" id="makeChatBtn" value="OK" title="make chat invitation">OK</button>
+	</div>
+</div>
+
+<!--accept chat dialog-->
+<div class="screen" id="acceptChatScr">
+	<div id="chatMsg2" class="message" align="center"></div><br><br>
+	<div align="center">
+		<button class="cssbutton" id="cancelChat2Btn" value="Cancel" title="cancel chat">Cancel</button>&nbsp;&nbsp;
+		<button class="cssbutton" id="acceptChatBtn" value="OK" title="start chat">OK</button>
+	</div>
+</div>
+
+<!--Cover text entry dialog-->
+<div class="screen" id="coverScr">
+	<div align="center"> <span id="coverMsg" class="message">Please enter the cover text for hiding and click <strong>OK</strong></span><br><br>
+    	<textarea class="cssbox" rows="5" autocomplete="off" id="coverBox" placeholder="Enter the cover text here." align="center"></textarea><br><br>
+    	<button class="cssbutton" id="cancelCoverBtn" value="cancel" title="close cover text dialog">Cancel</button>&nbsp;
+		<button class="cssbutton" id="acceptCoverBtn" value="OK" title="accept cover text">OK</button>
+	</div>
+</div>
+
+<!--Decoy message entry-->
+<div class="screen" id="decoyInScr" align="center">
+	<p id="decoyMsg" class="message">Enter the Hidden Message</p>
+	<textarea id="decoyText" class="cssbox" name="text" rows="3"></textarea>
+	<p id="decoyInMsg" class="message">Enter the shared Key or Lock for the Hidden message</p>
+	<input type="password" class="cssbox" id="decoyInBox" name="key"/>
+	<img id="decoyInIcon" class="field-icon" src='../img/eyeImg.png' title="click this to see/hide the Password">
+	<br><br>
+	<button class="cssbutton" id="cancelDecoyInBtn" value="Cancel" title="do not encrypt">Cancel</button>&nbsp;
+	<button class="cssbutton" id="acceptDecoyInBtn" value="OK" title="go on with encryption">OK</button>
+</div>
+
+<!--Decoy message retrieval-->
+<div class="screen" id="decoyOutScr" align="center">
+	<p id="decoyOutMsg" class="message">Enter the Key for the Hidden message</p>
+	<input type="password" class="cssbox" id="decoyOutBox" name="key"/>
+	<img id="decoyOutIcon" class="field-icon" src='../img/eyeImg.png' title="click this to see/hide the Password">
+	<br><br>
+	<button class="cssbutton" id="cancelDecoyOutBtn" value="Cancel" title="stop decryption">Cancel</button>&nbsp;
+	<button class="cssbutton" id="acceptDecoyOutBtn" value="OK" title="go on with decryption">OK</button>
+	<p>The Hidden message will appear at the top of the decrypt window</p>
+</div>
+
+<!--Image steganography screen-->
+<div class="screen" id="stegoImageScr" align="center">
+	<div id="stegoImageMsg" class="message"></div><br>
+	<input type="password" class="cssbox" id="stegoImageBox" title="use a password for better undetectability" placeholder=" optional Password"/>
+    <img id="stegoImageIcon" class="field-icon" src='../img/eyeImg.png' title="click this to see/hide the Password"><br><br>
+	<button class="cssbutton" id="encodePNGBtn" value="PNG Hide" title="encrypt into PNG image">Encrypt to PNG</button>&nbsp;
+	<button class="cssbutton" id="encodeJPGBtn" value="JPG Hide" title="encrypt into JPG image">Encrypt to JPG</button>
+	<button class="cssbutton" id="decodeImgBtn" value="Decrypt" title="extract hidden content and decrypt">Decrypt</button><br><br>
+	<img id="previewImg" src="" width="100%"/>
+</div>
+
+<!--symmetric key input-->
+<div class="screen" id="symmetricScr" align="center">
+	<p id="symmetricMsg" class="message">Enter the shared Password</p>
+	<input type="password" class="cssbox" id="symmetricBox" name="key"/>
+	<img id="symmetricIcon" class="field-icon" src='../img/eyeImg.png' title="click this to see/hide the Password">
+	<br><br>
+	<button class="cssbutton" id="cancelSymmetricBtn" value="Cancel" title="stop and go back">Cancel</button>&nbsp;
+	<button class="cssbutton" id="acceptSymmetricBtn" value="OK" title="go on">OK</button>
+	<p>Sender and recipients must know the shared Password, which must be distributed securely</p>
+</div>
+
+<!--body script: window reformatting, special functions-->
+<script src="../js-src/bodyscript.js"></script>
+</body>
+</html>

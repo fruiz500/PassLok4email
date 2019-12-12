@@ -13,16 +13,15 @@ function encrypt(){
 	if(chatMode.checked){
 		displayChat();
 		return
-	}else if(composeBox.innerHTML){
-		resetTimer();
-		if(!myKey){
-			showKeyDialog();
+	}else if(composeBox.innerHTML){		//sometimes imported text contains junk tags, so clean them out
+		if(symMode.checked){															//if shared Pwd. mode, process is diverted ahead of key entry
+			symmetricEncrypt(composeBox.textContent,false,false);
 			return
 		}
-		var emailArray = composeRecipientsBox.textContent.split(',');
-		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
-		encryptList(emailArray,false,false);
-		isChatInvite = false
+		for(var i = 0; i < emailList.length; i++) emailList[i] = emailList[i].trim();
+		encryptList(emailList,false,false);
+		isChatInvite = false;
+		sharedPwd = ''
 	}else{
 		composeMsg.textContent = 'Nothing to encrypt'
 	}
@@ -34,55 +33,51 @@ function encrypt2file(){
 	if(chatMode.checked){
 		displayChat();
 		return
-	}else if(composeBox.textContent){
-		resetTimer();
-		if(!myKey){
-			showKeyDialog();
+	}else if(composeBox.innerHTML){
+		if(symMode.checked){															//if shared Pwd. mode, process is diverted ahead of key entry
+			symmetricEncrypt(composeBox.textContent,true,false);
 			return
 		}
 		if(stegoMode.checked) enterCover();
-		var emailArray = composeRecipientsBox.textContent.split(',');
-		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
-		encryptList(emailArray,true,false);
-		isChatInvite = false
+		for(var i = 0; i < emailList.length; i++) emailList[i] = emailList[i].trim();
+		encryptList(emailList,true,false);
+		isChatInvite = false;
+		sharedPwd = ''
 	}else{
 		composeMsg.textContent = 'Nothing to encrypt'
 	}
 }
 
-//selects the encryption mode and starts it, but outputs to image instead
+//selects the encryption mode and starts it, but outputs to image instead. This function does prior encryption, to be followed by encoding
 function encrypt2image(){
 	callKey = 'encrypt2image';
 	if(chatMode.checked){
 		displayChat();
 		return
 	}else{
-		resetTimer();
-		if(!myKey){
-			showKeyDialog();
+		if(symMode.checked){									//if shared Pwd. mode, process is diverted ahead of key entry
+			symmetricEncrypt(composeBox.textContent,false,true);
+			if(sharedPwd){
+				stegoImageBox.value = sharedPwd;
+				sharedPwd = ''
+			}
 			return
 		}
-		var emailArray = composeRecipientsBox.textContent.split(',');
-		for(var i = 0; i < emailArray.length; i++) emailArray[i] = emailArray[i].trim();
-		encryptList(emailArray,false,true);
+		for(var i = 0; i < emailList.length; i++) emailList[i] = emailList[i].trim();
+		encryptList(emailList,false,true);
 		isChatInvite = false
 	}
 }
 
 var text2decrypt = '';	
+
 //function that starts it all when the read screen loads
 function decrypt(){
 	callKey = 'decrypt';
-	resetTimer();
-	if(!myKey){
-		showKeyDialog();
-		return
-	}
 	var text = text2decrypt;
 	text = text.replace(/<(.*?)>/gi,"");
 	if(text.match('\u2004') || text.match('\u2005') || text.match('\u2006')) fromLetters(text);		//if hidden text
 	if(text.match('\u00ad')) fromInvisible(text);
-	if(text2decrypt.match('==')) text2decrypt = text2decrypt.split('==')[1];
 	decryptList();
 	openChat()
 }
@@ -96,6 +91,7 @@ function concatUint8Arrays(array1,array2){
 }
 
 var inviteRequested = false;
+
 //make an invitation. This only happens after the second button click
 function inviteEncrypt(){
 	if(!inviteRequested){				//sets flag so action happens on next click
@@ -108,16 +104,14 @@ function inviteEncrypt(){
 		inviteBtn.style.background = '#FB5216';
 		setTimeout(function() {
 			inviteRequested = false;
-			inviteBtn.style.background = '#3896F9';
+			inviteBtn.style.background = '#d9edff';
+			composeMsg.textContent = 'Invite button disarmed';
 			callKey = '';
-		}, 15000)								//forget request after 15 seconds
+		}, 10000)								//forget request after 10 seconds
 
 	}else{
 		callKey = 'inviteEncrypt';
-		if(!myKey){
-			showKeyDialog();
-			return
-		}
+		if(!refreshKey()) return;			//check that key is active and stop if not
 		var nonce = nacl.randomBytes(9),
 			nonce24 = makeNonce24(nonce),
 			noncestr = nacl.util.encodeBase64(nonce).replace(/=+$/,''),
@@ -128,8 +122,8 @@ function inviteEncrypt(){
 		var output = myezLock + '//////' + nacl.util.encodeBase64(concatUint8Arrays([128],concatUint8Arrays(nonce,symEncrypt(text,nonce24,myLockbin,true)))).replace(/=+$/,'')
 		output = output.match(/.{1,80}/g).join("\r\n");
 		var outNode = document.createElement('div');	
-		outNode.style.whiteSpace = "pre-line";	
-		outNode.textContent = "The gibberish link below contains a message from me that has been encrypted with PassLok for Email, To decrypt it, do this:\r\n1. Install the PassLok for Email extension by following one of these links:\r\nChrome:&nbsp; https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh\r\nFirefox:&nbsp; https://addons.mozilla.org/en-US/firefox/addon/passlok-for-email/\r\n\r\n2. Reload your email and get back to this message.\r\n\r\n3. Click the PassLok logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.\r\n\r\n4. If you don't use Chrome or Firefox, or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com/app\r\n";
+		outNode.style.whiteSpace = "pre-line";			//so the line feeds format correctly
+		outNode.textContent = "The gibberish link below contains a message from me that has been encrypted with PassLok for Email, To decrypt it, do this:\r\n\r\n1. Install the PassLok for Email extension by following one of these links:\r\nChrome: https://chrome.google.com/webstore/detail/passlok-for-email/ehakihemolfjgbbfhkbjgahppbhecclh\r\nFirefox: https://addons.mozilla.org/en-US/firefox/addon/passlok-for-email/\r\n\r\n2. Reload your email and get back to this message.\r\n\r\n3. Click the PassLok logo above (orange key). You will be asked to supply a Password, which will not be stored or sent anywhere. You must remember the Password, but you can change it later if you want.\r\n\r\nIf your email is not on Gmail, Yahoo, or Outlook, you may want to install PassLok Universal instead, also available at the Chrome and Firefox stores.\r\n\r\nIf you don't use Chrome or Firefox, or don't want to install an extension, you can also open the message in PassLok Privacy, a standalone app available from https://passlok.com/app\r\n";
 		var initialTag = document.createElement('pre'),
 			invBody = document.createElement('pre'),
 			finalTag = document.createElement('pre');
@@ -139,14 +133,13 @@ function inviteEncrypt(){
 		outNode.appendChild(initialTag);
 		outNode.appendChild(invBody);
 		outNode.appendChild(finalTag);
-			
-		if(typeof(isNewYahoo) == "undefined") outNode.contentEditable = 'true';
-		var bodyElement = document.getElementById(bodyID);
-		bodyElement.insertBefore(outNode,bodyElement.childNodes[0]);
 
-		$('#composeScr').dialog("close");
+		if(typeof(isNewYahoo) == "undefined") outNode.contentEditable = 'true';
+
+		insertInBody(outNode);
 		inviteRequested = false;
-		callKey = ''
+		callKey = '';
+		window.close()
 	}
 }
 
@@ -154,6 +147,7 @@ function inviteEncrypt(){
 //the output string contains each encrypted key along with 66 bits of an encrypted form of the recipient's Lock, so he/she can find the right encrypted key
 //two modes: Signed, and ReadOnce
 function encryptList(listArray,isFileOut,isImageOut){
+	if(!refreshKey()) return;			//check that key is active and stop if not
 	var encryptArray = [],
 		inviteArray = [],
 		myselfOnList = false;
@@ -177,7 +171,7 @@ function encryptList(listArray,isFileOut,isImageOut){
 		composeMsg.textContent = 'None of these recipients are in your directory. You should send them an invitation first.';
 		return
 	}
-	if(!onceMode.checked) encryptArray.push(myEmail);						//copy to myself unless read-once
+	if(!onceMode.checked) encryptArray.push(myEmail);				//copy to myself unless read-once
 	encryptArray = shuffle(encryptArray);							//extra precaution
 	var recipients = encryptArray.length;
 
@@ -192,25 +186,37 @@ function encryptList(listArray,isFileOut,isImageOut){
 	var	msgKey = nacl.randomBytes(32),
 		nonce = nacl.randomBytes(15),
 		nonce24 = makeNonce24(nonce),
-		text = composeBox.innerHTML,
-		outString = myezLock + '//////';
-
-	if(onceMode.checked){													//add type marker, nonce, and padding for decoy msg
-		var outArray = new Uint8Array(2);	
-		outArray[0] = 56;												//will become "O" in base64
-		outArray[1] = recipients
+		text = composeBox.innerHTML;
+	if(anonMode.checked){
+		var outString = '',									//no Lock included in anonymous mode
+			secdum = nacl.randomBytes(32),					//make dummy Key and Lock
+			pubdum = makePub(secdum)
 	}else{
-		var outArray = new Uint8Array(2);	
-		outArray[0] = 72;												//will become "S" in base64
-		outArray[1] = recipients
+		var outString = myezLock + '//////'
 	}
-		
-	var padding = decoyEncrypt(75,myKey);						//this for decoy mode
-	if(!padding) return;
+
+	var outArray = new Uint8Array(2);	
+	if(onceMode.checked){
+		outArray[0] = 56												//will become "O" in base64
+	}else if(anonMode.checked){
+		outArray[0] = 0;												//will become "A" in base64
+	}else{
+		outArray[0] = 72;												//will become "S" in base64
+	}
+	outArray[1] = recipients;
+
+	if(anonMode.checked){
+		var paddingIn = decoyEncrypt(75,secdum)						//this for decoy mode
+	}else{
+		var paddingIn = decoyEncrypt(75,myKey)
+	}
+	if(!paddingIn) return;
 
 	var cipher = symEncrypt(text,nonce24,msgKey,true);					//main encryption event including compression, but don't add the result yet
 		
-	outArray = concatUint8Arrays(outArray,concatUint8Arrays(nonce,padding));
+	outArray = concatUint8Arrays(outArray,concatUint8Arrays(nonce,paddingIn));
+	
+	if(anonMode.checked) outArray = concatUint8Arrays(outArray,pubdum);					//for anonymous mode, add the dummy Lock now
 
 	//for each email on the List (unless empty), encrypt the message key and add it, prefaced by the first 256 bits of the ciphertext obtained when the item is encrypted with the message nonce and the shared key. Notice: same nonce, but different key for each item (unless someone planted two recipients who have the same key, but then the encrypted result will also be identical).
 	for (index = 0; index < encryptArray.length; index++){
@@ -221,10 +227,19 @@ function encryptList(listArray,isFileOut,isImageOut){
 			}else{
 				var Lock = locDir[email][0]
 			}
-			if(!onceMode.checked){													//for Signed mode and Chat invites
+			if(anonMode.checked){															//for Anonymous mode
+				var sharedKey = makeShared(convertPubStr(Lock),secdum),
+					cipher2 = nacl.secretbox(msgKey,nonce24,sharedKey),
+					LockBin2 = nacl.util.decodeBase64(Lock);
+				if(!LockBin2) return false;
+				var	idTag = nacl.secretbox(LockBin2,nonce24,sharedKey).slice(0,8)
+
+			}else if(!onceMode.checked){													//for Signed mode and Chat invites
 				var sharedKey = makeShared(convertPubStr(Lock),myKey),
 					cipher2 = nacl.secretbox(msgKey,nonce24,sharedKey),
-					idTag = nacl.secretbox(nacl.util.decodeBase64(Lock),nonce24,sharedKey).slice(0,8)
+					LockBin2 = nacl.util.decodeBase64(Lock);
+				if(!LockBin2) return false;
+				var	idTag = nacl.secretbox(LockBin2,nonce24,sharedKey).slice(0,8)
 					
 			}else{																	//for Read-once mode
 				if(email != myEmail){								//can't do Read-once to myself
@@ -269,7 +284,9 @@ function encryptList(listArray,isFileOut,isImageOut){
 					var idKey = makeShared(lastLock,myKey);
 
 					var cipher2 = nacl.secretbox(msgKey,nonce24,sharedKey),
-						idTag = nacl.secretbox(nacl.util.decodeBase64(Lock),nonce24,idKey).slice(0,8);
+						LockBin2 = nacl.util.decodeBase64(Lock);
+					if(!LockBin2) return false;
+					var	idTag = nacl.secretbox(LockBin2,nonce24,idKey).slice(0,8);
 
 					if(turnstring != 'lock'){															//if out of turn don't change the dummy Key, this includes reset
 						var newLockCipher = nacl.secretbox(makePub(lastKey),nonce24,idKey)
@@ -299,8 +316,13 @@ function encryptList(listArray,isFileOut,isImageOut){
 
 	//finish off by adding the encrypted message and tags
 	outString += nacl.util.encodeBase64(concatUint8Arrays(outArray,cipher)).replace(/=+$/,'');
+	finishEncrypt(outString,isFileOut,isImageOut,(!symMode.checked && inviteArray.length != 0),encryptArray.length)			//see if invitations would have been needed
+}
+
+//output formatting, which is shared by symmetric encryption modes
+function finishEncrypt(outString,isFileOut,isImageOut,invitesNeeded,recipientNumber){
 	var outNode = document.createElement('div');	
-	outNode.style.whiteSpace = "pre-line";						//so that carriage returns are respected
+	outNode.style.whiteSpace = "pre-line";									//so that carriage returns are respected
 	
 if(!isImageOut){																//normal output, not to image
 	if(stegoMode.checked){
@@ -325,6 +347,26 @@ if(!isImageOut){																//normal output, not to image
 				fileLink.href = "data:binary/octet-stream;base64," + outString;
 				fileLink.textContent = "PassLok 2.4 Read-once message (binary file); right-click and choose Save Link As..."
 			}
+		}else if(symMode.checked){
+			if(textMode.checked){
+				fileLink.download = "PL24msp.txt";
+				fileLink.href = "data:," + outString;
+				fileLink.textContent = "PassLok 2.4 shared Password message (text file); right-click and choose Save Link As..."
+			}else{
+				fileLink.download = "PL24msp.plk";
+				fileLink.href = "data:binary/octet-stream;base64," + outString;
+				fileLink.textContent = "PassLok 2.4 shared Password message (binary file); right-click and choose Save Link As..."
+			}
+		}else if(anonMode.checked){
+			if(textMode.checked){
+				fileLink.download = "PL24msa.txt";
+				fileLink.href = "data:," + outString;
+				fileLink.textContent = "PassLok 2.4 Anonymous message (text file); right-click and choose Save Link As..."
+			}else{
+				fileLink.download = "PL24msa.plk";
+				fileLink.href = "data:binary/octet-stream;base64," + outString;
+				fileLink.textContent = "PassLok 2.4 Anonymous message (binary file); right-click and choose Save Link As..."
+			}
 		}else{
 			if(textMode.checked){
 				fileLink.download = "PL24mss.txt";
@@ -345,9 +387,13 @@ if(!isImageOut){																//normal output, not to image
 			var fileLink = document.createElement('pre');
 			if(onceMode.checked){			
 				fileLink.textContent = '----------begin Read-once message encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end Read-once message encrypted with PassLok-----------'
-			} else if(isChatInvite){
+			}else if(isChatInvite){
 				fileLink.textContent = '----------begin Chat invitation encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end Chat invitation encrypted with PassLok-----------'
-			} else {
+			}else if(symMode.checked){			
+				fileLink.textContent = '----------begin shared Password message encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end shared Password message encrypted with PassLok-----------'
+			}else if(anonMode.checked){
+				fileLink.textContent = '----------begin Anonymous message encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end Anonymous message encrypted with PassLok-----------'
+			}else{
 				fileLink.textContent = '----------begin Signed message encrypted with PassLok--------==\r\n\r\n' + outString.match(/.{1,80}/g).join("\r\n") + '\r\n\r\n==---------end Signed message encrypted with PassLok-----------'
 			}
 		}
@@ -356,36 +402,35 @@ if(!isImageOut){																//normal output, not to image
 }else{																			//no extra text if output is to image
 	outNode.textContent = outString
 }
-	if(typeof(isNewYahoo) == "undefined") outNode.contentEditable = 'true';
+	outNode.contentEditable = 'true';
 	syncLocDir();
-	callKey = '';
 	visibleMode.checked = true;
 	decoyMode.checked = false;
 	if(isFileOut){
-		composeMsg.textContent = "Contents encrypted into a file. Now save it, close this dialog, and attach the file to your email"
+		composeMsg.textContent = "Contents encrypted into a file. Now save it, close this dialog, and attach the file to your email";
 		composeBox.textContent = '';
 		composeBox.appendChild(outNode)
+
 	}else if(isImageOut){
 		composeBox.textContent = '';
 		composeBox.appendChild(outNode);
-		$('#composeScr').dialog("close");
-		showImageDialog();
+		openScreen('stegoImageScr');
 		encodePNGBtn.style.display = '';
 		encodeJPGBtn.style.display = '';
 		decodeImgBtn.style.display = 'none';
-		if((onceMode.checked && encryptArray.length == 1) || (!onceMode.checked && encryptArray.length < 3)){
+		if((onceMode.checked && recipientNumber == 1) || (!onceMode.checked && recipientNumber < 3)){
 			stegoImageMsg.textContent = 'Message encrypted. Now choose an image to hide it into and click either Encrypt to PNG, or Encrypt to JPG. This pre-filled image Password will also be pre-filled on the receiving end.'
 		}else{
 			stegoImageMsg.textContent = 'Message encrypted. Now choose an image to hide it into and click either Encrypt to PNG, or Encrypt to JPG. For best results, use a Password known to the recipient.'
 		}
 	}else{
-		var bodyElement = document.getElementById(bodyID);
-		bodyElement.insertBefore(outNode,bodyElement.firstChild)
+		insertInBody(outNode)
 	}
-	if(inviteArray.length != 0){		 
-		composeMsg.textContent = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:\n' + inviteArray.join(', ') + '\nYou should send them an invitation first. You may close this dialog now'
-	}else if(!isFileOut){
-		$('#composeScr').dialog("close")
+	callKey = '';
+	if(invitesNeeded){
+		composeMsg.textContent = 'The following recipients have been removed from your encrypted message because they are not yet in your directory:\n' + inviteArray.join(', ') + '\nYou should send them an invitation first. You may close this dialog now';
+	}else if(!isFileOut && !isImageOut){
+		 	setTimeout(function(){window.close()},200)		//close after a delay, to make sure the command arrives
 	}
 }
 
@@ -417,6 +462,7 @@ function keyEncrypt(plainstr){
 //decrypts a string encrypted with the secret Key, 12 char nonce. Returns original if not encrypted. If isArray set, return uint8 array
 function keyDecrypt(cipherStr,isArray){
 	var cipher = nacl.util.decodeBase64(cipherStr);
+	if(!cipher) return false;
 	if (cipher[0] == 144){
 		var	nonce = cipher.slice(1,10),												//ignore the marker byte
 			nonce24 = makeNonce24(nonce),
@@ -430,10 +476,10 @@ function keyDecrypt(cipherStr,isArray){
 						oldKey = ed2curve.convertSecretKey(oldKeySgn);
 					plain = nacl.secretbox.open(cipher2,nonce24,oldKey);
 					if(!plain){
-						failedDecrypt('old')
+						failedDecrypt('old'); return
 					}
 				}else{
-					failedDecrypt('new')							//this will open the old Password dialog
+					failedDecrypt('new'); return							//this will open the old Password dialog
 				}
 			}
 			return plain
@@ -462,135 +508,164 @@ function isBase36(string){
 	return result
 }
 
-var padding;			//global variable involved in decoding secret message, needed for decoy decrypt
+var padding = '';			//global variable involved in decoding secret message, needed for decoy decrypt
+
 //decrypts a message encrypted for multiple recipients. Encryption can be Signed, Read-once, or an Invitation. This is detected automatically. It can also be an encrypted database
 function decryptList(){
 	readBox.textContent = '';
-	var text = stripHeaders(text2decrypt),										//get the data from a global variable holding it
-		words = text2decrypt.replace(/_/g,' ').trim();						       //this just in case it's a word Lock
-	theirEmail = senderBox.textContent.trim();
+	var hasTags = !!text2decrypt.match('=='),
+		text = stripHeaders(text2decrypt),										//get the data from a global variable holding it
+		words = text2decrypt.replace(/_/g,' ').trim(),						    //this just in case it's a word Lock
+		hasLock;
 
 	if(isBase36(text.slice(0,50)) && (text.slice(50,56) == '//////')){			//find Lock located at the start
-		theirLock = changeBase(text.slice(0,50),base36,base64,true)
+		theirLock = changeBase(text.slice(0,50),base36,base64,true);
+		hasLock = true
 	
 	}else if(text.length == 50 && isBase36(text)){								//just an ezLock
-		theirLock = changeBase(text,base36,base64,true)
+		theirLock = changeBase(text,base36,base64,true);
+		hasLock = true
 		
 	}else if(text.length == 43){													//just a regular Lock
-		theirLock = text
+		theirLock = text;
+		hasLock = true
 		
 	}else if(words.split(' ').length == 20){										//word Lock
 		var theirLockTest = changeBase(words,wordListExp,base64,true);			  		//convert to base64
 		if(theirLockTest){
 			theirLock = theirLockTest;
 			readMsg.textContent = "This message contains only the sender's Lock. Nothing to decrypt"
-		}else{
-			readMsg.textContent = "This message is not encrypted, but perhaps the images or attachments are. Download them and click the arrow to decrypt them";
-			return
 		}
+		openReadScreen();
+		return
 		
 	}else if(text.charAt(0) == 'k'){													//it's an encrypted database, so decrypt it and merge it
 		var agree = confirm('This is an encrypted local database. It will be loaded if you click OK, possibly replacing current data. This cannot be undone.');
 		if(!agree){
 			readBox.textContent = '';
 			readMsg.textContent = 'Backup merge canceled';
+			openReadScreen();
 			return
 		}
 		var newData = JSON.parse(keyDecrypt(text,false));
 		locDir = mergeObjects(locDir,newData);
 		syncLocDir();
-		readBox.textContent = '';
 		readMsg.textContent = 'Data from backup merged';
+		openReadScreen();
 		return
 		
 	}else{
-		readBox.textContent = '';
-		if(encodeURI(readInterfaceBtn.textContent) == "%E2%96%BA"){
-			readMsg.textContent = 'This message is not encrypted, but perhaps the images or attachments are. Download them and click the arrow to decrypt them'
-		}else{
-			readMsg.textContent = 'This message is not encrypted, but perhaps the images or attachments are. Download them and click the big button to decrypt them'
+		hasLock = false
+	}
+	
+	if(hasLock){
+		if(!locDir[theirEmail] && hasLock){											//make entry if needed
+			locDir[theirEmail] = [];
+			locDir[theirEmail][0] = theirLock;
+			storeData(theirEmail)
+		}else if(locDir[theirEmail][0] != theirLock && hasLock){					//to get permission to change it
+			openNewLock();
+			return
 		}
-		return
-	}
-
-	if(!locDir[theirEmail]){											//make entry if needed
-		locDir[theirEmail] = [];
-		locDir[theirEmail][0] = theirLock;
-		storeData(theirEmail)
-	}else if(locDir[theirEmail][0] != theirLock){					//to get permission to change it
-		openNewLock()
+		text = text.slice(56);												//take out ezLock and separator
 	}
 	
-	text = text.slice(56);												//take out ezLock and separator
-	
-	if(theirLock && !text){
-		readMsg.textContent = "This message contains only the sender's Lock. Nothing to decrypt";
+	if(!text){
+		if(hasLock){
+			readMsg.textContent = "This message contains only the sender's Lock. Nothing to decrypt"
+		}else{
+			readMsg.textContent = "Nothing to decrypt"
+		}
+		openReadScreen();
 		return
 	}
 	
 	var	type = text.charAt(0);
-
-	if(!type.match(/[gSO]/)){
-		readBox.textContent = '';
-		readMsg.textContent = 'This message is not encrypted, but perhaps the attachments are. Click More to decrypt them';
+	
+	if(!hasLock && type != 'A'){							//no Lock and not asymmetric encryption, so probably symmetric
+		if(type == 'g' || hasTags){
+			symmetricDecrypt(text)
+		}else{												//no tags so likely just text
+			readMsg.textContent = "This message is not encrypted, but perhaps the images or attachments are. Download them and click the arrow to decrypt them";
+			openReadScreen()
+		}
 		return
 	}
 	
-	var cipherInput = nacl.util.decodeBase64(text),
-		recipients = cipherInput[1],										//number of recipients. '0' reserved for special cases
+	if(!refreshKey()) return;											//make sure the key is loaded, otherwise stop to get it
+
+	var cipherInput = nacl.util.decodeBase64(text);
+	if(!cipherInput) return false;
+	var	recipients = cipherInput[1],										//number of recipients. '0' reserved for special cases
 		stuffForId = myLockbin;
 	if(type == 'g'){
 		var nonce = cipherInput.slice(1,10),						//shorter nonce for invitations, no padding
 			cipher = cipherInput.slice(10);
 		padding = []												//this is global
-	}else{
+	}else if(type == 'A'){
 		var nonce = cipherInput.slice(2,17);									//15 bytes
-		padding = cipherInput.slice(17, 117);								//100 bytes, global
+		padding = cipherInput.slice(17,117);								//100 bytes, global
+		var pubdum = cipherInput.slice(117,149);							//retrieve ephemeral lock for Anonymous mode
+		cipherInput = cipherInput.slice(149)
+	}else if(type == 'S' || type == 'O'){
+		var nonce = cipherInput.slice(2,17);									//15 bytes
+		padding = cipherInput.slice(17,117);								//100 bytes, global
 		cipherInput = cipherInput.slice(117)
+	}else{
+		readMsg.textContent = "This message is not encrypted, but perhaps the images or attachments are. Download them and click the arrow to decrypt them";
+		openReadScreen();
+		return
 	}
 
 	var nonce24 = makeNonce24(nonce);	
 	
 	//now cut the rest of the input into pieces. First ID tags and their respective encrypted keys etc., then the ciphertext
 	var cipherArray = new Array(recipients);
-	if(type == 'S'){													//shorter pieces in Anonymous and Signed modes
-		for(var i = 0; i < recipients; i++){
-			cipherArray[i] = cipherInput.slice(56*i,56*(i+1))		//8 bytes for ID, 48 for encrypted key
-		}
-		var cipher = cipherInput.slice(56*recipients)
-	}else if(type == 'O'){																//longer pieces in Read-once mode
+	if(type == 'O'){																//longer pieces in Read-once mode
 		for(var i = 0; i < recipients; i++){
 			cipherArray[i] = cipherInput.slice(105*i,105*(i+1))		//8 bytes for ID, 48 for encrypted ephemeral Lock, 48 for encrypted key, 1 for type
 		}
 		var cipher = cipherInput.slice(105*recipients)
+	}else if(type != 'g'){															//shorter pieces in Anonymous and Signed modes
+		for(var i = 0; i < recipients; i++){
+			cipherArray[i] = cipherInput.slice(56*i,56*(i+1))		//8 bytes for ID, 48 for encrypted key
+		}
+		var cipher = cipherInput.slice(56*recipients)
+	
 	}
 
 	if (type == 'O' && theirEmail == myEmail){
 		readMsg.textContent = 'You cannot decrypt Read-once messages to yourself';
+		openReadScreen();
 		return
 	}
-	if(type == 'S'){														//signed mode
+	if(type == 'S'){														//Signed mode
 		var sharedKey = makeShared(convertPubStr(theirLock),myKey),
-			idKey = sharedKey;
+			idKey = sharedKey
+	
+	}else if(type == 'A'){													//Anonymous mode
+		var	sharedKey = makeShared(pubdum,myKey),
+			idKey = sharedKey
 
 	}else if(type == 'O'){													//Read-once mode
 		if (locDir[theirEmail]){
 			var	lastKeyCipher = locDir[theirEmail][1],
 				lastLockCipher = locDir[theirEmail][2],
-				turnstring = locDir[theirEmail][3];									//this strings says whose turn it is to encrypt
+				turnstring = locDir[theirEmail][3]									//this strings says whose turn it is to encrypt
 		}
 
 		if(lastKeyCipher){													//now make idTag
 			var lastKey = keyDecrypt(lastKeyCipher,true),
-				idKey = makeShared(convertPubStr(theirLock),lastKey);
+				idKey = makeShared(convertPubStr(theirLock),lastKey)
 		}else{																//if a dummy Key doesn't exist, use permanent Key
 			var lastKey = myKey,
-				idKey = makeShared(convertPubStr(theirLock),myKey);
+				idKey = makeShared(convertPubStr(theirLock),myKey)
 		}
 	}
 	
 	if(type == 'g'){														//key for Invitation is the sender's Lock, otherwise, got to find it
-		var msgKey = nacl.util.decodeBase64(theirLock)
+		var msgKey = nacl.util.decodeBase64(theirLock);
+		if(!msgKey) return false;
 		
 	}else{
 		var idTag = nacl.secretbox(stuffForId,nonce24,idKey).slice(0,8);
@@ -607,9 +682,13 @@ function decryptList(){
 		}
 
 		if(typeof(msgKeycipher) == 'undefined'){							//may have been reset, so try again
-			if(theirLock){
-				lastKey = myKey;
-				idKey = makeShared(convertPubStr(theirLock),myKey);
+			if(theirLock || pubdum){
+				if(myKey) lastKey = myKey;
+				if(type == 'A'){
+					idKey = makeShared(pubdum,myKey)
+				}else{
+					idKey = makeShared(convertPubStr(theirLock),myKey)
+				}
 				idTag = nacl.secretbox(stuffForId,nonce24,idKey).slice(0,8);
 
 				for (i = 0; i < recipients; i++){
@@ -622,8 +701,7 @@ function decryptList(){
 					}
 				}
 			}
-			if(typeof(msgKeycipher) == 'undefined'){						//the password may have changed, so try again with old password
-				if(!document.getElementById('oldPwd')){showOldKeyDialog(); return;}
+			if(typeof(msgKeycipher) == 'undefined'){					//the password may have changed, so try again with old password
 				if(oldPwdStr){
 					var oldKeySgn = nacl.sign.keyPair.fromSeed(wiseHash(oldPwdStr,myEmail)).secretKey,
 						oldKey = ed2curve.convertSecretKey(oldKeySgn),
@@ -631,12 +709,14 @@ function decryptList(){
 						oldLock = nacl.util.encodeBase64(oldLockbin).replace(/=+$/,'');
 						
 				}else{													//prompt for old password
-					$('#oldKeyScr').dialog("open");
+					openScreen('oldPwdScr');
 					return
 				}
 				
 				if(type == 'S'){
 					idKey = makeShared(convertPubStr(theirLock),oldKey)
+				}else if(type == 'A'){
+					idKey = makeShared(pubdum,oldKey)
 				}else{
 					if(lastKeyCipher){	
 						lastKey = keyDecrypt(lastKeyCipher,true);
@@ -646,7 +726,7 @@ function decryptList(){
 						idKey = makeShared(convertPubStr(theirLock),lastKey)
 					}
 				}
-				idTag = symEncrypt(oldLock,nonce24,idKey).slice(0,8);
+				idTag = nacl.secretbox(oldLockbin,nonce24,idKey).slice(0,8);
 
 				for(i = 0; i < recipients; i++){
 					var success = true;
@@ -662,19 +742,19 @@ function decryptList(){
 						sharedKey = makeShared(convertPubStr(theirLock),oldKey)
 					}
 				}else{													//otherwise really give up
-					if(type == 'S'){
-						failedDecrypt('idSigned')
+					if(type == 'O'){
+						failedDecrypt('idReadonce'); openReadScreen(); return
 					}else{
-						failedDecrypt('idReadonce')
+						failedDecrypt('idSigned'); openReadScreen(); return
 					}
 				}
 			}
 		}
 
-		//got the encrypted message key so now decrypt it, and finally the main message. The process for PFS and Read-once modes is more involved.
-		if (type == 'S'){					//signed mode
+		//got the encrypted message key so now decrypt it, and finally the main message. The process for Read-once mode is more involved.
+		if (type != 'O'){					//Anonymous and Signed modes
 			var msgKey = nacl.secretbox.open(msgKeycipher,nonce24,sharedKey);
-			if(!msgKey) failedDecrypt('signed');
+			if(!msgKey) {failedDecrypt('signed'); openReadScreen(); return};
 
 //for Read-once mode, first we separate the encrypted new Lock from the proper message key, then decrypt the new Lock and combine it with the stored Key (if any) to get the ephemeral shared Key, which unlocks the message Key. The particular type of encryption (Read-once or PFS) is indicated by the last byte
 		}else{
@@ -682,7 +762,7 @@ function decryptList(){
 				newLockCipher = msgKeycipher.slice(49),
 				newLock = nacl.secretbox.open(newLockCipher,nonce24,idKey);
 			msgKeycipher = msgKeycipher.slice(0,48);
-			if(!newLock) failedDecrypt('read-once');
+			if(!newLock) {failedDecrypt('read-once'); openReadScreen(); return};
 
 			if(typeByte[0] == 164){														//PFS mode: last Key and new Lock
 				var	sharedKey = makeShared(newLock,lastKey);
@@ -704,7 +784,7 @@ function decryptList(){
 			}
 
 			var msgKey = nacl.secretbox.open(msgKeycipher,nonce24,sharedKey);
-			if(!msgKey) failedDecrypt('read-once');
+			if(!msgKey) {failedDecrypt('read-once'); openReadScreen(); return};
 			locDir[theirEmail][2] = keyEncrypt(newLock);										//store the new dummy Lock (final storage at end)
 			locDir[theirEmail][3] = 'lock';
 
@@ -713,13 +793,14 @@ function decryptList(){
 	}
 
 	//final decryption for the main message, which is also compressed
-	var plainstr = symDecrypt(cipher,nonce24,msgKey,true);
-	plainstr = decryptSanitizer(plainstr);										//sanitize what is about to be put in the DOM, based on a whitelist
+	var plainstr = symDecrypt(cipher,nonce24,msgKey,true).replace(/style="(.*?)"/g,'');	//remove styles that might have crept in; this function has its own error handling
+	if(!plainstr){failedDecrypt(''); openReadScreen(); return}
+	plainstr = decryptSanitizer(plainstr);													//sanitize what is about to be put in the DOM, based on a whitelist
 
 	if(type == 'g'){																	//add further instructions if it was an invitation
 		plainstr = "Congratulations! You have decrypted your first message from me with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address if it's not there already so PassLok can recognize the recipient, but <em>do not write your message yet</em>. Then click the <b>PassLok</b> logo (orange key in the bottom toolbar).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt to email</b> button.</li><li>The encrypted message will appear in the compose window. Add the subject and whatever plain text you want, and click <b>Send</b>.</li></ol>";		
 	}
-	readBox.innerHTML = plainstr
+	readBox.innerHTML = plainstr;
 
 	syncLocDir();															//everything OK, so store
 
@@ -732,8 +813,13 @@ function decryptList(){
 			readMsg.textContent = 'Decryption successful. This message will become un-decryptable after you reply'
 		}
 	}else{
-		readMsg.textContent = 'Decryption successful'
+		if(type == 'A'){
+			readMsg.textContent = 'Decryption successful, but the sender is not authenticated'
+		}else{
+			readMsg.textContent = 'Decryption successful'
+		}
 	}
+	openReadScreen();
 	callKey = ''
 }
 
@@ -751,35 +837,32 @@ function charsLeftDecoy(){
 //encrypts a hidden message into the padding included with list encryption, or makes a random padding also encrypted so it's indistinguishable
 function decoyEncrypt(length,seckey){
 	if(decoyMode.checked){
-		if(typeof(decoyPwdIn) == "undefined"){
-			showDecoyInDialog();
-			return false		
-		}
-		if (!decoyPwdIn.value.trim() || !decoyText.value.trim()){ 					//stop to display the decoy entry form if there is no hidden message or key
-			showDecoyInDialog();
+		if (!decoyInBox.value.trim() || !decoyText.value.trim()){ 					//stop to display the decoy entry form if there is no hidden message or key
+			openScreen('decoyInScr');
 			return false
 		}
-		var keyStr = decoyPwdIn.value,
-			text = encodeURI(decoyText.value.replace(/%20/g, ' '));
+		var decoyKeyStr = decoyInBox.value.trim(),
+			text = encodeURI(decoyText.value.trim().replace(/%20/g, ' '));
 			nonce = nacl.randomBytes(9),
 			nonce24 = makeNonce24(nonce),
-			keyStripped = stripHeaders(keyStr);
+			keyStripped = stripHeaders(decoyKeyStr);
 
 		if (keyStripped.length == 43 || keyStripped.length == 50){						//the key is a Lock, so do asymmetric encryption
 			if (keyStripped.length == 50) keyStripped = changeBase(keyStripped.toLowerCase().replace(/l/g,'L'), base36, base64, true) //ezLock replaced by regular Lock
 			var sharedKey = makeShared(convertPubStr(keyStripped),seckey);
 		}else{
-			var sharedKey = wiseHash(keyStr,nacl.util.encodeBase64(nonce));			//symmetric encryption for true shared key
+			var sharedKey = wiseHash(decoyKeyStr,nacl.util.encodeBase64(nonce));			//symmetric encryption for true shared key
 		}
 		
 		while (text.length < length) text = text + ' ';				//add spaces to make the number of characters required
 		text = text.slice(0,length);
 		var cipher = concatUint8Arrays(nonce,symEncrypt(text,nonce24,sharedKey));
 		
-		decoyPwdIn.value = "";
-		decoyText.value = "";
-		$('#decoyIn').dialog("close");
-		showDecoyInCheck.checked = false
+		decoyInBox.value = '';
+		decoyText.value = '';
+		showDecoyIn.checked = false;
+		openReadScreen()
+
 	}else{
 		var cipher = nacl.randomBytes(length + 25)					//no decoy mode so padding is random; add 25 to account for mac and nonce
 	}
@@ -788,42 +871,43 @@ function decoyEncrypt(length,seckey){
 
 //decrypt the message hidden in the padding, for decoy mode
 function decoyDecrypt(cipher,dummylock){
-	if(typeof(decoyPwdOut) == "undefined"){
-		showDecoyOutDialog();
-		return false			
-	}
-	var decoyOut = document.getElementById('decoyPwdOut');
-	if (!decoyOut.value.trim()){					//stop to display the decoy key entry form if there is no key entered
-		showDecoyOutDialog();
-		return false
-	}
-	var keyStr = decoyOut.value;
-	decoyOut.value = ""	;
+	var decoyKeyStr = decoyOutBox.value.trim();		//turn into local variable
+	decoyOutBox.value = '';
 
 	var nonce = cipher.slice(0,9),
 		cipherMsg = cipher.slice(9),
 		nonce24 = makeNonce24(nonce),
-		sharedKey = wiseHash(keyStr,nacl.util.encodeBase64(nonce)),				//try symmetric first
-		plain = nacl.secretbox.open(cipherMsg,nonce24,sharedKey);
+		sharedKey = wiseHash(decoyKeyStr,nacl.util.encodeBase64(nonce)),				//try symmetric first
+		plain = nacl.secretbox.open(cipherMsg,nonce24,sharedKey)
+
 	if(!plain){																//not a shared key, so try asymmetric
-		sharedKey = makeShared(dummylock,ed2curve.convertSecretKey(nacl.sign.keyPair.fromSeed(wiseHash(keyStr,myEmail)).secretKey));
+		sharedKey = makeShared(dummylock,ed2curve.convertSecretKey(nacl.sign.keyPair.fromSeed(wiseHash(decoyKeyStr,myEmail)).secretKey));
 		plain = nacl.secretbox.open(cipher,nonce24,sharedKey);
 	}
 	
-	$('#decoyOut').dialog("close");
-	showDecoyOutCheck.checked = false;
-	if(!plain) failedDecrypt('decoy');									//give up
-	readMsg.textContent = 'Hidden message: ' + decryptSanitizer(decodeURI(nacl.util.encodeUTF8(plain)));
-	return true
+	if(plain){
+		return 'Hidden message: ' + decryptSanitizer(decodeURI(nacl.util.encodeUTF8(plain)))
+	}else{
+		return "No Hidden message found"
+	}
 }
 
 //does decoy decryption after a button is clicked
 function doDecoyDecrypt(){
-	var msg = 'You must have just decrypted something in order to use this feature';
 	if(padding){
-		if(!decoyDecrypt(padding,convertPubStr(theirLock))){readMsg.textContent = msg; return};
+		if(!decoyOutBox.value.trim()){					//stop to display the decoy key entry form if there is no key entered
+			openScreen('decoyOutScr');
+			return
+		}
+		openScreen('readScr');
+		var decoyMsg = decoyDecrypt(padding,convertPubStr(theirLock));
+		if(decoyMsg){
+			readMsg.textContent = decoyMsg
+		}else{
+			readMsg.textContent = 'No Hidden message found'
+		}
 		padding = ''
 	}else{
-		readMsg.textContent = msg
+		readMsg.textContent = 'You must have just decrypted an eligible message in order to use this feature'
 	}
 }

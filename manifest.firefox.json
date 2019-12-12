@@ -2,14 +2,14 @@
  "name": "PassLok for Email",
  "short_name": "PassLok",
  "description": "High security encryption for email. PassLok is in no way associated with Gmail, Yahoo, or Outlook.",
- "version": "0.4.16",
+ "version": "0.5.1",
  "manifest_version": 2,
  "icons": {
- "16": "favicon.ico",
- "48": "passlok-icon48inv.png",
- "128": "passlok-touch-icon128.png"
+ "16": "img/passlok-icon16inv.png",
+ "48": "img/passlok-icon48inv.png",
+ "128": "img/passlok-touch-icon128.png"
  },
- "content_security_policy": "default-src 'self'; img-src 'self' data:; style-src 'self'",
+ "content_security_policy": "default-src 'self'; img-src 'self' data:; connect-src 'self' data:; style-src 'self' 'unsafe-inline'",
 "permissions":[
 	"storage",
     "https://mail.google.com/*",
@@ -23,16 +23,10 @@
     ],
 "background":{
 	"scripts": [
-		"src/background.js"
-	]
+		"js-src/background.js"
+	],
+	"persistent": false
 	},
-"browser_action": {
-   "default_icon": {
-	   		"16": "passlok-icon16gray.png",
-           "48": "passlok-icon48gray.png"
-   },
-   "default_title": "PassLok for Email"
- },
 "content_scripts": [{
     "matches":[
 	    "https://mail.google.com/*",
@@ -43,42 +37,14 @@
 		 "https://*.live.com/*"
 	],
     "css": [
-		"lib/jquery-ui.min.css",
-		"src/interface.css"
+		"css/content.css"
 	],
     "js": [
-		"lib/jquery-3.3.1.min.js",
-		"lib/jquery-ui.min.js",
-		"lib/nacl.js",
-		"lib/ed2curve.js",
-		"lib/scrypt-async.js",
-		"lib/lz-string.js",
-		"lib/purify.js",
-		"lib/jssteg.js",
-		"lib/jsstegencoder.js",
-		"lib/jsstegdecoder.js",
-		"lib/isaac.js",
-		"src/interface.js",
-		"src/crypto.js",
-		"src/dictionary_en.js",
-		"src/chat.js",
-		"src/keylock.js",
-		"src/localdir.js",
-		"src/screens.js",
-		"src/stego.js"
+		"js-src/content.js"
 	],
     "run_at":"document_idle",
     "all_frames":true
-}],
-
-"web_accessible_resources": [
-	"lib/images/ui-icons_222222_256x240.png",
-	"lib/images/ui-icons_555555_256x240.png",
-	"lib/images/ui-icons_777777_256x240.png",
-	"lib/images/ui-icons_ef8c08_256x240.png",
-	"lib/images/ui-bg_glass_100_f6f6f6_1x400.png",
-	"lib/images/ui-bg_diagonals-thick_20_666666_40x40.png"
-    ],
+  }],
 
  "applications": {
   	"gecko": {

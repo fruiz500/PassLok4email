@@ -1,51 +1,117 @@
-﻿//function to test key strength and come up with appropriate key stretching. Based on WiseHash
-function keyStrength(pwd,location) {
-	var entropy = entropycalc(pwd);
+﻿//a bunch of global variables. The rest of the global variables are flags that are defined right before they are to be used.
+//myKey is a 32-byte uint8 array private key deriving from the user's Password, for DH and local encryption. myEmail is what it sounds like (string). myLockbin is the derived public Key. Suffix "bin" means it is binary.
+//theirEmail, etc, refers to the sender or recipient at the moment a certain encryption or decryption is taking place. Global variable needed for error handling.
+//locDir is an object containing the data that is saved between sessions
+var	KeyStr,
+	myKey,
+	oldPwdStr,
+	myEmail,
+	myLockbin,
+	myLock,
+	myezLock,
+	theirEmail,
+	theirLock,
+	theirLockbin,
+	emailList,
+	activeTab,
+	soleRecipient,
+	callKey = '',
+	locDir = {},
+	serviceName,
+	prevServiceName;
+
+//resets the Keys in memory when the timer ticks off
+function resetKeys(){
+	KeyStr = '';
+	myKey = '';
+	myLockbin = '';
+	myLock = '';
+	myezLock = '';
+	pwdMsg.textContent = 'Your Password has expired. Please enter it again';
+	pwdMsg.style.color = '';
+	chrome.runtime.sendMessage({message: 'reset_now'})		//also reset in background page
+}
+
+//reads Key and stops if there's something wrong. If the timer has run out, the Key is deleted from box, and stretched keys are deleted from memory
+function refreshKey(){
+	resetTimer();
+	if (!myKey){					//if keys are gone, prompt for user password
+		openScreen('pwdScr');
+		return false
+	}else{return true}
+}
+
+//called if the service has changed and keys need to be remade
+function reformKeys(){
+	if(serviceName != prevServiceName && KeyStr && myEmail){				//in case user is on a different email, and keys are still cached
+		var KeySgn = nacl.sign.keyPair.fromSeed(wiseHash(KeyStr,myEmail)).secretKey;		//this one won't be kept as global
+		myKey = ed2curve.convertSecretKey(KeySgn);
+		myLockbin = nacl.sign.keyPair.fromSecretKey(KeySgn).publicKey;
+		myLock = nacl.util.encodeBase64(myLockbin).replace(/=+$/,'');
+		myezLock = changeBase(myLock,base64,base36,true);
+		prevServiceName = serviceName;
+		
+	chrome.runtime.sendMessage({message: 'preserve_keys', KeyStr: KeyStr, myKey: myKey, myLockbin: myLockbin, myLock: myLock, myezLock: myezLock, locDir: locDir, prevServiceName: serviceName});		//send them to background
+	}
+}
+
+
+var keyTimer = 0;
+
+//this function erases the secret values after 5 minutes
+function resetTimer(){
+	var period = 300000;
+	clearTimeout(keyTimer);	
+	keyTimer = setTimeout(function() {		//start timer to reset Password box
+		resetKeys()
+	}, period);
+
+	chrome.runtime.sendMessage({message: 'reset_timer'})		//also start clock in background page
+}
+
+//function to test key strength and come up with appropriate key stretching. Based on WiseHash
+function keyStrength(string,loc) {
+	var entropy = entropycalc(string),
+		msg,colorName;
 
 	if(entropy == 0){
-		var msg = 'This is a known bad Password!';
-		var colorName = 'magenta'
+		msg = 'This is a known bad Password!';
+		colorName = 'magenta'
 	}else if(entropy < 20){
-		var msg = 'Terrible!';
-		var colorName = 'magenta'
+		msg = 'Terrible!';
+		colorName = 'magenta'
 	}else if(entropy < 40){
-		var msg = 'Weak!';
-		var colorName = 'red'
+		msg = 'Weak!';
+		colorName = 'red'
 	}else if(entropy < 60){
-		var msg = 'Medium';
-		var colorName = 'darkorange'
+		msg = 'Medium';
+		colorName = 'darkorange'
 	}else if(entropy < 90){
-		var msg = 'Good!';
-		var colorName = 'green'
+		msg = 'Good!';
+		colorName = 'green'
 	}else if(entropy < 120){
-		var msg = 'Great!';
-		var colorName = 'blue'
+		msg = 'Great!';
+		colorName = 'blue'
 	}else{
-		var msg = 'Overkill  !!';
-		var colorName = 'cyan'
+		msg = 'Overkill  !!';
+		colorName = 'cyan'
 	}
 
 	var iter = Math.max(1,Math.min(20,Math.ceil(24 - entropy/5)));			//set the scrypt iteration exponent based on entropy: 1 for entropy >= 120, 20(max) for entropy <= 20
 
 	var seconds = time10/10000*Math.pow(2,iter-8);			//to tell the user how long it will take, in seconds
 	var msg = 'Password strength: ' + msg + '\r\nUp to ' + Math.max(0.01,seconds.toPrecision(3)) + ' sec. to process';
-	var msgName = '';
-	if(location == 'pwd'){msgName = 'keyMsg'
-	}else if(location == 'oldPwd'){msgName = 'oldKeyMsg'
-	}else if(location == 'decoyIn'){msgName = 'decoyInMsg'
-	}else if(location == 'decoyOut'){msgName = 'decoyOutMsg'
-	}else if(location == 'image'){msgName = 'stegoImageMsg'
-	}
-	if(msgName){
+	if(loc && string){
+		var msgName = loc + 'Msg';
 		document.getElementById(msgName).textContent = msg;
-		hashili(msgName,pwd);
+		hashili(msgName,string);
 		document.getElementById(msgName).style.color = colorName
 	}
 	return iter
 };
 
 //takes a string and calculates its entropy in bits, taking into account the kinds of characters used and parts that may be in the general wordlist (reduced credit) or the blacklist (no credit)
-function entropycalc(pwd){
+function entropycalc(string){
 
 //find the raw Keyspace
 	var numberRegex = new RegExp("^(?=.*[0-9]).*$", "g");
@@ -54,50 +120,50 @@ function entropycalc(pwd){
 	var base64Regex = new RegExp("^(?=.*[/+]).*$", "g");
 	var otherRegex = new RegExp("^(?=.*[^a-zA-Z0-9/+]).*$", "g");
 
-	pwd = pwd.replace(/\s/g,'');										//no credit for spaces
+	string = string.replace(/\s/g,'');										//no credit for spaces
 
 	var Ncount = 0;
-	if(numberRegex.test(pwd)){
+	if(numberRegex.test(string)){
 		Ncount = Ncount + 10;
 	}
-	if(smallRegex.test(pwd)){
+	if(smallRegex.test(string)){
 		Ncount = Ncount + 26;
 	}
-	if(capRegex.test(pwd)){
+	if(capRegex.test(string)){
 		Ncount = Ncount + 26;
 	}
-	if(base64Regex.test(pwd)){
+	if(base64Regex.test(string)){
 		Ncount = Ncount + 2;
 	}
-	if(otherRegex.test(pwd)){
+	if(otherRegex.test(string)){
 		Ncount = Ncount + 31;											//assume only printable characters
 	}
 
 //start by finding words that might be on the blacklist (no credit)
-	var pwd = reduceVariants(pwd);
-	var wordsFound = pwd.match(blackListExp);							//array containing words found on the blacklist
+	string = reduceVariants(string);
+	var wordsFound = string.match(blackListExp);							//array containing words found on the blacklist
 	if(wordsFound){
 		for(var i = 0; i < wordsFound.length;i++){
-			pwd = pwd.replace(wordsFound[i],'');						//remove them from the string
+			string = string.replace(wordsFound[i],'');						//remove them from the string
 		}
 	}
 
 //now look for regular words on the wordlist
-	wordsFound = pwd.match(wordListExp);									//array containing words found on the regular wordlist
+	wordsFound = string.match(wordListExp);									//array containing words found on the regular wordlist
 	if(wordsFound){
 		wordsFound = wordsFound.filter(function(elem, pos, self) {return self.indexOf(elem) == pos;});	//remove duplicates from the list
 		var foundLength = wordsFound.length;							//to give credit for words found we need to count how many
 		for(var i = 0; i < wordsFound.length;i++){
-			pwd = pwd.replace(new RegExp(wordsFound[i], "g"),'');									//remove all instances
+			string = string.replace(new RegExp(wordsFound[i], "g"),'');									//remove all instances
 		}
 	}else{
 		var foundLength = 0;
 	}
 
-	pwd = pwd.replace(/(.+?)\1+/g,'$1');								//no credit for repeated consecutive character groups
+	string = string.replace(/(.+?)\1+/g,'$1');								//no credit for repeated consecutive character groups
 
-	if(pwd != ''){
-		return (pwd.length*Math.log(Ncount) + foundLength*Math.log(wordLength + blackLength))/Math.LN2
+	if(string != ''){
+		return (string.length*Math.log(Ncount) + foundLength*Math.log(wordLength + blackLength))/Math.LN2
 	}else{
 		return (foundLength*Math.log(wordLength + blackLength))/Math.LN2
 	}
@@ -128,41 +194,115 @@ function hashili(msgID,string){
 				output += consonant[Math.floor(remainder / 5)] + vowel[remainder % 5];
 				code10 = (code10 - remainder) / 100
 			}
-//	return output
 			element.innerText += '\n' + output
 		}
 	}, 1000);						//one second delay to display hashili
 }
 
-//a bunch of global variables. The rest of the global variables are flags that are defined right before they are to be used.
-//myKey is a 32-byte uint8 array private key deriving from the user's Password, for DH and local encryption. myEmail is what it sounds like (string). myLockbin is the derived public Key. Suffix "bin" means it is binary.
-//theirEmail, etc, refers to the sender or recipient at the moment a certain encryption or decryption is taking place. Global variable needed for error handling.
-//locDir is an object containing the data that is saved between sessions
-var	myKey,
-	oldPwdStr,
-	myEmail,
-	myLockbin,
-	myLock,
-	myezLock,
-	theirEmail,
-	theirLock,
-	theirLockbin,
-	callKey = '',
-	locDir = {};
+//does the pending action set in variable callKey if the needed keys are present. Otherwise it prompts for user key
+function doAction(){
+	if(callKey == 'encrypt'){					//now complete whatever was being done when the key was found missing
+		encrypt()
+	}else if(callKey == 'encrypt2file'){
+		encrypt2file()
+	}else if(callKey == 'encrypt2image'){
+		encrypt2image()
+	}else if(callKey == 'inviteEncrypt'){
+		inviteEncrypt()
+	}else if(callKey == 'decrypt'){
+		decrypt()
+	}else if(callKey == 'decryptItem'){
+		decryptItem()
+	}else if(callKey == 'movedb'){
+		openScreen('composeScr');
+		moveDB()
+	} else if(callKey = 'compose'){
+		updateComposeButtons();
+		openScreen('composeScr')
+	}
+}
+
+//converts user Password into binary format and checks that it hasn't changed, resumes operation after keys are loaded
+function acceptpwd(){
+	KeyStr = pwdBox.value.trim();
+	if(KeyStr == ''){
+		pwdMsg.textContent = 'Please enter your Password';
+		return
+	}
+	if(KeyStr.length < 4){
+		pwdMsg.textContent = 'This Password is too short';
+		return
+	}
+	pwdMsg.textContent = '';
+	pwdMsg.style.color = '';
+	var blinker = document.createElement('span'),
+		msgText = document.createElement('span');
+	blinker.className = "blink";
+	blinker.textContent = "LOADING...";
+	msgText.textContent = " for best speed, use at least a Medium Password";
+	pwdMsg.appendChild(blinker);
+	pwdMsg.appendChild(msgText);
+
+	if(!newPwdAccepted && !myKey && KeyStr && myEmail){
+		var KeySgn = nacl.sign.keyPair.fromSeed(wiseHash(KeyStr,myEmail)).secretKey;		//this one won't be kept as global
+		myKey = ed2curve.convertSecretKey(KeySgn);
+		myLockbin = nacl.sign.keyPair.fromSecretKey(KeySgn).publicKey;
+		myLock = nacl.util.encodeBase64(myLockbin).replace(/=+$/,'');
+		myezLock = changeBase(myLock,base64,base36,true)
+	}
+
+	pwdMsg.textContent = 'Please enter your Password';
+	if(!checkPwd()) return;									//make sure it was not a mistake by comparing Lock with stored Lock
+	pwdBox.value = '';											//safe to delete box after check
+	if(!locDir[myEmail]) locDir[myEmail] = [];
+	locDir[myEmail][0] = myLock;
+	syncChromeLock(myEmail,JSON.stringify(locDir[myEmail]));
+		
+	firstTimeUser = false;
+	firstTimeKey.style.display = 'none';
+		
+	chrome.runtime.sendMessage({message: 'preserve_keys', KeyStr: KeyStr, myKey: myKey, myLockbin: myLockbin, myLock: myLock, myezLock: myezLock, locDir: locDir, prevServiceName: serviceName});		//send them to background
+
+	doAction()					//do what was being done when the key was found missing
+}
+
+var newPwdAccepted = false;
+
+//make sure the Password entered is the same as last time, otherwise stop for confirmation.
+function checkPwd(){
+	if(!locDir[myEmail]) return true;
+	if(myLock == locDir[myEmail][0]) return true;
+	if(!newPwdAccepted){											//first time: arm the button and wait for user to click again
+		newPwdAccepted = true;
+		pwdMsg.textContent = "This is not the same Password as last time. If you click OK again, it will be accepted as your new Password";
+		acceptPwdBtn.style.background = '#FB5216';
+		acceptPwdBtn.style.color = 'white';
+		setTimeout(function() {
+			newPwdAccepted = false;
+			acceptPwdBtn.style.background = '';
+			acceptPwdBtn.style.color = ''
+		}, 10000)								//forget request after 10 seconds
+		return false
+	}else{															//new Password accepted, so store it and move on
+		newPwdAccepted = false;
+		return true
+	}
+}
 
 //stretches a password string with a salt string to make a 256-bit Uint8Array Password
-function wiseHash(pwd,salt){
-	var iter = keyStrength(pwd,false),
+function wiseHash(string,salt){
+	var iter = keyStrength(string,false),
 		secArray = new Uint8Array(32),
 		keyBytes;
 	if(salt.length == 43) iter = 1;								//random salt: no extra stretching needed
-	scrypt(pwd,salt,iter,8,32,0,function(x){keyBytes=x;});
+	scrypt(string,salt,iter,8,32,0,function(x){keyBytes=x;});
 	for(var i=0;i<32;i++){
 			secArray[i] = keyBytes[i]
 	}
 	return secArray
 }
 
+var time10;			//will be filled at the end of window load
 //returns milliseconds for 10 scrypt runs at iter=10 so the user can know how long wiseHash will take; called at the end of body script
 function hashTime10(){
 	var before = Date.now();
@@ -184,7 +324,9 @@ function makeShared(pub,sec){
 
 //makes the DH public key (Montgomery) from a published Lock, which is a Signing public key (Edwards)
 function convertPubStr(Lock){
-	return ed2curve.convertPublicKey(nacl.util.decodeBase64(Lock))
+	var LockBin = nacl.util.decodeBase64(Lock);
+	if(!LockBin) return false;
+	return ed2curve.convertPublicKey(LockBin)
 }
 
 //stretches nonce to 24 bytes
@@ -207,12 +349,13 @@ function symEncrypt(plainstr,nonce24,symKey,isCompressed){
 //decrypt string (or uint8 array) with a symmetric Key
 function symDecrypt(cipherStr,nonce24,symKey,isCompressed){
 	if(typeof cipherStr == 'string'){
-		var cipher = nacl.util.decodeBase64(cipherStr)
+		var cipher = nacl.util.decodeBase64(cipherStr);
+		if(!cipher) return false
 	}else{
 		var cipher = cipherStr
 	}
 	var	plain = nacl.secretbox.open(cipher,nonce24,symKey);					//decryption instruction
-	if(!plain) failedDecrypt('key');
+	if(!plain){failedDecrypt('key'); return false}
 	if(!isCompressed || plain.join().match(",61,34,100,97,116,97,58,")){		//this is '="data:' after encoding
 		return nacl.util.encodeUTF8(plain)
 	}else{
@@ -273,22 +416,22 @@ function decryptSanitizer(string){
 //takes appropriate UI action if decryption fails
 function failedDecrypt(marker){
 	if(marker == 'new'){
-		$('#oldKeyScr').dialog("open");
+		openScreen('oldKeyScr')
 	}else if(marker == 'old'){
-		if(typeof(readScr) != "undefined"){
+		if(callKey == 'decrypt'){
 			readMsg.textContent = 'The old Password has not worked either. Reload the email page and try again';
-			resetSpan.style.display = '';
-		}else if(typeof(composeScr) != "undefined"){
-			composeMsg.textContent = 'The old Password has not worked either. Reload the email page and try again';
-			if(composeRecipientsBox.innerHTML.split(', ').length < 2 && onceMode.checked){
-				resetSpan2.style.display = '';				//display this only if one recipient
-				composeMsg.textContent = 'The old Password has not worked either. Try resetting the exchange with this recipient';
+			resetSpan.style.display = 'block'
+		}else if(callKey == 'compose'){
+			composeMsg('The old Password has not worked either. Reload the email page and try again');
+			if(composeRecipientsBox.innerHTML.split(', ').length < 2 && onceMode){
+				resetSpan2.style.display = 'block';				//display this only if one recipient
+				composeMsg.textContent = 'The old Password has not worked either. Try resetting the exchange with this recipient'
 			}
 		}
 	}else if(marker == 'read-once'){
 		restoreTempLock();
 		readMsg.textContent = 'Read-once messages can be decrypted only once. You may want to reset the exchange with the button below';
-		resetSpan.style.display = '';
+		resetSpan.style.display = 'block'
 		callKey = ''
 	}else if(marker == 'signed'){
 		restoreTempLock();
@@ -297,7 +440,7 @@ function failedDecrypt(marker){
 	}else if(marker == 'idReadonce'){
 		restoreTempLock();
 		readMsg.textContent = 'Nothing found for you, or you are trying to decrypt a Read-once message for the 2nd time\nYou may want to reset the exchange with the button below';
-		resetSpan.style.display = '';
+		resetSpan.style.display = 'block';
 		callKey = ''
 	}else if(marker == 'idSigned'){
 		restoreTempLock();
@@ -311,7 +454,6 @@ function failedDecrypt(marker){
 		readMsg.textContent = 'Decryption has Failed';
 		callKey = ''		
 	}
-	return
 }
 
 //restores the original Lock if unlocking from a new Lock fails
