@@ -243,7 +243,7 @@ function acceptpwd(){
 	pwdMsg.appendChild(blinker);
 	pwdMsg.appendChild(msgText);
 
-	if(!newPwdAccepted && !myKey && KeyStr && myEmail){
+	if(!myKey && KeyStr && myEmail){
 		var KeySgn = nacl.sign.keyPair.fromSeed(wiseHash(KeyStr,myEmail)).secretKey;		//this one won't be kept as global
 		myKey = ed2curve.convertSecretKey(KeySgn);
 		myLockbin = nacl.sign.keyPair.fromSecretKey(KeySgn).publicKey;
@@ -252,7 +252,7 @@ function acceptpwd(){
 	}
 
 	pwdMsg.textContent = 'Please enter your Password';
-	if(!checkPwd()) return;									//make sure it was not a mistake by comparing Lock with stored Lock
+	if(!checkPwd()){myKey = ''; return}						//make sure it was not a mistake by comparing Lock with stored Lock
 	pwdBox.value = '';											//safe to delete box after check
 	if(!locDir[myEmail]) locDir[myEmail] = [];
 	locDir[myEmail][0] = myLock;

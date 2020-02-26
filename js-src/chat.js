@@ -71,7 +71,7 @@ function randomBlackIndex(){
 
 //detects if there is a chat invitation in the main box, and opens the Chat window if appropriate
 function openChat(){
-	var typetoken = readBox.innerHTML.trim();
+	var typetoken = readBox.textContent.trim();
 	if (typetoken.length == 107 && !typetoken.slice(-43).match(' ')){			//chat invite detected, so open chat
 		var date = typetoken.slice(0,43).trim();									//the first 43 characters are for the date and time etc.
 		if(date != 'noDate'){
@@ -86,7 +86,7 @@ function openChat(){
 
 //continues to open chat if the user agrees
 function acceptChat(){
-	chrome.runtime.sendMessage({newtab: "chatTab", typetoken: readBox.innerHTML.trim()});
+	chrome.runtime.sendMessage({newtab: "chatTab", typetoken: readBox.textContent.slice(43).trim()});
 	openScreen('readScr');
 	readBox.textContent = '';
 	readMsg.textContent = 'Chat session open in a separate tab. You may close this now.'
