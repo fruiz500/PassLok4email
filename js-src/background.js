@@ -6,7 +6,7 @@ chrome.runtime.onMessage.addListener(
                 chrome.tabs.create({url: '../html/help.html'})
 				
             }else if(request.newtab == "chatTab") {						//open chat page in new tab
-				chrome.tabs.create({url: 'https://passlok.com/chat/index.html#' + request.typetoken})
+				chrome.tabs.create({url: 'https://passlok.com/chat2/index.html#' + request.typetoken})
 			
 	  		}else if(request.message == "read_data"){					//got data from existing email, now send it to popup
 				myEmail = request.myEmail;

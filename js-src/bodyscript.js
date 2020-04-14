@@ -159,7 +159,7 @@ window.onload = function() {
 				serviceName = request.serviceName;
 				if(!activeTab) activeTab = sender.tab;			//when received directly from content script
 				if(emailList) composeRecipientsBox.textContent = emailList.join(', ');
-				composeBox.innerHTML = decryptSanitizer(request.bodyText);					//put in what was in email compose
+				composeBox.innerHTML = safeHTML(request.bodyText);					//put in what was in email compose
 				if(composeBox.innerHTML) composeMsg.textContent = "It is best to click the PassLok icon before you type anything in the email compose box"
 				callKey = 'compose';
 				doAction()

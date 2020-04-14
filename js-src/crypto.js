@@ -795,7 +795,7 @@ function decryptList(){
 	//final decryption for the main message, which is also compressed
 	var plainstr = symDecrypt(cipher,nonce24,msgKey,true).replace(/style="(.*?)"/g,'');	//remove styles that might have crept in; this function has its own error handling
 	if(!plainstr){failedDecrypt(''); openReadScreen(); return}
-	plainstr = decryptSanitizer(plainstr);													//sanitize what is about to be put in the DOM, based on a whitelist
+	plainstr = safeHTML(plainstr);													//sanitize what is about to be put in the DOM, based on a whitelist
 
 	if(type == 'g'){																	//add further instructions if it was an invitation
 		plainstr = "Congratulations! You have decrypted your first message from me with <b>PassLok for Email</b>. This is my message to you:<blockquote><em>" + plainstr + "</em></blockquote><br>Do this to reply to me with an encrypted message:<ol><li>Click the <b>Compose</b> or <b>Reply</b> button on your email program.</li><li>Type in my email address if it's not there already so PassLok can recognize the recipient, but <em>do not write your message yet</em>. Then click the <b>PassLok</b> logo (orange key in the bottom toolbar).</li><li>A new window will appear, and there you can write your reply securely.</li><li>After writing your message (and optionally selecting the encryption mode), click the <b>Encrypt to email</b> button.</li><li>The encrypted message will appear in the compose window. Add the subject and whatever plain text you want, and click <b>Send</b>.</li></ol>";		
@@ -886,7 +886,7 @@ function decoyDecrypt(cipher,dummylock){
 	}
 	
 	if(plain){
-		return 'Hidden message: ' + decryptSanitizer(decodeURI(nacl.util.encodeUTF8(plain)))
+		return 'Hidden message: ' + safeHTML(decodeURI(nacl.util.encodeUTF8(plain)))
 	}else{
 		return "No Hidden message found"
 	}
