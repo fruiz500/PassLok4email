@@ -65,7 +65,7 @@ function symmetricDecrypt(cipherStr){
 		openReadScreen();
 		return
 	}
-	readBox.innerHTML = safeHTML(plain.trim());
+	readBox.innerHTML = decryptSanitizer(plain.trim());
 	readMsg.textContent = 'shared Password decryption successful';
 	openReadScreen();
 	callKey = ''
@@ -244,7 +244,7 @@ function padDecrypt(cipherStr){
 		}
 
 		if(macChecks){																//check authentication and display result if passed
-			readBox.innerHTML = safeHTML(plain.trim());
+			readBox.innerHTML = decryptSanitizer(plain.trim());
 			readMsg.textContent = 'Pad mode decryption successful';
 		}else{
 			readMsg.textContent = 'Pad mode message authentication has failed';

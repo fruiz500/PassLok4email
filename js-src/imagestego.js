@@ -231,7 +231,7 @@ function decodePNG(){
 	decrypt();
 	openChat();
 	if(result2){
-		readMsg.textContent = 'Hidden message: ' + safeHTML(LZString.decompressFromBase64(fromBin(result2[0])))
+		readMsg.textContent = 'Hidden message: ' + LZString.decompressFromBase64(fromBin(result2[0]))
 	}
 }
 
@@ -281,7 +281,7 @@ var decodeJPG = function(){
 		decryptList();
 		openChat();
 		if(result2){
-			readMsg.textContent = 'Hidden message: ' + safeHTML(LZString.decompressFromBase64(fromBin(result2[0])))
+			readMsg.textContent = 'Hidden message: ' + LZString.decompressFromBase64(fromBin(result2[0]))
 		}
 	})
 }
