@@ -28,8 +28,8 @@
         <h3 class="helpitem">How do I use PassLok for Email?</h3>
   <div class="helptext">
     <p>
-    <p>The first time PassLok for Email ran on your machine, you were asked to come up with a secret Password. You must remember this Password and <em>never give it to anyone</em>, not even your friends. PassLok for Email gives you a score as you type it and tells you how long it will take to process it. The lower the score, the longer it takes to process, so it is better to come up with a good Password. If you click the eye icon, it also displays a mnemonic "hashili" word to reassure you that you typed it correctly. Click the eye icon again to see the whole Password.</p>
-    <p>As soon as you click<strong></strong> the PassLok icon (which looks like this: <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAGFBMVEUAAAD8cT77Uhb//Pr7WyH/2cv+ooL/8eyW2r6lAAAAAXRSTlMAQObYZgAAAFZJREFUCNdjQAWhocFQFrOQkmMCjOmkpAZlirilOMJEBRgVDaBM4RQ4U1RFjQHGVEqGMcXTGeDagCRMG1amOAM2tW5pATA3KKnBmS6OUCZDaWlpAapnAO5QC8JQ9jftAAAAAElFTkSuQmCC'>) on a encrypted message, the message loads automatically and PassLok for Email decrypts it, possibly asking you first for your Password. If the sender's Password has changed, PassLok for Email will inform you and ask you accept it.</p>
+    <p>The first time you encrypt or decrypt anything, PassLok  asks you to come up with a secret Password. You must remember this Password and <em>never give it to anyone</em>, not even your friends. PassLok gives you a score as you type it and tells you how long it will take to process it. The lower the score, the longer it takes to process, so it is better to come up with a good Password. If you click the eye icon, it also displays a mnemonic "hashili" word to reassure you that you typed it correctly. Click the eye icon again to see the whole Password.</p>
+    <p>As soon as you click<strong></strong> the PassLok icon (which looks like this: <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAGFBMVEUAAAD8cT77Uhb//Pr7WyH/2cv+ooL/8eyW2r6lAAAAAXRSTlMAQObYZgAAAFZJREFUCNdjQAWhocFQFrOQkmMCjOmkpAZlirilOMJEBRgVDaBM4RQ4U1RFjQHGVEqGMcXTGeDagCRMG1amOAM2tW5pATA3KKnBmS6OUCZDaWlpAapnAO5QC8JQ9jftAAAAAElFTkSuQmCC'>) on a encrypted message, the message loads automatically and PassLok for Email decrypts it, possibly asking you first for your Password. If the sender's Password has changed, PassLok for Email will inform you and ask you accept it. You can also do this on a message that simply contains the sender's Lock in the signature area, in order to encrypt messages for this sender.</p>
     <p>To send an encrypted message, click  click the <strong>Compose</strong> or <strong>Reply</strong> button in your email page, and then do this:</p>
     <ol>
             <li>Fill in the recipients' addresses, and perhaps the subject line, but <em><strong>do not</strong></em> write the text that you want to be encrypted (otherwise the email server might have it, unencrypted, as soon as you type it). If you add any images at this point, they will be stripped in the next step.</li>
@@ -38,6 +38,7 @@
             <li>The message will then be encrypted and placed back in the email compose or reply window. Add whatever plain text or attachments you want before sending it out in the normal way. Beware: attachments added this way <em>will not be encrypted</em>. If you want them encrypted, load them as in step 2 or follow the instructions below about encrypting files.</li>
     </ol>
     <p>If you want to correspond with new people, you must send them an invitation first, or receive an encrypted message from them. To do this, proceed as indicated above but click the <strong>Invite</strong> button instead. Be aware, however, that the contents of invitation messages are <em>not secure</em>, and anyone in the world can decrypt them. You can also send to the recipient a text file containing only your Lock, consisting of the first fifty characters of any message encrypted by you (up to but not including a series of six slashes ////// ) with extension .txt, possibly sent by a different channel. In this case, they'll have to load it as if they were loading an encrypted file (the process is described below), which won't decrypt, but after that they'll be able to send you encrypted messages.</p>
+    <p>If you put your PassLok Lock in your email signature, other PassLok users will be able to correspond securely with you without a previous invitation. To display your Lock in several formats (all accepted by PassLok for Email), click the <strong>my Lock</strong> button on any PassLok decrypt window (may have to click &#9658; first in order to see the button). It is a good practice to also add a link to a video where you read your Lock in the same format, with some background music for added security. This way other users will be sure that the Lock in your email signature is authentic.</p>
     <p>All of this is explained in this video: <a href="https://www.youtube.com/watch?v=aomKUA4PcAI" target="_blank">https://www.youtube.com/watch?v=aomKUA4PcAI</a></p>
   </div><hr>
   		<h3 class="helpitem">What options are available?</h3>
@@ -101,7 +102,7 @@
         <h3 class="helpitem">How does Chat work?</h3>
   <div class="helptext">
     <p>
-          <p>If you select <strong>Chat</strong> option at the bottom of the dialog before clicking <strong>Encrypt to email</strong> or <strong>Encrypt to image</strong> (you may need to click &#9658; first) a dialog asks you what kind of real-time chat you want to set up. There are three choices: text and files, this plus audio, and all this plus video. You can also add a short message, such as the exact time to start the chat session.</p>
+          <p>If you select <strong>Chat</strong> option at the bottom of the dialog before clicking <strong>Encrypt to email</strong> or <strong>Encrypt to image</strong> (you may need to click &#9658; first) a dialog asks you what kind of real-time chat you want to set up. There are four choices: text and files, this plus audio, all this plus video, and Jitsi, which is full-featured except for files. You can also add a short message, such as the exact time to start the chat session.</p>
     <p>After you click <strong>OK</strong>, PassLok makes an encrypted chat invitation, which you can then send to the participants of the chat. This invitation contains the short message mentioned above (limit 43 characters) plus some data needed to establish the connection.</p>
     <p>When the recipients get your chat invitation, they will decrypt it like any other PassLok message and then the short message will pop up and ask for confirmation to continue (this is so they don't join the chat too early, if set for a later time). After this the chat will open on a separate tab and ask you to supply a name for yourself. When each participant does this, an encrypted connection is established with one another without any server in-between. They also may be asked to grant permission to feed audio or video when the connection takes place. The original sender connects exactly the same way, by decrypting the invitation he/she sent to the others.</p>
     <p>If you get disconnected, just reload the chat tab in your browser and type your alias again. The chat session ceases to exist when all participants close their chat tabs.</p>
@@ -276,22 +277,23 @@
     <p>PassLok for Email contains strong cryptographic methods, which may be illegal in some countries. Please check the local laws before using PassLok for Email.</p>
     <p>PassLok for Email is intended to protect professionals and innocent citizens from hackers and abusive surveillance. It is not intended to facilitate any form of crime. Please refrain from using it if your intention is to commit a crime.</p>
     <div id="canary"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8BAMAAADI0sRBAAAAGFBMVEUAAAAAAAD///91XhdgYGCcnJzMzMzUqipkv+fEAAAAAXRSTlMAQObYZgAAAYFJREFUOMt1lLGOgzAQREEUaVkHkhpEUkOVmvsDIt31IF1PdP8vnWwzHtaGKRDmsbO7eHGm9Cfyys4km/ojmEvQ/ZBS10N6Gl+I18/v6G/KtCrTOnVuscbWSwsxPYPBwEsGw1nxgEGpxoUzuI00MjuDqWdwvyD4e88nuOdbMFOge3j79V3liHAjL7np4kt4u5V2fwS8bGbbHd3hjZ0wyt1hZAzuxL3FZoffqrUSlaG4qqU2HFbMfoplj68pNqr0T4xF4SFUMyJcY+EqxVgTS4QlwkZjrAXSubFRsw4H5p5BxLlIgwfTIW6DoXafPcYkqN74zRf3uN7bf2HHChvnuMGX7WoRYD8tTN/4q2CS/YQ8tvY79GwsXjO3J6jq/Qz7Mds8ds5RSDypAmz4zSr1E/EfQ9MJHjDd5PSGu1Vt8Q3BOBrVDuNdnj0DB2RCvH0xPpnYHoLhXmluXdajU7E7ONOj+YyP5Fzx9MDHQHIkQGCv1WtcaFqSkKeUumjnVB80TP0D1fGXaRHBg/YAAAAASUVORK5CYII=">
-    <p>This paragraph and the canary logo above attest to the fact that, up until the release of version 0.5.2 (January 2020) we have not received any requests under gag order for user data or modifications of the code. This paragraph will be periodically updated as this situation continues.</p>
+    <p>This paragraph and the canary logo above attest to the fact that, up until the release of version 0.5.5 (October 2020) we have not received any requests under gag order for user data or modifications of the code. This paragraph will be periodically updated as this situation continues.</p>
   </div>
 </div><hr>
-<p> PassLok for Email 0.5.2 &#169; F. Ruiz 2020, Credits and License</p>
+<p> PassLok for Email 0.5.5 &#169; F. Ruiz 2020, Credits and License</p>
       <div>
 	<ul>
         <li> engine: NaCl by D. Bernstein, W. Janssen, T. Lange, P. Schwabe, M. Dempsky, and A. Moon 2013</li>
         <li> tweetNaCl JavaScript implementation by D. Chestnykh and D. Mandiri 2015</li>
         <li> scrypt key stretching implementation and edcurve-js by D. Chestnykh 2014</li>
         <li> lz-string compression by pieroxy 2014</li>
-        <li> DOMPurify XSS sanitizer by cure53 2017</li>
+        <li> DOMPurify XSS sanitizer by cure53 2020</li>
         <li> file In/Out based on an article from the This Could Be Better blog 2012</li>
         <li> image steganography based on F5 by Andreas Westfeld 2001</li>
     	 <li> jpeg image hiding libraries js-steg by Owen Campbell-Moore et al. 2014</li>
     	 <li> isaac seedable PRNG by Yves-Marie Rinquin 2012</li>
-        <li> webRTC chat by Muaz Khan 2017</li>
+        <li> webRTC chat by Muaz Khan 2019</li>
+        <li> Jitsi chat by jitsi.org 2020</li>
         <li> text hiding based on a homoglyph encoder by Adrian Crenshaw, 2013</li>
         <li> testing, help items, interface ideas by the IIT PassLok team 2014-17</li>
       </ul>

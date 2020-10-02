@@ -199,7 +199,7 @@ function hashili(msgID,string){
 	}, 1000);						//one second delay to display hashili
 }
 
-//does the pending action set in variable callKey if the needed keys are present. Otherwise it prompts for user key
+//does the pending action set in variable callKey
 function doAction(){
 	if(callKey == 'encrypt'){					//now complete whatever was being done when the key was found missing
 		encrypt()
@@ -216,9 +216,12 @@ function doAction(){
 	}else if(callKey == 'movedb'){
 		openScreen('composeScr');
 		moveDB()
-	} else if(callKey = 'compose'){
+	}else if(callKey == 'compose'){
 		updateComposeButtons();
 		openScreen('composeScr')
+	}else if(callKey == 'showLock'){
+		openScreen('readScr');
+		showLock()
 	}
 }
 
@@ -373,44 +376,9 @@ function escapeHTML(str){
 	return str.replace(/non-breaking-space/g,'&nbsp;')
 }
 
-//mess up all tags except those whitelisted: formatting, images, and links containing a web reference or a file
-function safeHTML(string){
-	//first mess up attributes with values not properly enclosed within quotes, because Chrome likes to complete those; extra replaces needed to preserve encrypted material
-	string = string.replace(/==/g,'double-equal').replace(/<(.*?)=[^"'](.*?)>/g,'').replace(/double-equal/g,'==');
-	//now escape every dangerous character; we'll recover tags and attributes on the whitelist later on
-	string = escapeHTML(string);
-	//make regular expressions containing whitelisted tags, attributes, and origins; sometimes two versions to account for single quotes
-	var allowedTags = '(b|i|strong|em|u|strike|sub|sup|blockquote|ul|ol|li|pre|div|span|a|h1|h2|h3|h4|h5|h6|p|pre|table|tbody|tr|td|img|br|wbr|hr|font)',
-		tagReg = new RegExp('&lt;(\/?)' + allowedTags + '(.*?)&gt;','gi'),
-		allowedAttribs = '(download|style|src|target|name|id|class|color|size|cellpadding|tabindex|type|start|align)',
-		attribReg1 = new RegExp(allowedAttribs + '=\&quot;(.*?)\&quot;','gi'),
-		attribReg2 = new RegExp(allowedAttribs + '=\&#039;(.*?)\&#039;','gi'),
-		allowedOrigins = '(http:\/\/|https:\/\/|mailto:\/\/|#)',
-		origReg1 = new RegExp('href=\&quot;' + allowedOrigins + '(.*?)\&quot;','gi'),
-		origReg2 = new RegExp('href=\&#039;' + allowedOrigins + '(.*?)\&#039;','gi');
-	//recover allowed tags
-	string = string.replace(tagReg,'<$1$2$3>');
-	//recover allowed attributes
-	string = string.replace(attribReg1,'$1="$2"').replace(attribReg2,"$1='$2'");
-	//recover file-containing links
-	string = string.replace(/href=\&quot;data:(.*?),(.*?)\&quot;/gi,'href="data:$1,$2"').replace(/href=\&#039;data:(.*?),(.*?)\&#039;/gi,"href='data:$1,$2'");
-	//recover web links and local anchors
-	string = string.replace(origReg1,'href="$1$2"').replace(origReg2,"href='$1$2'");
-	return string
-}
-
-//detects the presence of data URI scheme and offers to use the safeHTML filter rather than DOMPurify, which removes that content
+//remove XSS vectors using DOMPurify
 function decryptSanitizer(string){
-	if(string.indexOf('href="data:') == -1){		//check the absence of a link containing data
-		var result = DOMPurify.sanitize(string)
-	}else{											//otherwise ask the user what to do
-		if(confirm('The decrypted material seems to contain binary data, which might lead to unsafe execution in Firefox. If you click OK, it will be preserved, otherwise it will be removed.')){
-			var result = safeHTML(string)
-		}else{
-			var result = DOMPurify.sanitize(string)
-		}		
-	}
-	return result
+	return DOMPurify.sanitize(string, {ADD_DATA_URI_TAGS: ['a']})
 }
 
 //takes appropriate UI action if decryption fails
@@ -468,6 +436,7 @@ function restoreTempLock(){
 //Alphabets for base conversion. Used in making and reading the ezLock format
 var base36 = '0123456789abcdefghijkLmnopqrstuvwxyz';										//capital L so it won't be mistaken for 1
 var base64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
 //changes the base of a number. inAlpha and outAlpha are strings containing the base code for the original and target bases, as in '0123456789' for decimal
 //adapted from http://snippetrepo.com/snippets/bignum-base-conversion, by kybernetikos
 function changeBase(numberIn, inAlpha, outAlpha, isLock) {
@@ -521,4 +490,14 @@ function changeBase(numberIn, inAlpha, outAlpha, isLock) {
 	}
 
     return isWordsOut ? result.join(' ') : result.join('')
+}
+
+//displays Lock in several formats on the read screen
+function showLock(){
+	callKey = 'showLock';
+	if(!refreshKey()) return;											//make sure the key is loaded, otherwise stop to get it
+	var myWordLock = changeBase(myLock,base64,wordListExp,true);	//make word Lock for display
+	
+	readBox.textContent = "This is your ezLock, which is also at the start of any material encrypted by you:\r\n\r\nPL24ezLok==" + myezLock.match(/.{1,5}/g).join("-") + "==PL24ezLok\r\n\r\nThis is your Lock in base64:\r\n\r\nPL24lok==" + myLock + "==PL24lok\r\n\r\nAnd this is your word Lock:\r\n\r\nPL24wordLok==" + myWordLock + "==PL24wordLok/r/n/r/nIt is good practice to display it with a link to a video where you read it aloud, with background music.";
+	readMsg.textContent = "Below is your Lock in several formats. Put any of these in your email signature so people can send you encrypted messages."
 }

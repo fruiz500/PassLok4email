@@ -3,10 +3,10 @@ chrome.runtime.onMessage.addListener(
       function (request, sender, sendResponse) {
 
             if (request.newtab == "helpTab") {							//open Help page in new tab
-                chrome.tabs.create({url: '../html/help.html'})
+                chrome.tabs.create({url: '/html/help.html'})
 				
             }else if(request.newtab == "chatTab") {						//open chat page in new tab
-				chrome.tabs.create({url: 'https://passlok.com/chat/index.html#' + request.typetoken})
+				chrome.tabs.create({url: 'https://passlok.com/chat/chat.html#' + request.typetoken})
 			
 	  		}else if(request.message == "read_data"){					//got data from existing email, now send it to popup
 				myEmail = request.myEmail;
@@ -94,17 +94,17 @@ function resetNow(){
 	prevServiceName = ''
 }
 
-var popupParams = "scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=610,height=244";
+var popupParams = "scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=640,height=244";
 var popup, popupType = 'read';
 
 //opens popup on key entry dialog
 function openPopup(){
 	if(!popupOpen){
 		if(isFirefox){
-			popup = chrome.windows.create({url:'../html/popup.html#' + myEmail, width:816, height:366, type:'popup'})			//not resizable, though
+			popup = chrome.windows.create({url:'/html/popup.html#' + myEmail, width:816, height:366, type:'popup'})			//not resizable, though
 		}else{
-			popup = window.open('../html/popup.html#' + myEmail,'popup',popupParams)		//add myEmail to hashtag, needed to retrieve locDir
-		}
+			popup = window.open('/html/popup.html#' + myEmail,'popup',popupParams)		//add myEmail to hashtag, needed to retrieve locDir
+	}
 	}else{
 		chrome.runtime.sendMessage({message: 'ready?'})
 	}

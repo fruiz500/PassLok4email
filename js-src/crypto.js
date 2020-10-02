@@ -492,11 +492,11 @@ function keyDecrypt(cipherStr,isArray){
 }
 
 //this strips initial and final header, plus spaces and non-base64 characters in the middle
-function stripHeaders(string){
-	string = string.replace(/[\s\n]/g,'').replace(/&nbsp;/g,'');							//remove spaces, newlines
-	if(string.match('==')) string = string.split('==')[1];									//keep only PassLok item, if bracketed
-	string = string.replace(/<(.*?)>/gi,"").replace(/[^a-zA-Z0-9\+\/]/g,''); 		//takes out html tags and anything that is not base64
-	return string
+function stripHeaders(string,leaveSpaces){
+	string = string.replace(/\n/g,'').replace(/&nbsp;/g,'');								//remove special spaces, newlines
+	if(string.match('==')) string = string.split('==')[1];								//keep only PassLok item, if bracketed
+	string = string.replace(/<(.*?)>/gi,"").replace(/[^a-zA-Z0-9\+\/\s]/g,''); 		//takes out html tags and anything that is not base64 or a space
+	return leaveSpaces ? string : string.replace(/\s/g,'')								//unless leaveSpaces is on, remove spaces as well
 }
 
 //to make sure attached Lock is correct
@@ -515,29 +515,31 @@ function decryptList(){
 	readBox.textContent = '';
 	var hasTags = !!text2decrypt.match('=='),
 		text = stripHeaders(text2decrypt),										//get the data from a global variable holding it
-		words = text2decrypt.replace(/_/g,' ').trim(),						    //this just in case it's a word Lock
-		hasLock;
+		words = stripHeaders(text2decrypt,true).trim(),						    //this just in case it's a word Lock; spaces are left in
+		hasLock,onlyLock;
 
 	if(isBase36(text.slice(0,50)) && (text.slice(50,56) == '//////')){			//find Lock located at the start
 		theirLock = changeBase(text.slice(0,50),base36,base64,true);
-		hasLock = true
+		hasLock = true;
+		onlyLock = false
 	
 	}else if(text.length == 50 && isBase36(text)){								//just an ezLock
 		theirLock = changeBase(text,base36,base64,true);
-		hasLock = true
+		hasLock = true;
+		onlyLock = true
 		
 	}else if(text.length == 43){													//just a regular Lock
 		theirLock = text;
-		hasLock = true
+		hasLock = true;
+		onlyLock = true
 		
 	}else if(words.split(' ').length == 20){										//word Lock
 		var theirLockTest = changeBase(words,wordListExp,base64,true);			  		//convert to base64
 		if(theirLockTest){
 			theirLock = theirLockTest;
-			readMsg.textContent = "This message contains only the sender's Lock. Nothing to decrypt"
+			hasLock = true;
+			onlyLock = true
 		}
-		openReadScreen();
-		return
 		
 	}else if(text.charAt(0) == 'k'){													//it's an encrypted database, so decrypt it and merge it
 		var agree = confirm('This is an encrypted local database. It will be loaded if you click OK, possibly replacing current data. This cannot be undone.');
@@ -570,7 +572,7 @@ function decryptList(){
 		text = text.slice(56);												//take out ezLock and separator
 	}
 	
-	if(!text){
+	if(!text || onlyLock){
 		if(hasLock){
 			readMsg.textContent = "This message contains only the sender's Lock. Nothing to decrypt"
 		}else{
@@ -886,7 +888,7 @@ function decoyDecrypt(cipher,dummylock){
 	}
 	
 	if(plain){
-		return 'Hidden message: ' + decryptSanitizer(decodeURI(nacl.util.encodeUTF8(plain)))
+		return 'Hidden message: ' + decodeURI(nacl.util.encodeUTF8(plain))
 	}else{
 		return "No Hidden message found"
 	}

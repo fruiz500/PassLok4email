@@ -21,7 +21,7 @@
 <!--lz-string compression algorithm 1.4.4. https://github.com/pieroxy/lz-string-->
 <script src="../js-lib/lz-string.js"></script>
 
-<!--dompurify, used to sanitize decrypted material before putting in DOM v2.0.7. https://github.com/cure53/DOMPurify-->
+<!--DOMPurify, used to sanitize decrypted material before putting in DOM v2.1.1. https://github.com/cure53/DOMPurify-->
 <script src="../js-lib/purify.js"></script>
 
 <!--jpeg image steganography by Owen Campbell-Moore and others. https://github.com/owencm/js-steg. First jsstegencoder-1.0.js-->
@@ -79,7 +79,8 @@
 		<span id="moreReadButtons">&nbsp;&nbsp;
 			<label for="loadEncrFile" id="decryptFileBtn" title="open dialog to load an encrypted file or image"><span class="cssbutton">Decrypt file / image</span></label>&nbsp;&nbsp;
 			<input type="file" id="loadEncrFile"/>
-			<button class="cssbutton" id="decoyBtn" value="Decoy" title="decrypt hidden message, if any">Hidden</button>
+			<button class="cssbutton" id="decoyBtn" value="Decoy" title="decrypt hidden message, if any">Hidden</button>&nbsp;&nbsp;
+           <button class="cssbutton" id="myLockBtn" value="myLock" title="display your Lock in several formats">my Lock</button>
 		</span>&nbsp;&nbsp;
 		<button class="cssbutton" id="readInterfaceBtn" value="switch" title="get more options">&#9658;</button>
 	</div><br>
@@ -280,7 +281,9 @@
 	<div align="center">
 		<input type="radio" name="chatmodes" id="dataChat"  title="chat with text messages and file exchange" checked/>&nbsp; Text and files&nbsp;&nbsp;
 		<input type="radio" name="chatmodes" id="audioChat" title="like Text chat, plus audio"/>&nbsp; Audio&nbsp;&nbsp;
-		<input type="radio" name="chatmodes" id="videoChat" title="like audio chat, plus video"/>&nbsp; Video <br><br>
+		<input type="radio" name="chatmodes" id="videoChat" title="like audio chat, plus video"/>&nbsp; Video&nbsp;&nbsp;
+  		<input type="radio" name="chatmodes" id="jitsiChat" title="full featured, on jit.si"/>&nbsp; Jitsi
+        <br><br>
 	</div>
 	<textarea id="chatDate" class="cssbox" name="chatDate" rows="1" title="additional information" placeholder="Write here the date and time for the chat"></textarea><br><br>
 	<div align="center">

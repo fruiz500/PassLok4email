@@ -28,7 +28,8 @@ window.onload = function() {
 	decoyBtn.addEventListener('click',doDecoyDecrypt);
 	loadEncrFile.addEventListener('change',loadEncryptedFile);
 	loadEncrFile.addEventListener('click',function(){this.value = '';});
-	decryptFileBtn.addEventListener('click',function(){this.value = '';});	
+	decryptFileBtn.addEventListener('click',function(){this.value = '';});
+	myLockBtn.addEventListener('click',showLock);
 	readInterfaceBtn.addEventListener('click',switchReadButtons);
 	
 	encryptBtn.addEventListener('click',encrypt);
