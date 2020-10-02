@@ -4,10 +4,10 @@ chrome.runtime.onMessage.addListener(
 
             if (request.newtab == "helpTab") {							//open Help page in new tab
                 chrome.tabs.create({url: '/html/help.html'})
-				
+
             }else if(request.newtab == "chatTab") {						//open chat page in new tab
 				chrome.tabs.create({url: 'https://passlok.com/chat/chat.html#' + request.typetoken})
-			
+
 	  		}else if(request.message == "read_data"){					//got data from existing email, now send it to popup
 				myEmail = request.myEmail;
 				theirEmail = request.theirEmail;
@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener(
 
 			}else if(request.message == "popup_ready"){					//needed so the popup can get relayed data after it loads or responds
 				if(popupType == 'read'){
-					chrome.runtime.sendMessage({message: 'read_bgdata', myEmail: myEmail, theirEmail: theirEmail, bodyText: text2decrypt, soleRecipient: soleRecipient, serviceName: serviceName})				
+					chrome.runtime.sendMessage({message: 'read_bgdata', myEmail: myEmail, theirEmail: theirEmail, bodyText: text2decrypt, soleRecipient: soleRecipient, serviceName: serviceName})
 				}else if(popupType == 'compose'){
 					chrome.runtime.sendMessage({message: 'compose_bgdata', myEmail: myEmail, emailList: emailList, bodyText: text2decrypt, activeTab: activeTab, serviceName: serviceName})
 				}
@@ -56,7 +56,7 @@ chrome.runtime.onMessage.addListener(
 
 			}else if(request.message == "popup_closed"){					//reset flag so popup is created again
 				popupOpen = false
-			}  
+			}
       }
 );
 
