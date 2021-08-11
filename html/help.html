@@ -139,14 +139,14 @@
     <p>The recipient will then save the attachment and load it back into PassLok's decrypt dialog (there is a <strong>Decrypt file/image</strong> button for this, visible after clicking &#9658;), and then the file will decrypt automatically. This button also allows loading the sender's PassLok Lock (any format supported by PassLok Privacy will work) from a .txt file rather than from an invitation message, which might be useful for sharing someone else's Lock.</p>
     <p>Encrypting files is explained in this video: <a href="https://www.youtube.com/watch?v=S9sK4V0tUe0" target="_blank">https://www.youtube.com/watch?v=S9sK4V0tUe0</a>, and encrypting into files in this one: <a href="https://www.youtube.com/watch?v=5YY6-tNJe94" target="_blank">https://www.youtube.com/watch?v=5YY6-tNJe94</a></p>
   </div><hr>
-        <h3 class="helpitem">How about inserting images, rich formatting?</h3>
+        <h3 class="helpitem">How about inserting images, rich formatting?</h3> 
   <div class="helptext">
   		<p>
   		<p>Images that you want to encrypt can be inserted in the same way as formatted text. Simply click &#9658; in order to display the formatting toolbar, and then click the second from the right button on the toolbar, which looks like this: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAAbFBMVEUAAAAAAAAmJibm5uaJiYnZ2dnn5+e5ubmBgYHNzc3z8/Pr6+vW1ta2trZ/f3/y8vLQ0NDPz8/Dw8OgoKCOjo54eHgcHBwGBgb+/v7T09PIyMi+vr6srKyEhIRqampiYmJbW1tPT08qKioRERGLOctyAAAAAXRSTlMAQObYZgAAAHJJREFUGNOtzkkShCAQRNFKbLsVsZ3nWe9/R8EAYeHSv6u3qEh6qo0/TkUiKULNbCglfZGSjf0vCvWZLTmxwBBXVGG1NO2D+hoIQ6IHmrKrciJDfgxIBGbPId12E//pUjOiyHydCGtFyQG3kWTcc4ro1U7vPAUU4TAxJQAAAABJRU5ErkJggg==" /></p>
   		<p>A dialog will open so you can load whatever local image you wish. Bear in mind that images can be large in data size, so the email service may end up clipping the encrypted message. PassLok will warn you in that event, so you can encrypt it to a file instead, and load it as an attachment.</p>
   		<p>If the image comes from a website, you have the option to open that website on a separate browser window and drag the image into PassLok, or do a copy/paste operation. In this case, the image will load as a link to the external website, which will make the encrypted message much smaller. This may pose security concerns, however.</p>
   		<p>Images loaded into the email's compose or reply windows before clicking the PassLok don't have any security (in fact, they may be uploaded to the email server immediately and without encryption, so don't do it), and are stripped when the PassLok encryption dialog loads.</p>
-  </div><hr>
+  </div><hr>  
   <h3 class="helpitem">I don't want my messages to look encrypted to a casual observer</h3>
   <div class="helptext">
         <p>
@@ -169,7 +169,7 @@
   <h3 class="helpitem">What is Hidden message mode?</h3>
   <div class="helptext">
         <p>
-        <p>When you turn on the <strong>Hidden msg.</strong> option at the bottom of the encrypt dialog  (you may need to click &#9658; first), PassLok includes a second message (limit 75 characters), which is encrypted under a separate key. Its presence is undetectable, and it won't make the encrypted result any longer or shorter. This is the process to use this mode:
+        <p>When you turn on the <strong>Hidden msg.</strong> option at the bottom of the encrypt dialog  (you may need to click &#9658; first), PassLok includes a second message (limit 75 characters), which is encrypted under a separate key. Its presence is undetectable, and it won't make the encrypted result any longer or shorter. This is the process to use this mode:                
         <p>When you are the sender:</p>
         <ol>
           <li>Check the <strong>Hidden msg.</strong> box, in addtion to setting the encryption mode and optionally Concealed or Invisible mode, and click an <strong>Encrypt</strong> button after you have typed in the main message.</li>
@@ -192,10 +192,10 @@
         </ol>
         <p>Most of these things are explained in this video: <a href="https://www.youtube.com/watch?v=oFCrETTwySw" target="_blank">https://www.youtube.com/watch?v=oFCrETTwySw</a></p>
    </div><hr>
-
+   
         <h3 class="helpitem">Something is not working</h3>
   <div class="helptext">
-    <p>
+    <p>    
     <p>If a new Read-once message fails to decrypt even though your Password is correct, this could be because you have already decrypted other messages from the same sender that were generated after that one. The un-decryptable message has &quot;missed its turn,&quot; so to speak, when later messages were decrypted. Ask the sender to re-send the contents in a newly encrypted message. No reset is needed.</p>
     <p>A new Read-once message can also fail to decrypt if  the  hidden data needed for Read-once mode have become corrupt of failed to sync. In this case you will be offered the opportunity to reset the conversation with the sender by clicking a special button.</p>
     <p>A message containing files or a long piece of text might have been clipped by the email service so that only the beginning is shown. Since the server is withholding some of the data, there isn't much that can be done with that message if the email service does not offer a way to display the complete message. Ask the sender to split the text into several shorter messages, or encrypt it to file and send it as an attachment. Some services, Gmail for instance, will display the entire message on a separate tab if requested. Then you can simply save that page locally as an html file, click the PassLok icon on the message (which will fail to decrypt), and load the html file you just saved as if it were an encrypted attachment. Decryption should restart at that point.</p>
@@ -263,7 +263,7 @@
       </ul>
       <li>If the published hash matches what you obtained from the .xpi file, all is good; go ahead and install PassLok for Email by clicking the Add-ons icon on the menu, then the little gear icon, and selecting &quot;Install Add-on from file.&quot; After you navigate the selection tp the .xpi file you just checked, PassLok for Email will install.</li>
     </ol>
-  </div><hr>
+  </div><hr> 
         <h3 class="helpitem">Privacy Statement, Legal Notices, and Warrant Canary</h3>
   <div class="helptext">
     <p>
@@ -277,10 +277,10 @@
     <p>PassLok for Email contains strong cryptographic methods, which may be illegal in some countries. Please check the local laws before using PassLok for Email.</p>
     <p>PassLok for Email is intended to protect professionals and innocent citizens from hackers and abusive surveillance. It is not intended to facilitate any form of crime. Please refrain from using it if your intention is to commit a crime.</p>
     <div id="canary"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8BAMAAADI0sRBAAAAGFBMVEUAAAAAAAD///91XhdgYGCcnJzMzMzUqipkv+fEAAAAAXRSTlMAQObYZgAAAYFJREFUOMt1lLGOgzAQREEUaVkHkhpEUkOVmvsDIt31IF1PdP8vnWwzHtaGKRDmsbO7eHGm9Cfyys4km/ojmEvQ/ZBS10N6Gl+I18/v6G/KtCrTOnVuscbWSwsxPYPBwEsGw1nxgEGpxoUzuI00MjuDqWdwvyD4e88nuOdbMFOge3j79V3liHAjL7np4kt4u5V2fwS8bGbbHd3hjZ0wyt1hZAzuxL3FZoffqrUSlaG4qqU2HFbMfoplj68pNqr0T4xF4SFUMyJcY+EqxVgTS4QlwkZjrAXSubFRsw4H5p5BxLlIgwfTIW6DoXafPcYkqN74zRf3uN7bf2HHChvnuMGX7WoRYD8tTN/4q2CS/YQ8tvY79GwsXjO3J6jq/Qz7Mds8ds5RSDypAmz4zSr1E/EfQ9MJHjDd5PSGu1Vt8Q3BOBrVDuNdnj0DB2RCvH0xPpnYHoLhXmluXdajU7E7ONOj+YyP5Fzx9MDHQHIkQGCv1WtcaFqSkKeUumjnVB80TP0D1fGXaRHBg/YAAAAASUVORK5CYII=">
-    <p>This paragraph and the canary logo above attest to the fact that, up until the release of version 0.5.5 (October 2020) we have not received any requests under gag order for user data or modifications of the code. This paragraph will be periodically updated as this situation continues.</p>
+    <p>This paragraph and the canary logo above attest to the fact that, up until the release of version 0.5.6 (August 2021) we have not received any requests under gag order for user data or modifications of the code. This paragraph will be periodically updated as this situation continues.</p>
   </div>
 </div><hr>
-<p> PassLok for Email 0.5.5 &#169; F. Ruiz 2020, Credits and License</p>
+<p> PassLok for Email 0.5.6 &#169; F. Ruiz 2021, Credits and License</p>
       <div>
 	<ul>
         <li> engine: NaCl by D. Bernstein, W. Janssen, T. Lange, P. Schwabe, M. Dempsky, and A. Moon 2013</li>

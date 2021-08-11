@@ -69,6 +69,15 @@ function ancestor(el,separation){
 
 var soleRecipient = false;
 
+//reply when polled in order to keep popup window alive
+chrome.runtime.onMessage.addListener(
+	function(request, sender, sendResponse) {
+		if(request.message == "is_script_there"){
+			chrome.runtime.sendMessage({message: "script_here"})
+		}				
+  	}
+);
+
 //detects compose or read areas and places buttons in them  
 function composeIntercept(ev) {
 	//start with Gmail

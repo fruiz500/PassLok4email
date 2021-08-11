@@ -9,7 +9,7 @@
 <!--License notice-->
 <script src="../js-src/license.js"></script>
 
-<!--TweetNaCl crypto library 1.0.1 by Dmitry Chestnykh. https://github.com/dchest/tweetnacl-js-->
+<!--TweetNaCl crypto library 1.0.3 by Dmitry Chestnykh. https://github.com/dchest/tweetnacl-js-->
 <script src="../js-lib/nacl.js"></script>
 
 <!--ed2curve-js conversion of curve coordinates 0.2.1 by Dmitry Chestnykh. https://github.com/dchest/ed2curve-js-->
@@ -21,7 +21,7 @@
 <!--lz-string compression algorithm 1.4.4. https://github.com/pieroxy/lz-string-->
 <script src="../js-lib/lz-string.js"></script>
 
-<!--DOMPurify, used to sanitize decrypted material before putting in DOM v2.1.1. https://github.com/cure53/DOMPurify-->
+<!--DOMPurify, used to sanitize decrypted material before putting in DOM v2.3.0. https://github.com/cure53/DOMPurify-->
 <script src="../js-lib/purify.js"></script>
 
 <!--jpeg image steganography by Owen Campbell-Moore and others. https://github.com/owencm/js-steg. First jsstegencoder-1.0.js-->
@@ -37,7 +37,7 @@
 <script src="../js-lib/isaac.js"></script>
 
 <!--this used to be in TweetNaCl, but they dropped it-->
-<script src="../js-src/nacl-util.js"></script>
+<script src="../js-lib/nacl-util.js"></script>
 
 <!--this only loads two word arrays: wordlist and blacklist-->
 <script src="../js-src/dictionary_en.js"></script>
@@ -70,7 +70,7 @@
 </head>
 
 <body>
-
+	
 <!--read screen-->
 <div class="screen" id="readScr">
 	<div id="readMsg" class="message" align="center"><p><span>Welcome to PassLok</span></p></div><br>
@@ -90,7 +90,7 @@
 	</span><br><br>
 	Message:<br><div id="readBox" class="cssbox"></div>
 </div>
-
+	
 <!--compose screen-->
 <div class="screen" id="composeScr">
 	<div id="composeMsg" class="message" align="center"><p><span>Welcome to PassLok</span></p></div><br>
@@ -111,7 +111,7 @@
 		<button class="cssbutton" id="resetBtn2" value="Reset" title="reset the current Read-once conversation with this sender">Reset</button>
 	</span><br><br>
 	Message:<br>
-
+    
 <!--toolbar for rich text editing-->
 <div id="toolBar1">
     <select id="formatBlock" title="headings, etc.">
@@ -207,8 +207,8 @@
 	<img class="intLink" title="Load a file" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAATlBMVEUAAAAAAAD19fVcXFwbGxsTExP8/PzT09NxcXFaWlo4ODg1NTUEBAT5+fnw8PDr6+vU1NTIyMi+vr6Xl5dsbGxnZ2dXV1dISEghISEMDAw0f0rSAAAAAXRSTlMAQObYZgAAAFBJREFUGNO9yEkOgCAQBMBmUxDc9/9/VJ2EjgkHb9axcJuceqQRtMq4aAdWkDr6xtW5jJRFx2MBu23fdS7eG6Vz0U8VytrKmhMnVoDQlOfbBQLIAl4FF2fyAAAAAElFTkSuQmCC" /></label>
 	<input type="file" id="mainFile"/>
 	</div>
-  </div>
-
+  </div> 
+     
      <div id="composeBox" class="cssbox" contenteditable="true"></div>
 	<div id="checkBoxes" align="center">
 		<br>

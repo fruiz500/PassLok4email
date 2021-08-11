@@ -147,6 +147,8 @@ window.onload = function() {
 				soleRecipient = request.soleRecipient;
 				senderBox.textContent = theirEmail;
 				serviceName = request.serviceName;
+				activeTab = request.activeTab;
+				if(!activeTab) activeTab = sender.tab;			//when received directly from content script
 				reformKeys();							//email service may have changed, so reform keys if needed
 				callKey = 'decrypt';
 				doAction()
@@ -156,8 +158,8 @@ window.onload = function() {
 				reformKeys();
 				emailList = request.emailList;
 				if(emailList) soleRecipient = emailList.length > 1;
-				activeTab = request.activeTab;
 				serviceName = request.serviceName;
+				activeTab = request.activeTab;
 				if(!activeTab) activeTab = sender.tab;			//when received directly from content script
 				if(emailList) composeRecipientsBox.textContent = emailList.join(', ');
 				composeBox.innerHTML = decryptSanitizer(request.bodyText);					//put in what was in email compose
@@ -191,7 +193,11 @@ window.onload = function() {
 				pwdMsg.style.color = ''
 
 			}else if(request.message == "ready?"){				//background is waiting to send something
-				chrome.runtime.sendMessage({message: "popup_ready"})
+				chrome.runtime.sendMessage({message: "popup_ready"})			
+							
+			}else if(request.message == "script_here"){			//reset popup kill if there's reply from the content script, relayed by background script
+				clearTimeout(killWindow);
+				killWindow = null
 
 			}else if(request.message.slice(-3) == 'Scr'){		//open a certain screen from background. Not used at the moment
 				openScreen(request.message)
@@ -203,6 +209,16 @@ window.onload = function() {
 //	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
 	time10 = 200;				//about right for 10 wiseHash at iter = 10 on a core2-duo
 }
+
+//poison pill code that kills the popup if the host page is closed
+var killWindow;													//a timer to close window, refreshed every 0.5 seconds
+var resInt = setInterval(function(){
+	if(!killWindow) killWindow = setTimeout(function(){			//close in 3 sec if no reply
+		chrome.runtime.sendMessage({message: "reset_now"});
+		window.close()
+	},3000);
+	chrome.tabs.sendMessage(activeTab.id, {message: "is_script_there"})		//poll content script
+},500);
 
 //Firefox needs to know when the popup closes
 window.onbeforeunload = function(){
