@@ -21,7 +21,7 @@
 <!--lz-string compression algorithm 1.4.4. https://github.com/pieroxy/lz-string-->
 <script src="../js-lib/lz-string.js"></script>
 
-<!--DOMPurify, used to sanitize decrypted material before putting in DOM v2.3.0. https://github.com/cure53/DOMPurify-->
+<!--DOMPurify, used to sanitize decrypted material before putting in DOM v2.3.6. https://github.com/cure53/DOMPurify-->
 <script src="../js-lib/purify.js"></script>
 
 <!--jpeg image steganography by Owen Campbell-Moore and others. https://github.com/owencm/js-steg. First jsstegencoder-1.0.js-->
@@ -79,6 +79,7 @@
 		<span id="moreReadButtons">&nbsp;&nbsp;
 			<label for="loadEncrFile" id="decryptFileBtn" title="open dialog to load an encrypted file or image"><span class="cssbutton">Decrypt file / image</span></label>&nbsp;&nbsp;
 			<input type="file" id="loadEncrFile"/>
+			<button class="cssbutton" id="saveFileBtn" value="Save" title="save decrypted files">Save files</button>&nbsp;&nbsp;
 			<button class="cssbutton" id="decoyBtn" value="Decoy" title="decrypt hidden message, if any">Hidden</button>&nbsp;&nbsp;
            <button class="cssbutton" id="myLockBtn" value="myLock" title="display your Lock in several formats">my Lock</button>
 		</span>&nbsp;&nbsp;
@@ -206,6 +207,7 @@
 	<label for="mainFile">
 	<img class="intLink" title="Load a file" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAMAAABhEH5lAAAATlBMVEUAAAAAAAD19fVcXFwbGxsTExP8/PzT09NxcXFaWlo4ODg1NTUEBAT5+fnw8PDr6+vU1NTIyMi+vr6Xl5dsbGxnZ2dXV1dISEghISEMDAw0f0rSAAAAAXRSTlMAQObYZgAAAFBJREFUGNO9yEkOgCAQBMBmUxDc9/9/VJ2EjgkHb9axcJuceqQRtMq4aAdWkDr6xtW5jJRFx2MBu23fdS7eG6Vz0U8VytrKmhMnVoDQlOfbBQLIAl4FF2fyAAAAAElFTkSuQmCC" /></label>
 	<input type="file" id="mainFile"/>
+	<img class="intLink" title="Save encrypted file" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAMAAADzapwJAAAAdVBMVEUAAAAfHx9GRkYAAAAPDw9aWlr+/v739/fHx8dpaWkEBAT7+/v29vby8vLu7u7Z2dm1tbWysrKtra2qqqqMjIxWVlZJSUk1NTUUFBQJCQnz8/Pq6uri4uLMzMzKysq+vr69vb2NjY16enpvb29hYWE9PT0rKytDpsqlAAAAAXRSTlMAQObYZgAAAHdJREFUGNO1zscOgCAMgGG0iIp77z3e/xEV05CoJJ78D9B86aHkO6bUuXBUnFWuig1q/sTs5PclyR7YpZ+vD+4rrSg3mJ7rFgWA9EZhcPmlbuyh1mCLr0vEO0CI7HPB2AgRTh43mORYMstBk3HaEqxZdFlmkZ87AICHBL2TAUCPAAAAAElFTkSuQmCC" />
 	</div>
   </div> 
      

@@ -294,13 +294,6 @@ function loadFile(){
 		var fileName = fileToLoad.name,
 			URLFromFileLoaded = fileLoadedEvent.target.result,
 			escapedName = escapeHTML(fileName);
-		if(URLFromFileLoaded.length > 2000000){
-			var reply = confirm("This file is larger than 1.5MB and Chrome won't save it. Do you want to continue loading it?");
-			if(!reply){
-				composeMsg.textContent = 'File load canceled';
-				return
-			}
-		}
 		if(fileToLoad.type.slice(0,4) == "text"){
 			composeBox.innerHTML += "<br><br>" + URLFromFileLoaded.replace(/  /g,' &nbsp;')
 		}else{
@@ -417,4 +410,17 @@ var loadEncryptImage = function(e) {
 		openScreen('stegoImageScr')
 	  }
 	}
+}
+
+//operates when the Save button is clicked
+function saveFiles(boxId,isEditable){
+	var element = document.getElementById(boxId);
+	if(!element) return;
+ 	if(isEditable) element.contentEditable = 'false';
+    var files = element.querySelectorAll('a'),
+        length = files.length;				//since files will be loaded as links in the main box
+    for(var i = 0; i < length; i++){		//download all files
+        if(files[i].href.includes('data:')) files[i].click()
+    }
+    if(isEditable) element.contentEditable = 'true'
 }

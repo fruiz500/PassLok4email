@@ -323,6 +323,7 @@ function encryptList(listArray,isFileOut,isImageOut){
 function finishEncrypt(outString,isFileOut,isImageOut,invitesNeeded,recipientNumber){
 	var outNode = document.createElement('div');	
 	outNode.style.whiteSpace = "pre-line";									//so that carriage returns are respected
+	outNode.id = "composeOut";
 	
 if(!isImageOut){																//normal output, not to image
 	if(stegoMode.checked){
@@ -336,46 +337,46 @@ if(!isImageOut){																//normal output, not to image
 		if(stegoMode.checked){
 			fileLink.download = "ChangeMe.txt";
 			fileLink.href = "data:," + outString;
-			fileLink.textContent = "PassLok Hidden message; right-click and select Save Link As... Make sure to change the name"			
+			fileLink.textContent = "PassLok Hidden message. Make sure to change the name"			
 		}else if(onceMode.checked){
 			if(textMode.checked){
 				fileLink.download = "PL24mso.txt";
 				fileLink.href = "data:," + outString;
-				fileLink.textContent = "PassLok 2.4 Read-once message (text file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 Read-once message (text file)"
 			}else{
 				fileLink.download = "PL24mso.plk";
 				fileLink.href = "data:binary/octet-stream;base64," + outString;
-				fileLink.textContent = "PassLok 2.4 Read-once message (binary file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 Read-once message (binary file)"
 			}
 		}else if(symMode.checked){
 			if(textMode.checked){
 				fileLink.download = "PL24msp.txt";
 				fileLink.href = "data:," + outString;
-				fileLink.textContent = "PassLok 2.4 shared Password message (text file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 shared Password message (text file)"
 			}else{
 				fileLink.download = "PL24msp.plk";
 				fileLink.href = "data:binary/octet-stream;base64," + outString;
-				fileLink.textContent = "PassLok 2.4 shared Password message (binary file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 shared Password message (binary file)"
 			}
 		}else if(anonMode.checked){
 			if(textMode.checked){
 				fileLink.download = "PL24msa.txt";
 				fileLink.href = "data:," + outString;
-				fileLink.textContent = "PassLok 2.4 Anonymous message (text file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 Anonymous message (text file)"
 			}else{
 				fileLink.download = "PL24msa.plk";
 				fileLink.href = "data:binary/octet-stream;base64," + outString;
-				fileLink.textContent = "PassLok 2.4 Anonymous message (binary file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 Anonymous message (binary file)"
 			}
 		}else{
 			if(textMode.checked){
 				fileLink.download = "PL24mss.txt";
 				fileLink.href = "data:," + outString;
-				fileLink.textContent = "PassLok 2.4 Signed message (text file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 Signed message (text file)"
 			}else{
 				fileLink.download = "PL24mss.plk";
 				fileLink.href = "data:binary/octet-stream;base64," + outString;
-				fileLink.textContent = "PassLok 2.4 Signed message (binary file); right-click and choose Save Link As..."
+				fileLink.textContent = "PassLok 2.4 Signed message (binary file)"
 			}
 		}
 	}else{																		//output to email page

@@ -29,6 +29,7 @@ window.onload = function() {
 	loadEncrFile.addEventListener('change',loadEncryptedFile);
 	loadEncrFile.addEventListener('click',function(){this.value = '';});
 	decryptFileBtn.addEventListener('click',function(){this.value = '';});
+	saveFileBtn.addEventListener('click',function(){saveFiles('readBox',false)});
 	myLockBtn.addEventListener('click',showLock);
 	readInterfaceBtn.addEventListener('click',switchReadButtons);
 	
@@ -74,6 +75,7 @@ window.onload = function() {
 	toolBar2.children[18].addEventListener("click", function() {formatDoc('removeFormat')});
 	toolBar2.children[19].addEventListener("click", function() {formatDoc('undo')});
 	toolBar2.children[20].addEventListener("click", function() {formatDoc('redo')});
+	toolBar2.children[25].addEventListener("click", function() {saveFiles('composeOut',true)});
 	imgFile.addEventListener('change', loadImage);
 	imgFile.addEventListener('click', function(){this.value = '';});
 	mainFile.addEventListener('change', loadFile);
