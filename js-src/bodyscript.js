@@ -169,20 +169,6 @@ window.onload = function() {
 				callKey = 'compose';
 				doAction()
 
-			}else if(request.message == "keys_fromBg"){			//get cached keys from background
-				if(request.KeyStr){
-					KeyStr = request.KeyStr;
-					myKey = new Uint8Array(32);				    //must be Uint8Array type
-					for(var i = 0; i < 32; i++) myKey[i] = request.myKey[i];
-					myLockbin = new Uint8Array(32);
-					for(var i = 0; i < 32; i++) myLockbin[i] = request.myLockbin[i];
-					myLock = request.myLock;
-					myezLock = request.myezLock;
-					locDir = request.locDir;
-					prevServiceName = request.prevServiceName;
-				}
-				if(!popupReady){chrome.runtime.sendMessage({message: "popup_ready"}); popupReady = true}		//now it's really ready
-
 			}else if(request.message == "delete_keys"){			//delete cached keys
 				myKey = '';
 				KeyStr = '';
@@ -207,7 +193,18 @@ window.onload = function() {
 	  	}
 	);
 	var popupReady = false;										//not yet ready, until stored keys are received from bg
-	chrome.runtime.sendMessage({message: "retrieve_keys"});
+	let gettingKeys = chrome.storage.session.get();
+	gettingKeys.then(function(result){
+		if(result["KeyStr"]) KeyStr = result["KeyStr"];
+		if(result["myLock"]) myLock = result["myLock"];
+		if(result["myezLock"]) myezLock = result["myezLock"];
+//		if(result["myEmail"]) myEmail = result["myEmail"];
+		if(result["prevServiceName"]) serviceName = result["prevServiceName"];
+		if(result["locDir"]) locDir = JSON.parse(result["locDir"]);
+		if(result["myKey"]) myKey = new Uint8Array(JSON.parse(result["myKey"]));
+		if(result["myLockbin"]) myLockbin = new Uint8Array(JSON.parse(result["myLockbin"]))
+	})
+
 //	time10 = hashTime10();											//get milliseconds for 10 wiseHash at iter = 10
 	time10 = 200;				//about right for 10 wiseHash at iter = 10 on a core2-duo
 }
@@ -216,13 +213,15 @@ window.onload = function() {
 var killWindow;													//a timer to close window, refreshed every 0.5 seconds
 var resInt = setInterval(function(){
 	if(!killWindow) killWindow = setTimeout(function(){			//close in 3 sec if no reply
-		chrome.runtime.sendMessage({message: "reset_now"});
+		chrome.storage.session.clear();
 		window.close()
 	},3000);
-	chrome.tabs.sendMessage(activeTab.id, {message: "is_script_there"})		//poll content script
+	chrome.tabs.sendMessage(activeTab.id, {message: "is_script_there"})		//poll content script 
 },500);
 
 //Firefox needs to know when the popup closes
-window.onbeforeunload = function(){
+window.addEventListener("beforeunload", function(){
 	chrome.runtime.sendMessage({message: "popup_closed"})
-}
+});
+
+chrome.runtime.sendMessage({message: "popup_ready"})		//ready to receive data from background.js

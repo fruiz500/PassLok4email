@@ -107,10 +107,10 @@ function composeIntercept(ev) {
 //					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
 //					if(extraText) bodyText += extraText;
 
-					var emails = ancestor(this,12).querySelectorAll('.vN');		//element containing recipient addresses
+					var emails = ancestor(this,12).querySelectorAll('.afV');		//element containing recipient addresses
 					var emailList = [];
 					for(var i = 0; i < emails.length; i++){
-						emailList.push(emails[i].getAttribute("email"))
+						emailList.push(emails[i].getAttribute("data-hovercard-id"))
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 
@@ -233,7 +233,7 @@ function composeIntercept(ev) {
 					}else{
 						soleRecipient = false
 					}
-					var bodyElement = ancestor(this,2).querySelector('.msg-body');
+					var bodyElement = ancestor(this,3).querySelector('.msg-body');
 					var bodyText = bodyElement.innerHTML;
 //					var subject = $(this).parents().eq(16).find('.hP').text();
 
@@ -263,7 +263,8 @@ function composeIntercept(ev) {
 
 				el.addEventListener('click', function(){						//activate the button
 					getMyEmail();
-					var bodyDiv = ancestor(this,2).querySelector("[role='textbox']");
+					var bodyAreas = ancestor(this,3).querySelectorAll("[role='textbox']");
+					var bodyDiv = bodyAreas[bodyAreas.length - 1];			//take the last box as there may be several
 					bodyDiv.id = "bodyText";
 					bodyID = "bodyText";									//this global variable will be used to write the encrypted message
 					var bodyText = bodyDiv.textContent;
@@ -271,11 +272,15 @@ function composeIntercept(ev) {
 //					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
 //					if(extraText) bodyText += extraText;
 
-					var emails = ancestor(this,2).querySelectorAll("[aria-label^='Opens Profile'], [class*='wellItemText']");		//element containing recipient addresses
+					var emails = ancestor(this,3).querySelectorAll("[aria-label^='Opens Profile'], [class*='wellItemText']");		//element containing recipient addresses
 					var emailList = [];
 					for(var i = 1; i < emails.length; i++){			//ignore the first, which is the sender
 						var address = emails[i].parentElement.querySelector('[class*="wellItemText"], [aria-label^="Opens Profile"]').textContent.replace(/ /g,'').trim();
 						emailList.push(address)
+					}
+					emails = ancestor(this,3).querySelectorAll("[class*='recipientClass']");		//if contentEditable
+					for(var i = 0; i < emails.length; i++){
+						emailList.push(emails[i].textContent.slice(0,-1).replace(/<(.*?)>/,'').replace(/ /g,'').trim())
 					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 
@@ -310,11 +315,10 @@ function composeIntercept(ev) {
 				
 				el.addEventListener('click', function(){
 					getMyEmail();
-					var theirEmail = ancestor(this,6).children[1].firstChild.textContent.replace(/<(.*?)>/,'').replace(/ /g,'').trim();
-					var recipients = ancestor(this,7).querySelectorAll("[aria-label^='Opens Profile']");
+					var theirEmail = ancestor(this,8).children[0].textContent.replace(/<(.*?)>/,'').replace(/ /g,'').trim();
+					var recipients = ancestor(this,9).querySelectorAll("[aria-label^='Opens Profile']");
 					soleRecipient = (recipients.length < 4);							
-					var bodyText = ancestor(this,9).children[1].textContent;
-//					var subject = $(this).parents().eq(16).find('.hP').text();
+					var bodyText = ancestor(this,10).children[2].textContent;
 
 					chrome.runtime.sendMessage({message: "read_data", myEmail: myEmail, theirEmail: theirEmail, bodyText: bodyText, soleRecipient: soleRecipient, serviceName: serviceName})
 				});

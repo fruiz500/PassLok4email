@@ -51,7 +51,18 @@ function reformKeys(){
 		myezLock = changeBase(myLock,base64,base36,true);
 		prevServiceName = serviceName;
 		
-	chrome.runtime.sendMessage({message: 'preserve_keys', KeyStr: KeyStr, myKey: myKey, myLockbin: myLockbin, myLock: myLock, myezLock: myezLock, locDir: locDir, prevServiceName: serviceName});		//send them to background
+//	chrome.runtime.sendMessage({message: 'preserve_keys', KeyStr: KeyStr, myKey: myKey, myLockbin: myLockbin, myLock: myLock, myezLock: myezLock, locDir: locDir, prevServiceName: serviceName});		//send them to background
+		chrome.storage.session.set({"KeyStr": KeyStr});
+		chrome.storage.session.set({"myKey": JSON.stringify(Array.from(myKey))});
+//		chrome.storage.session.set({"myEmail": myEmail});
+		chrome.storage.session.set({"myLockbin": JSON.stringify(Array.from(myLockbin))});
+		chrome.storage.session.set({"myLock": myLock});
+		chrome.storage.session.set({"myezLock": myezLock});
+		chrome.storage.session.set({"locDir": JSON.stringify(locDir)});
+		chrome.storage.session.set({"prevServiceName": serviceName});
+		chrome.alarms.create("PLEAlarm",
+			{"delayInMinutes": 5}
+		);
 	}
 }
 
@@ -263,9 +274,18 @@ function acceptpwd(){
 		
 	firstTimeUser = false;
 	firstTimeKey.style.display = 'none';
-		
-	chrome.runtime.sendMessage({message: 'preserve_keys', KeyStr: KeyStr, myKey: myKey, myLockbin: myLockbin, myLock: myLock, myezLock: myezLock, locDir: locDir, prevServiceName: serviceName});		//send them to background
 
+	chrome.storage.session.set({"KeyStr": KeyStr});
+	chrome.storage.session.set({"myKey": JSON.stringify(Array.from(myKey))});
+//	chrome.storage.session.set({"myEmail": myEmail});
+	chrome.storage.session.set({"myLockbin": JSON.stringify(Array.from(myLockbin))});
+	chrome.storage.session.set({"myLock": myLock});
+	chrome.storage.session.set({"myezLock": myezLock});
+	chrome.storage.session.set({"locDir": JSON.stringify(locDir)});
+	chrome.storage.session.set({"prevServiceName": serviceName});
+	chrome.alarms.create("PLEAlarm",
+		{"delayInMinutes": 5}
+	);
 	doAction()					//do what was being done when the key was found missing
 }
 
@@ -498,6 +518,6 @@ function showLock(){
 	if(!refreshKey()) return;											//make sure the key is loaded, otherwise stop to get it
 	var myWordLock = changeBase(myLock,base64,wordListExp,true);	//make word Lock for display
 	
-	readBox.textContent = "This is your ezLock, which is also at the start of any material encrypted by you:\r\n\r\nPL24ezLok==" + myezLock.match(/.{1,5}/g).join("-") + "==PL24ezLok\r\n\r\nThis is your Lock in base64:\r\n\r\nPL24lok==" + myLock + "==PL24lok\r\n\r\nAnd this is your word Lock:\r\n\r\nPL24wordLok==" + myWordLock + "==PL24wordLok/r/n/r/nIt is good practice to display it with a link to a video where you read it aloud, with background music.";
+	readBox.textContent = "This is your ezLock, which is also at the start of any material encrypted by you:\r\n\r\nPL24ezLok==" + myezLock.match(/.{1,5}/g).join("-") + "==PL24ezLok\r\n\r\nThis is your Lock in base64:\r\n\r\nPL24lok==" + myLock + "==PL24lok\r\n\r\nAnd this is your word Lock:\r\n\r\nPL24wordLok==" + myWordLock + "==PL24wordLok\r\n\r\nIt is good practice to display it with a link to a video where you read it aloud, with background music.";
 	readMsg.textContent = "Below is your Lock in several formats. Put any of these in your email signature so people can send you encrypted messages."
 }
