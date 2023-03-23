@@ -40,9 +40,7 @@ window.onload = function() {
 	inviteBtn.addEventListener('click',inviteEncrypt);
 	interfaceBtn.addEventListener('click',switchButtons);
 	compHelpBtn.addEventListener('click',function(){
-		chrome.runtime.sendMessage({newtab: "helpTab"}, function (response) {
-			console.log(response.farewell)
-		});
+		chrome.runtime.sendMessage({newtab: "helpTab"});
 	});
 	resetBtn2.addEventListener('click',resetPFS);
 	moveBtn.addEventListener('click',moveDB);

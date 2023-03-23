@@ -9,7 +9,9 @@ a:hover {
 }
 select {
 	-webkit-appearance: button;
+	appearance: button;
 	-webkit-user-select: none;
+	user-select: none;
 	margin: 0;
 	border: 1px solid #dedede;
 	color: #666666;
@@ -53,6 +55,7 @@ img.intLink {
   	text-decoration: none;
 	width: 99.4%;
 	-webkit-appearance: none;
+	appearance: none;
 	box-sizing: border-box;
    	 -webkit-box-sizing:border-box;
 	-webkit-box-shadow: none;
@@ -66,6 +69,12 @@ img.intLink {
     outline: none;
     border:1px solid #00CA68;
     box-shadow: 0 0 10px #719ECE;
+}
+.centered {
+	text-align: center;
+}
+.left {
+	text-align: left;
 }
 .message {
 	white-space: pre-line;

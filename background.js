@@ -54,10 +54,18 @@ chrome.runtime.onMessage.addListener(
       }
 );
 
-//resets cached data afteer 5 minutes of inactivity
+//resets cached data after 5 minutes of inactivity
 chrome.alarms.onAlarm.addListener(function(result){
 	if(result.name == "PLEAlarm"){
 		chrome.storage.session.clear();
-		chrome.runtime.sendMessage({message: "delete_keys"})
+		chrome.runtime.sendMessage({message: "delete_keys"}, function(response) {
+			var lastError = chrome.runtime.lastError;
+			if (lastError) {
+				console.log(lastError.message);
+				// 'Could not establish connection. Receiving end does not exist.'
+				return;
+			}
+			// Success, do something with response...
+		})
 	}
 });

@@ -1,4 +1,4 @@
-/*! @license DOMPurify 2.4.0 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.4.0/LICENSE */
+/*! @license DOMPurify 3.0.1 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.0.1/LICENSE */
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -55,6 +55,10 @@
     return _construct.apply(null, arguments);
   }
 
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+  }
+
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
@@ -63,8 +67,42 @@
     if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
   function _iterableToArray(iter) {
     if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+  }
+
+  function _iterableToArrayLimit(arr, i) {
+    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+
+    if (_i == null) return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+
+    var _s, _e;
+
+    try {
+      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
   }
 
   function _unsupportedIterableToArray(o, minLen) {
@@ -88,7 +126,68 @@
     throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
-  var hasOwnProperty = Object.hasOwnProperty,
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
+  function _createForOfIteratorHelper(o, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+
+    if (!it) {
+      if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+        if (it) o = it;
+        var i = 0;
+
+        var F = function () {};
+
+        return {
+          s: F,
+          n: function () {
+            if (i >= o.length) return {
+              done: true
+            };
+            return {
+              done: false,
+              value: o[i++]
+            };
+          },
+          e: function (e) {
+            throw e;
+          },
+          f: F
+        };
+      }
+
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+
+    var normalCompletion = true,
+        didErr = false,
+        err;
+    return {
+      s: function () {
+        it = it.call(o);
+      },
+      n: function () {
+        var step = it.next();
+        normalCompletion = step.done;
+        return step;
+      },
+      e: function (e) {
+        didErr = true;
+        err = e;
+      },
+      f: function () {
+        try {
+          if (!normalCompletion && it.return != null) it.return();
+        } finally {
+          if (didErr) throw err;
+        }
+      }
+    };
+  }
+
+  var entries = Object.entries,
       setPrototypeOf = Object.setPrototypeOf,
       isFrozen = Object.isFrozen,
       getPrototypeOf = Object.getPrototypeOf,
@@ -129,6 +228,7 @@
   var arrayPop = unapply(Array.prototype.pop);
   var arrayPush = unapply(Array.prototype.push);
   var stringToLowerCase = unapply(String.prototype.toLowerCase);
+  var stringToString = unapply(String.prototype.toString);
   var stringMatch = unapply(String.prototype.match);
   var stringReplace = unapply(String.prototype.replace);
   var stringIndexOf = unapply(String.prototype.indexOf);
@@ -192,20 +292,28 @@
 
   function clone(object) {
     var newObject = create(null);
-    var property;
 
-    for (property in object) {
-      if (apply(hasOwnProperty, object, [property])) {
-        newObject[property] = object[property];
+    var _iterator = _createForOfIteratorHelper(entries(object)),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var _step$value = _slicedToArray(_step.value, 2),
+            property = _step$value[0],
+            value = _step$value[1];
+
+        newObject[property] = value;
       }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
     }
 
     return newObject;
   }
-  /* IE10 doesn't support __lookupGetter__ so lets'
-   * simulate it. It also automatically checks
-   * if the prop is function or getter and behaves
-   * accordingly. */
+  /* This method automatically checks if the prop is function
+   * or getter and behaves accordingly. */
 
   function lookupGetter(object, prop) {
     while (object !== null) {
@@ -255,6 +363,7 @@
   var MUSTACHE_EXPR = seal(/\{\{[\w\W]*|[\w\W]*\}\}/gm); // Specify template detection regex for SAFE_FOR_TEMPLATES mode
 
   var ERB_EXPR = seal(/<%[\w\W]*|[\w\W]*%>/gm);
+  var TMPLIT_EXPR = seal(/\${[\w\W]*}/gm);
   var DATA_ATTR = seal(/^data-[\-\w.\u00B7-\uFFFF]/); // eslint-disable-line no-useless-escape
 
   var ARIA_ATTR = seal(/^aria-[\-\w]+$/); // eslint-disable-line no-useless-escape
@@ -326,7 +435,7 @@
      */
 
 
-    DOMPurify.version = '2.4.0';
+    DOMPurify.version = '3.0.1';
     /**
      * Array of elements that DOMPurify removed during sanitation.
      * Empty if nothing was removed.
@@ -381,20 +490,15 @@
         createDocumentFragment = _document.createDocumentFragment,
         getElementsByTagName = _document.getElementsByTagName;
     var importNode = originalDocument.importNode;
-    var documentMode = {};
-
-    try {
-      documentMode = clone(document).documentMode ? document.documentMode : {};
-    } catch (_) {}
-
     var hooks = {};
     /**
      * Expose whether this browser supports running the full DOMPurify.
      */
 
-    DOMPurify.isSupported = typeof getParentNode === 'function' && implementation && typeof implementation.createHTMLDocument !== 'undefined' && documentMode !== 9;
+    DOMPurify.isSupported = typeof entries === 'function' && typeof getParentNode === 'function' && implementation && typeof implementation.createHTMLDocument !== 'undefined';
     var MUSTACHE_EXPR$1 = MUSTACHE_EXPR,
         ERB_EXPR$1 = ERB_EXPR,
+        TMPLIT_EXPR$1 = TMPLIT_EXPR,
         DATA_ATTR$1 = DATA_ATTR,
         ARIA_ATTR$1 = ARIA_ATTR,
         IS_SCRIPT_OR_DATA$1 = IS_SCRIPT_OR_DATA,
@@ -455,6 +559,10 @@
     /* Decide if unknown protocols are okay */
 
     var ALLOW_UNKNOWN_PROTOCOLS = false;
+    /* Decide if self-closing tags in attributes are allowed.
+     * Usually removed due to a mXSS issue in jQuery 3.0 */
+
+    var ALLOW_SELF_CLOSE_IN_ATTR = true;
     /* Output should be safe for common template engines.
      * This means, DOMPurify removes data attributes, mustaches and ERB
      */
@@ -534,6 +642,10 @@
 
     var NAMESPACE = HTML_NAMESPACE;
     var IS_EMPTY_INPUT = false;
+    /* Allowed XHTML+XML namespaces */
+
+    var ALLOWED_NAMESPACES = null;
+    var DEFAULT_ALLOWED_NAMESPACES = addToSet({}, [MATHML_NAMESPACE, SVG_NAMESPACE, HTML_NAMESPACE], stringToString);
     /* Parsing of strict XHTML documents */
 
     var PARSER_MEDIA_TYPE;
@@ -577,13 +689,12 @@
       PARSER_MEDIA_TYPE = // eslint-disable-next-line unicorn/prefer-includes
       SUPPORTED_PARSER_MEDIA_TYPES.indexOf(cfg.PARSER_MEDIA_TYPE) === -1 ? PARSER_MEDIA_TYPE = DEFAULT_PARSER_MEDIA_TYPE : PARSER_MEDIA_TYPE = cfg.PARSER_MEDIA_TYPE; // HTML tags and attributes are not case-sensitive, converting to lowercase. Keeping XHTML as is.
 
-      transformCaseFunc = PARSER_MEDIA_TYPE === 'application/xhtml+xml' ? function (x) {
-        return x;
-      } : stringToLowerCase;
+      transformCaseFunc = PARSER_MEDIA_TYPE === 'application/xhtml+xml' ? stringToString : stringToLowerCase;
       /* Set configuration parameters */
 
       ALLOWED_TAGS = 'ALLOWED_TAGS' in cfg ? addToSet({}, cfg.ALLOWED_TAGS, transformCaseFunc) : DEFAULT_ALLOWED_TAGS;
       ALLOWED_ATTR = 'ALLOWED_ATTR' in cfg ? addToSet({}, cfg.ALLOWED_ATTR, transformCaseFunc) : DEFAULT_ALLOWED_ATTR;
+      ALLOWED_NAMESPACES = 'ALLOWED_NAMESPACES' in cfg ? addToSet({}, cfg.ALLOWED_NAMESPACES, stringToString) : DEFAULT_ALLOWED_NAMESPACES;
       URI_SAFE_ATTRIBUTES = 'ADD_URI_SAFE_ATTR' in cfg ? addToSet(clone(DEFAULT_URI_SAFE_ATTRIBUTES), // eslint-disable-line indent
       cfg.ADD_URI_SAFE_ATTR, // eslint-disable-line indent
       transformCaseFunc // eslint-disable-line indent
@@ -603,6 +714,8 @@
       ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false; // Default true
 
       ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
+
+      ALLOW_SELF_CLOSE_IN_ATTR = cfg.ALLOW_SELF_CLOSE_IN_ATTR !== false; // Default true
 
       SAFE_FOR_TEMPLATES = cfg.SAFE_FOR_TEMPLATES || false; // Default false
 
@@ -626,6 +739,7 @@
 
       IS_ALLOWED_URI$1 = cfg.ALLOWED_URI_REGEXP || IS_ALLOWED_URI$1;
       NAMESPACE = cfg.NAMESPACE || HTML_NAMESPACE;
+      CUSTOM_ELEMENT_HANDLING = cfg.CUSTOM_ELEMENT_HANDLING || {};
 
       if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck)) {
         CUSTOM_ELEMENT_HANDLING.tagNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck;
@@ -766,7 +880,7 @@
 
       if (!parent || !parent.tagName) {
         parent = {
-          namespaceURI: HTML_NAMESPACE,
+          namespaceURI: NAMESPACE,
           tagName: 'template'
         };
       }
@@ -774,13 +888,17 @@
       var tagName = stringToLowerCase(element.tagName);
       var parentTagName = stringToLowerCase(parent.tagName);
 
+      if (!ALLOWED_NAMESPACES[element.namespaceURI]) {
+        return false;
+      }
+
       if (element.namespaceURI === SVG_NAMESPACE) {
         // The only way to switch from HTML namespace to SVG
         // is via <svg>. If it happens via any other tag, then
         // it should be killed.
         if (parent.namespaceURI === HTML_NAMESPACE) {
           return tagName === 'svg';
-        } // The only way to switch from MathML to SVG is via
+        } // The only way to switch from MathML to SVG is via`
         // svg if parent is either <annotation-xml> or MathML
         // text integration points.
 
@@ -828,9 +946,15 @@
 
 
         return !ALL_MATHML_TAGS[tagName] && (COMMON_SVG_AND_HTML_ELEMENTS[tagName] || !ALL_SVG_TAGS[tagName]);
+      } // For XHTML and XML documents that support custom namespaces
+
+
+      if (PARSER_MEDIA_TYPE === 'application/xhtml+xml' && ALLOWED_NAMESPACES[element.namespaceURI]) {
+        return true;
       } // The code should never reach this place (this means
       // that the element somehow got namespace that is not
-      // HTML, SVG or MathML). Return false just in case.
+      // HTML, SVG, MathML or allowed via ALLOWED_NAMESPACES).
+      // Return false just in case.
 
 
       return false;
@@ -851,11 +975,7 @@
         // eslint-disable-next-line unicorn/prefer-dom-node-remove
         node.parentNode.removeChild(node);
       } catch (_) {
-        try {
-          node.outerHTML = emptyHTML;
-        } catch (_) {
-          node.remove();
-        }
+        node.remove();
       }
     };
     /**
@@ -914,7 +1034,7 @@
         leadingWhitespace = matches && matches[0];
       }
 
-      if (PARSER_MEDIA_TYPE === 'application/xhtml+xml') {
+      if (PARSER_MEDIA_TYPE === 'application/xhtml+xml' && NAMESPACE === HTML_NAMESPACE) {
         // Root of XHTML doc must contain xmlns declaration (see https://www.w3.org/TR/xhtml1/normative.html#strict)
         dirty = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + dirty + '</body></html>';
       }
@@ -937,7 +1057,7 @@
         doc = implementation.createDocument(NAMESPACE, 'template', null);
 
         try {
-          doc.documentElement.innerHTML = IS_EMPTY_INPUT ? '' : dirtyPayload;
+          doc.documentElement.innerHTML = IS_EMPTY_INPUT ? emptyHTML : dirtyPayload;
         } catch (_) {// Syntax error if dirtyPayload is invalid xml
         }
       }
@@ -977,7 +1097,7 @@
 
 
     var _isClobbered = function _isClobbered(elm) {
-      return elm instanceof HTMLFormElement && (typeof elm.nodeName !== 'string' || typeof elm.textContent !== 'string' || typeof elm.removeChild !== 'function' || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== 'function' || typeof elm.setAttribute !== 'function' || typeof elm.namespaceURI !== 'string' || typeof elm.insertBefore !== 'function');
+      return elm instanceof HTMLFormElement && (typeof elm.nodeName !== 'string' || typeof elm.textContent !== 'string' || typeof elm.removeChild !== 'function' || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== 'function' || typeof elm.setAttribute !== 'function' || typeof elm.namespaceURI !== 'string' || typeof elm.insertBefore !== 'function' || typeof elm.hasChildNodes !== 'function');
     };
     /**
      * _isNode
@@ -1034,14 +1154,6 @@
 
         return true;
       }
-      /* Check if tagname contains Unicode */
-
-
-      if (regExpTest(/[\u0080-\uFFFF]/, currentNode.nodeName)) {
-        _forceRemove(currentNode);
-
-        return true;
-      }
       /* Now let's check the element's type and name */
 
 
@@ -1056,14 +1168,6 @@
 
 
       if (currentNode.hasChildNodes() && !_isNode(currentNode.firstElementChild) && (!_isNode(currentNode.content) || !_isNode(currentNode.content.firstElementChild)) && regExpTest(/<[/\w]/g, currentNode.innerHTML) && regExpTest(/<[/\w]/g, currentNode.textContent)) {
-        _forceRemove(currentNode);
-
-        return true;
-      }
-      /* Mitigate a problem with templates inside select */
-
-
-      if (tagName === 'select' && regExpTest(/<template/i, currentNode.innerHTML)) {
         _forceRemove(currentNode);
 
         return true;
@@ -1105,6 +1209,8 @@
 
         return true;
       }
+      /* Make sure that older browsers don't get noscript mXSS */
+
 
       if ((tagName === 'noscript' || tagName === 'noembed') && regExpTest(/<\/no(script|embed)/i, currentNode.innerHTML)) {
         _forceRemove(currentNode);
@@ -1119,6 +1225,7 @@
         content = currentNode.textContent;
         content = stringReplace(content, MUSTACHE_EXPR$1, ' ');
         content = stringReplace(content, ERB_EXPR$1, ' ');
+        content = stringReplace(content, TMPLIT_EXPR$1, ' ');
 
         if (currentNode.textContent !== content) {
           arrayPush(DOMPurify.removed, {
@@ -1256,7 +1363,7 @@
         /* Work around a security issue in jQuery 3.0 */
 
 
-        if (regExpTest(/\/>/i, value)) {
+        if (!ALLOW_SELF_CLOSE_IN_ATTR && regExpTest(/\/>/i, value)) {
           _removeAttribute(name, currentNode);
 
           continue;
@@ -1267,6 +1374,7 @@
         if (SAFE_FOR_TEMPLATES) {
           value = stringReplace(value, MUSTACHE_EXPR$1, ' ');
           value = stringReplace(value, ERB_EXPR$1, ' ');
+          value = stringReplace(value, TMPLIT_EXPR$1, ' ');
         }
         /* Is `value` valid for this attribute? */
 
@@ -1379,7 +1487,6 @@
       var body;
       var importedNode;
       var currentNode;
-      var oldNode;
       var returnNode;
       /* Make sure we have a string to sanitize.
         DO NOT return early, as this will return the wrong type if
@@ -1405,20 +1512,10 @@
           }
         }
       }
-      /* Check we can run. Otherwise fall back or ignore */
+      /* Return dirty HTML if DOMPurify cannot run */
 
 
       if (!DOMPurify.isSupported) {
-        if (_typeof(window.toStaticHTML) === 'object' || typeof window.toStaticHTML === 'function') {
-          if (typeof dirty === 'string') {
-            return window.toStaticHTML(dirty);
-          }
-
-          if (_isNode(dirty)) {
-            return window.toStaticHTML(dirty.outerHTML);
-          }
-        }
-
         return dirty;
       }
       /* Assign config vars */
@@ -1491,13 +1588,7 @@
 
 
       while (currentNode = nodeIterator.nextNode()) {
-        /* Fix IE's strange behavior with manipulated textNodes #89 */
-        if (currentNode.nodeType === 3 && currentNode === oldNode) {
-          continue;
-        }
         /* Sanitize tags and elements */
-
-
         if (_sanitizeElements(currentNode)) {
           continue;
         }
@@ -1511,12 +1602,9 @@
 
 
         _sanitizeAttributes(currentNode);
-
-        oldNode = currentNode;
       }
-
-      oldNode = null;
       /* If we sanitized `dirty` in-place, return it. */
+
 
       if (IN_PLACE) {
         return dirty;
@@ -1536,7 +1624,7 @@
           returnNode = body;
         }
 
-        if (ALLOWED_ATTR.shadowroot) {
+        if (ALLOWED_ATTR.shadowroot || ALLOWED_ATTR.shadowrootmod) {
           /*
             AdoptNode() is not used because internal state is not reset
             (e.g. the past names map of a HTMLFormElement), this is safe
@@ -1562,6 +1650,7 @@
       if (SAFE_FOR_TEMPLATES) {
         serializedHTML = stringReplace(serializedHTML, MUSTACHE_EXPR$1, ' ');
         serializedHTML = stringReplace(serializedHTML, ERB_EXPR$1, ' ');
+        serializedHTML = stringReplace(serializedHTML, TMPLIT_EXPR$1, ' ');
       }
 
       return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(serializedHTML) : serializedHTML;

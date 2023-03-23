@@ -2,7 +2,7 @@
  "name": "PassLok for Email",
  "short_name": "PassLok",
  "description": "High security encryption for email. PassLok is in no way associated with Gmail, Yahoo, or Outlook.",
- "version": "0.5.8",
+ "version": "0.5.10",
  "manifest_version": 3,
  "icons": {
  "16": "img/passlok-icon16inv.png",
@@ -10,7 +10,7 @@
  "128": "img/passlok-touch-icon128.png"
  },
  "content_security_policy": {
-	"extension_pages": "default-src 'self'; img-src 'self' data:; connect-src 'self' data:; style-src 'self' 'unsafe-inline'"
+	"extension_pages": "default-src 'self'; img-src 'self' data:; connect-src 'self' data:; style-src 'self'"
  },
 "permissions": [
 	"storage",

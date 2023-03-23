@@ -4,7 +4,7 @@
         @licstart  The following is the entire license notice for the
         code in this extension.
 
-        Copyright (C) 2022  Francisco Ruiz
+        Copyright (C) 2023  Francisco Ruiz
 
         The JavaScript and html code in this page is free software: you can
         redistribute it and/or modify it under the terms of the GNU

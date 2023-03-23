@@ -233,6 +233,10 @@ function doAction(){
 	}else if(callKey == 'showLock'){
 		openScreen('readScr');
 		showLock()
+	}else{
+		callKey = 'compose';
+		updateComposeButtons();
+		openScreen('composeScr')
 	}
 }
 
