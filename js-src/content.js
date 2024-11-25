@@ -55,7 +55,7 @@ function getMyEmail(){
 	}else if(serviceName == 'yahoo'){
 		myEmail = document.title.match(/[a-z0-9]+@yahoo.com/)[0]
 	}else if(serviceName == 'outlook'){
-		myEmail = document.title.split('-')[1].replace(/ /g,'').trim()		//no spaces so it can sync with the browser
+		myEmail = document.title.split('-')[1].trim()
 	}
   }
 }
@@ -162,7 +162,13 @@ function composeIntercept(ev) {
 
 	//now the same for Yahoo
   }else if(serviceName == 'yahoo'){
-	var composeBoxes = document.querySelectorAll('.bottomToolbar,[data-test-id="compose-toolbar-styler"]');				//toolbar at bottom of window
+	var composeBoxes = document.querySelectorAll('[data-test-id="compose-toolbar-styler"]');				//toolbar at bottom of window, old style
+	if(composeBoxes.length == 0){
+		composeBoxes = document.querySelectorAll('[data-test-id="compose-toolbar"]');	//new style
+		var newStyle = true
+	}else{
+		var newStyle = false
+	}
 	if (composeBoxes && composeBoxes.length > 0){
 
 		Array.prototype.forEach.call(composeBoxes, function(element){
@@ -179,22 +185,37 @@ function composeIntercept(ev) {
 
 				el.addEventListener('click', function(){						//activate the button
 					getMyEmail();
-					var bodyDiv = ancestor(this,3).querySelector('.cm-rtetext,[data-test-id="rte"]');
-					bodyID = bodyDiv.id;								//this global variable will be used to write the encrypted message, should be "rtetext"
-					if(!bodyID){bodyID = "bodyText"; bodyDiv.id = "bodyText"};
-					var bodyText = bodyDiv.innerHTML.replace(/<(.*?)>/gi,"");				//clean junk tags
-					bodyText = bodyText.split('<hr')[0];								//take out quoted stuff
-					//PREVIOUS THREAD MESSAGES OPTIONAL
-//					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
-//					if(extraText) bodyText += extraText;
+					var newStyle;
+					newStyle = !document.querySelector('[data-test-id="compose-toolbar-styler"]');
 
-					var emails = ancestor(this,3).querySelectorAll('.pill-content');		//element containing recipient addresses
-					var emailList = [];
-					for(var i = 0; i < emails.length; i++){
-						emailList.push(emails[i].getAttribute("title").match(/<(.*?)>/)[1])
+					if(newStyle){
+						var bodyDiv = ancestor(this,1).querySelector('[data-test-id="rte"]');
+						bodyID = bodyDiv.id;
+						if(!bodyID){bodyID = "bodyText"; bodyDiv.id = "bodyText"};
+						var bodyText = bodyDiv.innerHTML.replace(/<(.*?)>/gi,"");				//clean junk tags
+						bodyText = bodyText.split('<hr')[0];
+						var emails = ancestor(this,2).querySelectorAll('[data-test-id="y-pill"]');
+						var emailList = [];
+						for(var i = 0; i < emails.length; i++){
+							emailList.push(emails[i].textContent)
+						}
+					}else{
+						var bodyDiv = ancestor(this,3).querySelector('.cm-rtetext,[data-test-id="rte"]');
+						bodyID = bodyDiv.id;								//this global variable will be used to write the encrypted message, should be "rtetext"
+						if(!bodyID){bodyID = "bodyText"; bodyDiv.id = "bodyText"};
+						var bodyText = bodyDiv.innerHTML.replace(/<(.*?)>/gi,"");				//clean junk tags
+						bodyText = bodyText.split('<hr')[0];								//take out quoted stuff
+						//PREVIOUS THREAD MESSAGES OPTIONAL
+	//					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
+	//					if(extraText) bodyText += extraText;
+
+						var emails = ancestor(this,3).querySelectorAll('.pill-content');		//element containing recipient addresses
+						var emailList = [];
+						for(var i = 0; i < emails.length; i++){
+							emailList.push(emails[i].getAttribute("title").match(/<(.*?)>/)[1])
+						}
+	//					var subject = $(this).parents().eq(11).find('.aoT').val();
 					}
-//					var subject = $(this).parents().eq(11).find('.aoT').val();
-
 					chrome.runtime.sendMessage({message: "compose_data", myEmail: myEmail, emailList: emailList, bodyText: bodyText, serviceName: serviceName});
 					chrome.runtime.onMessage.addListener(					//get ready to insert encrypted data
   					function(request, sender, sendResponse) {
@@ -204,14 +225,25 @@ function composeIntercept(ev) {
 						}
   					})
 				});
-				var lastPalette = element.children[6];
-				lastPalette.parentNode.insertBefore( el, lastPalette.nextSibling ) 
+				if(newStyle){
+					var lastPalette = element.children[1];
+					lastPalette.parentNode.insertBefore( el, lastPalette) 
+				}else{
+					var lastPalette = element.children[4];
+					lastPalette.parentNode.insertBefore( el, lastPalette.nextSibling ) 
+				}
 			}
 		});
 	}
 
 //this part for reading messages
 	var viewTitleBar = document.querySelectorAll('.thread-info, .msg-date, [data-test-id="message-date"]');			//title bar at top of message
+	if(viewTitleBar.length == 0){
+		viewTitleBar = document.querySelectorAll('[data-test-id="message-header"]');
+		var newStyle = true
+	}else{
+		var newStyle = false
+	}
 	if (viewTitleBar && viewTitleBar.length > 0){
 
 		Array.prototype.forEach.call(viewTitleBar, function(element){			//insert PassLok icon right before the other stuff, if there is encrypted data
@@ -226,20 +258,31 @@ function composeIntercept(ev) {
 				
 				el.addEventListener('click', function(){
 					getMyEmail();
-					var theirEmail = ancestor(this,1).querySelector('.u_N').textContent.replace(/[^A-Za-z\.\@]/g,'');			//sender's address
-					var recipients = ancestor(this,1).querySelectorAll('.D_F .rtlI_dz_sSg');									//includes sender
-					if(recipients){
-						soleRecipient = (recipients.length < 3)
+					if(newStyle){
+						var theirEmail = ancestor(this,0).querySelector('[data-test-id="with-contact-card-anchor"]').textContent;
+						soleRecipient = false;
+						var bodyElement = ancestor(this,4).querySelector('[data-test-id="message-view-body"]');
+						var bodyText = bodyElement.innerHTML
 					}else{
-						soleRecipient = false
+						var theirEmail = ancestor(this,2).querySelector('.D_F .rtlI_dz_sSg').textContent.replace(/[^A-Za-z\.\@]/g,'');			//sender's address
+						var recipients = ancestor(this,2).querySelectorAll('.D_F .rtlI_dz_sSg');				//includes sender
+						if(recipients){
+							soleRecipient = (recipients.length < 4)
+						}else{
+							soleRecipient = false
+						}
+						var bodyElement = ancestor(this,3).querySelector('.msg-body');
+						var bodyText = bodyElement.innerHTML;
+	//					var subject = $(this).parents().eq(16).find('.hP').text();
 					}
-					var bodyElement = ancestor(this,3).querySelector('.msg-body');
-					var bodyText = bodyElement.innerHTML;
-//					var subject = $(this).parents().eq(16).find('.hP').text();
 
 					chrome.runtime.sendMessage({message: "read_data", myEmail: myEmail, theirEmail: theirEmail, bodyText: bodyText, soleRecipient: soleRecipient, serviceName: serviceName});
 				});
-				element.insertBefore(el, element.firstChild)
+				if(newStyle){
+					element.appendChild(el)
+				}else{
+					element.insertBefore(el, element.firstChild)
+				}
 			}
 		});
 	}
@@ -272,16 +315,20 @@ function composeIntercept(ev) {
 //					var extraText = $(this).parents().eq(11).find('.gmail_extra').html();
 //					if(extraText) bodyText += extraText;
 
-					var emails = ancestor(this,3).querySelectorAll("[aria-label^='Opens Profile'], [class*='wellItemText']");		//element containing recipient addresses
+//					var emails = ancestor(this,3).querySelectorAll("[aria-label^='Opens Profile'], [class*='wellItemText']");		//element containing recipient addresses
+					var emails = ancestor(this,1).children[2].querySelectorAll('._EType_RECIPIENT_ENTITY');
+					if(emails.length == 0) emails = ancestor(this,1).children[1].querySelectorAll('._EType_RECIPIENT_ENTITY');
 					var emailList = [];
-					for(var i = 1; i < emails.length; i++){			//ignore the first, which is the sender
-						var address = emails[i].parentElement.querySelector('[class*="wellItemText"], [aria-label^="Opens Profile"]').textContent.replace(/ /g,'').trim();
+					for(var i = 0; i < emails.length; i++){
+//						var address = emails[i].parentElement.querySelector('[class*="wellItemText"], [aria-label^="Opens Profile"]').textContent.replace(/ /g,'').trim();
+						var address = emails[i].textContent.replace(/<.*>/,'').trim();
+						if(!address.slice(-1).match(/[A-Za-z0-9]/)) address = address.slice(0,-1); //remove spurious end character
 						emailList.push(address)
 					}
-					emails = ancestor(this,3).querySelectorAll("[class*='recipientClass']");		//if contentEditable
-					for(var i = 0; i < emails.length; i++){
-						emailList.push(emails[i].textContent.slice(0,-1).replace(/<(.*?)>/,'').replace(/ /g,'').trim())
-					}
+//					emails = ancestor(this,3).querySelectorAll("[class*='recipientClass']");		//if contentEditable
+//					for(var i = 0; i < emails.length; i++){
+//						emailList.push(emails[i].textContent.slice(0,-1).replace(/<(.*?)>/,'').replace(/ /g,'').trim())
+//					}
 //					var subject = $(this).parents().eq(11).find('.aoT').val();
 
 					chrome.runtime.sendMessage({message: "compose_data", myEmail: myEmail, emailList: emailList, bodyText: bodyText, serviceName: serviceName});
@@ -299,11 +346,11 @@ function composeIntercept(ev) {
 	}
 	
 //this part for reading messages
-	var viewTitleBar = document.querySelectorAll("[aria-label='Reply all']");			//reply icon at top of message
+	var viewTitleBar = document.querySelectorAll("[aria-label='Reply']");	//reply icon at top of message
 	if (viewTitleBar && viewTitleBar.length > 0){
 
 		Array.prototype.forEach.call(viewTitleBar, function(element){			//insert PassLok icon right before the other stuff, if there is encrypted data
-			var bar = ancestor(element,2);
+			var bar = ancestor(element,1);
 			if (bar.querySelectorAll('.passlok').length === 0){
 				var el = document.createElement("a");
 				el.href = "#";
@@ -315,10 +362,10 @@ function composeIntercept(ev) {
 				
 				el.addEventListener('click', function(){
 					getMyEmail();
-					var theirEmail = ancestor(this,8).children[0].textContent.replace(/<(.*?)>/,'').replace(/ /g,'').trim();
-					var recipients = ancestor(this,9).querySelectorAll("[aria-label^='Opens Profile']");
+					var theirEmail = ancestor(this,5).children[0].textContent.split('<')[0].slice(2);
+					var recipients = ancestor(this,6).children[1].textContent.slice(3,-22);
 					soleRecipient = (recipients.length < 4);							
-					var bodyText = ancestor(this,10).children[2].textContent;
+					var bodyText = ancestor(this,7).children[2].textContent;
 
 					chrome.runtime.sendMessage({message: "read_data", myEmail: myEmail, theirEmail: theirEmail, bodyText: bodyText, soleRecipient: soleRecipient, serviceName: serviceName})
 				});

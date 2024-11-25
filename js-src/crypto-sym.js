@@ -20,7 +20,7 @@ function symmetricEncrypt(text,isFileOut,isImageOut){
 	var sharedKey = wiseHash(sharedPwd,nonceStr);		//use the nonce for stretching the user-supplied Key
 
 	var cipher = symEncrypt(text,nonce24,sharedKey,true),		//true because compression is used
-		outStr = nacl.util.encodeBase64(concatUint8Arrays([128],concatUint8Arrays(nonce,cipher))).replace(/=+$/,'');
+		outStr = nacl.util.encodeBase64(concatUi8([[128],nonce,cipher])).replace(/=+$/,'');
 		
 	finishEncrypt(outStr,isFileOut,isImageOut,false)
 }
@@ -103,7 +103,7 @@ function padEncrypt(text,isFileOut,isImageOut){
 
 	var cipherBin = padResult(textBin, keyTextBin, nonce, startIndex),				//main encryption event
 		macBin = padMac(textBin, keyTextBin, nonce, startIndex),						//make mac
-		outStr = nacl.util.encodeBase64(concatUint8Arrays([116],concatUint8Arrays(nonce,concatUint8Arrays(macBin,cipherBin)))).replace(/=+$/,'');
+		outStr = nacl.util.encodeBase64(concatUi8([[116],nonce,macBin,cipherBin])).replace(/=+$/,'');
 	
 	finishEncrypt(outStr,isFileOut,isImageOut,false)
 }

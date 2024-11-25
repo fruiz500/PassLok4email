@@ -82,11 +82,18 @@ function decrypt(){
 	openChat()
 }
 
-//concatenates two uint8 arrays, normally used right before displaying the output
-function concatUint8Arrays(array1,array2){
-	var result = new Uint8Array(array1.length + array2.length);
-	result.set(array1,0);
-	result.set(array2,array1.length);
+//to concatenate a few Uint8Arrays fed as an array
+function concatUi8(arrays) {
+	var totalLength = 0;
+	for(var i = 0; i < arrays.length; i++) totalLength += arrays[i].length;
+	
+	var result = new Uint8Array(totalLength);
+  
+	var length = 0;
+	for(var i = 0; i < arrays.length; i++) {
+	  result.set(arrays[i], length);
+	  length += arrays[i].length;
+	}
 	return result
 }
 
@@ -119,7 +126,7 @@ function inviteEncrypt(){
 
 		setTimeout(function(){composeMsg.textContent = "This invitation can be decrypted by anyone"},20);
 
-		var output = myezLock + '//////' + nacl.util.encodeBase64(concatUint8Arrays([128],concatUint8Arrays(nonce,symEncrypt(text,nonce24,myLockbin,true)))).replace(/=+$/,'')
+		var output = myezLock + '//////' + nacl.util.encodeBase64(concatUi8([[128],nonce,symEncrypt(text,nonce24,myLockbin,true)])).replace(/=+$/,'')
 		output = output.match(/.{1,80}/g).join("\r\n");
 		var outNode = document.createElement('div');	
 		outNode.style.whiteSpace = "pre-line";			//so the line feeds format correctly
@@ -216,9 +223,9 @@ function encryptList(listArray,isFileOut,isImageOut){
 
 	var cipher = symEncrypt(text,nonce24,msgKey,true);					//main encryption event including compression, but don't add the result yet
 		
-	outArray = concatUint8Arrays(outArray,concatUint8Arrays(nonce,paddingIn));
+	outArray = concatUi8([outArray,nonce,paddingIn]);
 	
-	if(anonMode.checked) outArray = concatUint8Arrays(outArray,pubdum);					//for anonymous mode, add the dummy Lock now
+	if(anonMode.checked) outArray = concatUi8([outArray,pubdum]);					//for anonymous mode, add the dummy Lock now
 
 	//for each email on the List (unless empty), encrypt the message key and add it, prefaced by the first 256 bits of the ciphertext obtained when the item is encrypted with the message nonce and the shared key. Notice: same nonce, but different key for each item (unless someone planted two recipients who have the same key, but then the encrypted result will also be identical).
 	for (index = 0; index < encryptArray.length; index++){
@@ -308,16 +315,16 @@ function encryptList(listArray,isFileOut,isImageOut){
 				}
 			}
 			if(onceMode.checked){
-				if(email != myEmail) outArray = concatUint8Arrays(outArray,concatUint8Arrays(idTag,concatUint8Arrays(cipher2,concatUint8Arrays(typeByte,newLockCipher))))
+				if(email != myEmail) outArray = concatUi8([outArray,idTag,cipher2,typeByte,newLockCipher])
 			}else{
-				outArray = concatUint8Arrays(outArray,concatUint8Arrays(idTag,cipher2))
+				outArray = concatUi8([outArray,idTag,cipher2])
 			}
 		}
 	}
 	//all recipients done at this point
 
 	//finish off by adding the encrypted message and tags
-	outString += nacl.util.encodeBase64(concatUint8Arrays(outArray,cipher)).replace(/=+$/,'');
+	outString += nacl.util.encodeBase64(concatUi8([outArray,cipher])).replace(/=+$/,'');
 	finishEncrypt(outString,isFileOut,isImageOut,inviteArray,encryptArray.length)			//see if invitations would have been needed
 }
 
@@ -462,7 +469,7 @@ function keyEncrypt(plainstr){
 	}else{
 		var cipher = nacl.secretbox(plainstr,nonce24,myKey)
 	}
-	return nacl.util.encodeBase64(concatUint8Arrays([144],concatUint8Arrays(nonce,cipher))).replace(/=+$/,'')		//1st character should be k
+	return nacl.util.encodeBase64(concatUi8([[144],nonce,cipher])).replace(/=+$/,'')		//1st character should be k
 }
 
 //decrypts a string encrypted with the secret Key, 12 char nonce. Returns original if not encrypted. If isArray set, return uint8 array
@@ -864,7 +871,7 @@ function decoyEncrypt(length,seckey){
 		
 		while (text.length < length) text = text + ' ';				//add spaces to make the number of characters required
 		text = text.slice(0,length);
-		var cipher = concatUint8Arrays(nonce,symEncrypt(text,nonce24,sharedKey));
+		var cipher = concatUi8([nonce,symEncrypt(text,nonce24,sharedKey)]);
 		
 		decoyInBox.value = '';
 		decoyText.value = '';
